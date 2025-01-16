@@ -1,0 +1,165 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      <a href="https://www.blindsbook.com">
+          <img alt="logo"  src="assets/imgs/bb_logo.png">
+      </a>
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+    <h3>Drapery Calculator</h3>
+      <form [formGroup]="form" (ngSubmit)="CalculatorForm(form)">
+       
+                <ion-label>Width (inches)</ion-label>
+                <ion-label *ngIf="width.hasError('required') && (width.touched || form.submitted )" ><strong>Width is required</strong></ion-label>
+                <ion-label *ngIf="width.hasError('min') && (width.touched || form.submitted )" ><strong>Width has to be greater than 0</strong></ion-label>
+                <ion-label *ngIf="width.hasError('pattern')" ><strong>Width must be an integer value</strong></ion-label>
+                <ion-item>
+                    <ion-input type="number" pattern="[0-9]*" formControlName="width" width></ion-input>
+                </ion-item>
+                
+                <ion-item>
+                    <ion-label>Width Fraction</ion-label>
+                    <ion-select formControlName="widthFraction" >
+                      <ion-option value="0">0</ion-option>
+                      <ion-option value="0.125">1/8</ion-option>
+                      <ion-option value="0.25">1/4</ion-option>
+                      <ion-option value="0.375">3/8</ion-option>
+                      <ion-option value="0.5">1/2</ion-option>
+                      <ion-option value="0.625">5/8</ion-option>
+                      <ion-option value="0.75">3/4</ion-option>
+                      <ion-option value="0.875">7/8</ion-option>
+                    </ion-select>
+                </ion-item>
+                <ion-label>Height (inches)</ion-label>
+                  <ion-label *ngIf="height.hasError('min') && (height.touched || form.submitted )" ><strong>Height has to be greater than 0</strong></ion-label>
+                  <ion-label *ngIf="height.hasError('required') && (height.touched || form.submitted )" ><strong>Height is required</strong></ion-label>
+                  <ion-label *ngIf="height.hasError('pattern')" ><strong>Height must be an integer value</strong></ion-label>
+                  <ion-item>
+                      <ion-input type="number" pattern="[0-9]*" formControlName="height"></ion-input>
+                  </ion-item>
+                  
+                  <ion-item>
+                      <ion-label>Height Fraction</ion-label>
+                      <ion-select formControlName="heightFraction" >
+                        <ion-option value="0">0</ion-option>
+                        <ion-option value="0.125">1/8</ion-option>
+                        <ion-option value="0.25">1/4</ion-option>
+                        <ion-option value="0.375">3/8</ion-option>
+                        <ion-option value="0.5">1/2</ion-option>
+                        <ion-option value="0.625">5/8</ion-option>
+                        <ion-option value="0.75">3/4</ion-option>
+                        <ion-option value="0.875">7/8</ion-option>
+                      </ion-select>
+                  </ion-item>
+                     
+        <ion-label>Product</ion-label>
+        <ion-label *ngIf="productType.hasError('required') && (productType.touched || form.submitted )" ><strong>Product is required</strong></ion-label>
+        <ion-list radio-group  formControlName="productType">
+            <ion-item>
+                <ion-label>Ripplefold curtain</ion-label>
+                <ion-radio value="1" checked></ion-radio>
+              </ion-item>
+            <ion-item>
+              <ion-label>Pinch Pleated curtain</ion-label>
+              <ion-radio value="2" ></ion-radio>
+            </ion-item>
+        </ion-list>
+
+        <ion-label>Fabric width (inches)</ion-label>
+        <ion-label *ngIf="fabricWidth.hasError('required') && (fabricWidth.touched || form.submitted )" ><strong>Fabric width is required</strong></ion-label>
+        <ion-item>
+          <ion-select formControlName="fabricWidth">
+            <ion-option value="54">54</ion-option>
+            <ion-option value="108">108</ion-option>
+            <ion-option value="110">110</ion-option>
+            <ion-option value="118">118</ion-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-label>Vertical repeat (inches)</ion-label>
+        <ion-label *ngIf="verticalRepeat.hasError('min') && (verticalRepeat.touched || form.submitted )" ><strong>Vertical repeat has to be greater than 0</strong></ion-label>
+        <ion-label *ngIf="verticalRepeat.hasError('required') && (verticalRepeat.touched || form.submitted )" ><strong>Vertical repeat is required</strong></ion-label>
+        <ion-item>
+            <ion-input type="number" formControlName="verticalRepeat"></ion-input>
+        </ion-item>
+
+        <ion-label>Fullness</ion-label>
+        <ion-label *ngIf="RFFullness.hasError('required') && (RFFullness.touched || form.submitted )" ><strong>RFFullness is required</strong></ion-label>
+        <ion-label *ngIf="PPFullness.hasError('required') && (PPFullness.touched || form.submitted )" ><strong>RFFullness is required</strong></ion-label>
+        <ion-list radio-group [hidden]="productType.value != 1" formControlName="RFFullness">
+            <ion-item>
+              <ion-label>60%</ion-label>
+              <ion-radio value="60"></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>80%</ion-label>
+              <ion-radio value="80"></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>100%</ion-label>
+              <ion-radio value="100" checked></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>120%</ion-label>
+              <ion-radio value="120"></ion-radio>
+            </ion-item>
+        </ion-list>
+        
+        <ion-list radio-group [hidden]="productType.value != 2" formControlName="PPFullness">
+            <ion-item>
+              <ion-label>2</ion-label>
+              <ion-radio value="2" checked></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>2.5</ion-label>
+              <ion-radio value="2.5" checked></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>3</ion-label>
+              <ion-radio value="3" checked></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>3.5</ion-label>
+              <ion-radio value="3.5" checked></ion-radio>
+            </ion-item>
+        </ion-list>
+      
+        <ion-label>Return (inches)</ion-label>
+        <ion-label *ngIf="return.hasError('min') && (return.touched || form.submitted )" ><strong>Return has to be greater or equal than 0</strong></ion-label>
+        <ion-label *ngIf="return.hasError('required') && (return.touched || form.submitted )" ><strong>Return repeat is required</strong></ion-label>
+        <ion-item>
+            <ion-input type="number" formControlName="return"></ion-input>
+        </ion-item>
+
+        <ion-label>Opening</ion-label>
+        <ion-label *ngIf="opening.hasError('required') && (opening.touched || form.submitted )" ><strong>Opening repeat is required</strong></ion-label>
+        <ion-list radio-group formControlName="opening">
+            <ion-item>
+              <ion-label>On way</ion-label>
+              <ion-radio value="1" checked></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>Center open</ion-label>
+              <ion-radio value="2" checked></ion-radio>
+            </ion-item>
+        </ion-list>
+
+        <ion-label>Allow Railroad</ion-label>
+        <ion-list radio-group  formControlName="railroad">
+            <ion-item>
+              <ion-label>Yes</ion-label>
+              <ion-radio value="1"></ion-radio>
+            </ion-item>
+            <ion-item>
+                <ion-label>No</ion-label>
+                <ion-radio value="0"></ion-radio>
+              </ion-item>
+        </ion-list>
+
+      <hr />
+      <ion-label  *ngIf="!form.valid && form.touched && formSubmitted " ><strong>Oops!, there are errors...</strong></ion-label>
+      <button #error ion-button type="submit" block>Calculate</button>
+    </form>
+</ion-content>
