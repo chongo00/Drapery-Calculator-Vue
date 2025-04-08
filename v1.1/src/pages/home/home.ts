@@ -56,28 +56,39 @@ export class DraperyCalculatorPage {
       opening,
       railroad
     } = this.form.value;
+
+    const nRFFullness = Number(RFFullness);
+    const nPPFullness = Number(PPFullness);
+    const nWidth = Number(width);
+    const nHeight = Number(height);
+    const nOpening = Number(opening);
+    const nReturnValue = Number(returnValue);
+    const nVerticalRepeat = Number(verticalRepeat);
     
-    const fullness = productType === '1' ? this.ripplefoldFullness[RFFullness] : PPFullness;
-    const totalHeight = Number(height) + parseFloat(heightFraction) + this.heightMargin;
-    const totalWidth = (Number(width) + parseFloat(widthFraction)) * fullness + Number(opening) * (Number(returnValue) + this.widthMargin);
+    const fullness = productType === '1' ? this.ripplefoldFullness[nRFFullness] : nPPFullness;
+    const fullWidth = (nWidth + parseFloat(widthFraction)) * fullness;
+    const fullHeight = nHeight + parseFloat(heightFraction);
+
+    const totalWidth = fullWidth + nOpening * (nReturnValue + this.widthMargin);
+    const totalHeight = fullHeight + this.heightMargin;
     
     let fabricOrientation = 'Regular';
     let requiredWidths = Math.ceil(totalWidth / fabricWidth);
     let requiredCuts = requiredWidths;
-    let requiredCutLength = totalHeight + Number(verticalRepeat);
+    let requiredCutLength = totalHeight + nVerticalRepeat;
     let requiredFabric = requiredWidths * requiredCutLength;
     let requiredSnaps = 0;
 
     if (railroad === '1' && totalHeight < fabricWidth) {
       fabricOrientation = 'Railroad';
       requiredWidths = 1;
-      requiredCuts = Number(opening);
-      requiredCutLength = totalWidth / Number(opening);
+      requiredCuts = nOpening;
+      requiredCutLength = totalWidth / nOpening;
       requiredFabric = totalWidth;
     }
 
     if (productType === '1') {
-      requiredSnaps = Number(opening) * Math.ceil(((Number(width) + parseFloat(widthFraction)) * fullness) / Number(opening) / this.rfSnapSeparation);
+      requiredSnaps = nOpening * Math.ceil(fullWidth / nOpening / this.rfSnapSeparation);
     }
 
     this.modalCtrl.create({
