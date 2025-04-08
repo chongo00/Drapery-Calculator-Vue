@@ -14,7 +14,7 @@ export class DraperyCalculatorPage {
   private widthMargin = 10;
   private heightMargin = 10;
   private rfSnapSeparation = 4.25;
-  private ripplefoldFullness = { 60: 1.8, 80: 2.0, 100: 2.2, 120: 2.4 };
+  private ripplefoldFullness: { [key: number]: number } = { 60: 1.8, 80: 2.0, 100: 2.2, 120: 2.4 };
 
   @ViewChild('error', { static: false }) error!: ElementRef;
 
