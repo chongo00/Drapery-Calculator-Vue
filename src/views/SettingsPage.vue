@@ -2,7 +2,7 @@
   <ion-page class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-950">
     <ion-header class="bg-white dark:bg-neutral-950 shadow-lg">
       <ion-toolbar class="bg-transparent">
-        <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100"><span class="title-inline"><img :src="appIcon" class="w-6 h-6 rounded" alt="" /><span>Settings</span></span></ion-title>
+        <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>Settings</span></span></ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding bg-transparent">

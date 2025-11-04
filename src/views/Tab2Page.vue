@@ -2,13 +2,13 @@
   <ion-page class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-950">
     <ion-header class="bg-white dark:bg-neutral-950 shadow-lg">
       <ion-toolbar class="bg-transparent">
-        <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100"><span class="title-inline"><img :src="appIcon" class="w-6 h-6 rounded" alt="" /><span>Calculation History</span></span></ion-title>
+        <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>Calculation History</span></span></ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding" :fullscreen="true" :force-overscroll="false">
       <ion-header collapse="condense" class="bg-white dark:bg-neutral-950">
         <ion-toolbar class="bg-transparent">
-          <ion-title size="large" class="text-xl font-semibold text-gray-700 dark:text-gray-200"><span class="title-inline"><img :src="appIcon" class="w-5 h-5 rounded" alt="" /><span>History</span></span></ion-title>
+          <ion-title size="large" class="text-xl font-semibold text-gray-700 dark:text-gray-200"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>History</span></span></ion-title>
         </ion-toolbar>
       </ion-header>
 
