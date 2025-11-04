@@ -2,13 +2,13 @@
   <ion-page class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-950">
     <ion-header class="bg-white dark:bg-neutral-950 shadow-lg">
       <ion-toolbar class="bg-transparent">
-        <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100">Drapery Calculator</ion-title>
+        <ion-title class="text-2xl font-bold flex items-center gap-2 text-gray-800 dark:text-gray-100"><img :src="appIcon" class="w-6 h-6 rounded" alt="" />Drapery Calculator</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding bg-transparent">
       <ion-header collapse="condense" class="bg-white dark:bg-neutral-950">
         <ion-toolbar class="bg-transparent">
-          <ion-title size="large" class="text-xl font-semibold text-gray-700 dark:text-gray-100">Drapery Calculator</ion-title>
+          <ion-title size="large" class="text-xl font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-100"><img :src="appIcon" class="w-5 h-5 rounded" alt="" />Drapery Calculator</ion-title>
         </ion-toolbar>
       </ion-header>
 
@@ -171,6 +171,7 @@ import { modalController } from '@ionic/vue';
 import ResultModal from '@/components/ResultModal.vue';
 import useVuelidate from '@vuelidate/core';
 import { required, minValue, helpers } from '@vuelidate/validators';
+import appIcon from '../../icons/icon-128.webp';
 
 // Storage helpers (localStorage for compatibility)
 const getStorageItem = (key: string) => {
