@@ -32,7 +32,7 @@ import { calculator, list, settings } from 'ionicons/icons';
 const router = useRouter();
 const route = useRoute();
 
-// Orden de las pestañas para navegación por gesto
+// Tab order for swipe navigation (route.path is base-less even with BASE configured)
 const TAB_ORDER = ['/tabs/tab1', '/tabs/tab2', '/tabs/settings'];
 
 let isPointerActive = false;
@@ -45,15 +45,16 @@ let lastMoveY = 0;
 const normalizePath = (path: string) => TAB_ORDER.find(p => path.startsWith(p)) ?? TAB_ORDER[0];
 const goToIndex = (i: number) => { const t = TAB_ORDER[i]; if (t) router.push(t); };
 
+// Ignore pointer events that originate from the tab bar/buttons
 const ignore = (target: EventTarget | null) => {
   const el = target as Element | null;
   if (!el) return true;
-  // Solo ignorar la barra de tabs inferior para no interferir con los clics en iconos
+  // Only ignore the bottom tab bar so icon taps are not blocked
   return !!el.closest('ion-tab-button, ion-tab-bar');
 };
 
 const onDown = (e: PointerEvent) => {
-  // Permitir touch/pen y también mouse (para pruebas en devtools)
+  // Allow touch/pen and mouse (for devtools testing)
   if (e.pointerType === 'mouse' && e.buttons !== 1) return;
   if (ignore(e.target)) return;
   isPointerActive = true;
@@ -64,7 +65,7 @@ const onMove = (e: PointerEvent) => {
   if (!isPointerActive) return;
   const dx = e.clientX - startX; const dy = e.clientY - startY;
   const ax = Math.abs(dx); const ay = Math.abs(dy);
-  // Si detectamos intención horizontal clara, anulamos el comportamiento del navegador
+  // If a clear horizontal intent is detected, prevent browser back/forward gesture
   if (ax > ay && ax > 10) {
     if (typeof e.preventDefault === 'function') {
       e.preventDefault();
@@ -80,12 +81,12 @@ const onUp = (e: PointerEvent) => {
   const ax = Math.abs(dx); const ay = Math.abs(dy);
   const dt = Math.max(1, performance.now() - startTime);
   const v = ax / dt; // px/ms
-  // Sensibilidad estándar móvil (ajustada)
-  if (ay > 40 || ax <= ay) return; // descartar gestos más verticales
-  const distanceOK = ax >= 35;  // distancia moderada para apps móviles
-  const velocityOK = v >= 0.35; // velocidad moderada para flick
+  // Mobile-friendly thresholds: discard mostly-vertical gestures
+  if (ay > 40 || ax <= ay) return;
+  const distanceOK = ax >= 35;  // moderate distance
+  const velocityOK = v >= 0.35; // moderate flick speed
   if (!distanceOK && !velocityOK) return;
-  // Evita overlay de back/forward del navegador
+  // Prevent browser back/forward overlay
   if (typeof e.preventDefault === 'function') {
     e.preventDefault();
     e.stopPropagation();
@@ -96,16 +97,63 @@ const onUp = (e: PointerEvent) => {
 };
 const onCancel = () => { isPointerActive = false; };
 
+// Touch fallback for environments where Pointer Events may not fire reliably
+const onTouchStart = (e: TouchEvent) => {
+  if (isPointerActive) return;
+  if (ignore(e.target)) return;
+  const t = e.touches[0];
+  if (!t) return;
+  isPointerActive = true;
+  startX = t.clientX; startY = t.clientY; startTime = performance.now();
+  lastMoveX = 0; lastMoveY = 0;
+};
+const onTouchMove = (e: TouchEvent) => {
+  if (!isPointerActive) return;
+  const t = e.touches[0];
+  if (!t) return;
+  const dx = t.clientX - startX; const dy = t.clientY - startY;
+  const ax = Math.abs(dx); const ay = Math.abs(dy);
+  if (ax > ay && ax > 10) {
+    if (typeof e.preventDefault === 'function') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+  lastMoveX = dx; lastMoveY = dy;
+};
+const onTouchEnd = (e: TouchEvent) => {
+  if (!isPointerActive) return; isPointerActive = false;
+  const dx = lastMoveX; const dy = lastMoveY;
+  const ax = Math.abs(dx); const ay = Math.abs(dy);
+  const dt = Math.max(1, performance.now() - startTime);
+  const v = ax / dt;
+  if (ay > 40 || ax <= ay) return;
+  const distanceOK = ax >= 35;  const velocityOK = v >= 0.35;
+  if (!distanceOK && !velocityOK) return;
+  if (typeof e.preventDefault === 'function') {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const idx = TAB_ORDER.indexOf(normalizePath(route.path));
+  if (idx < 0) return;
+  if (dx < 0) goToIndex(idx + 1); else goToIndex(idx - 1);
+};
+const onTouchCancel = () => { isPointerActive = false; };
+
 const onTab = (path: string) => {
   router.push(path);
 };
 
 onMounted(() => {
-  window.addEventListener('pointerdown', onDown, { passive: false });
-  window.addEventListener('pointermove', onMove, { passive: false });
-  window.addEventListener('pointerup', onUp, { passive: false });
-  window.addEventListener('pointercancel', onCancel, { passive: false });
-  window.addEventListener('pointerleave', onCancel, { passive: false });
+  window.addEventListener('pointerdown', onDown, { passive: false, capture: true });
+  window.addEventListener('pointermove', onMove, { passive: false, capture: true });
+  window.addEventListener('pointerup', onUp, { passive: false, capture: true });
+  window.addEventListener('pointercancel', onCancel, { passive: false, capture: true });
+  window.addEventListener('pointerleave', onCancel, { passive: false, capture: true });
+  window.addEventListener('touchstart', onTouchStart, { passive: false, capture: true });
+  window.addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
+  window.addEventListener('touchend', onTouchEnd, { passive: false, capture: true });
+  window.addEventListener('touchcancel', onTouchCancel, { passive: false, capture: true });
 });
 onBeforeUnmount(() => {
   window.removeEventListener('pointerdown', onDown);
@@ -113,12 +161,16 @@ onBeforeUnmount(() => {
   window.removeEventListener('pointerup', onUp);
   window.removeEventListener('pointercancel', onCancel);
   window.removeEventListener('pointerleave', onCancel);
+  window.removeEventListener('touchstart', onTouchStart);
+  window.removeEventListener('touchmove', onTouchMove);
+  window.removeEventListener('touchend', onTouchEnd);
+  window.removeEventListener('touchcancel', onTouchCancel);
 });
 </script>
 
 <style scoped>
 :deep(ion-tabs) {
-  touch-action: pan-x pan-y; /* permitir gestos horizontales y verticales */
-  overscroll-behavior-x: contain; /* evitar gesto de back/forward del navegador */
+  touch-action: pan-y; /* allow vertical scroll, block browser horizontal nav */
+  overscroll-behavior-x: contain; /* contain back/forward gesture */
 }
 </style>

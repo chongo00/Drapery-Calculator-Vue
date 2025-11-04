@@ -21,16 +21,16 @@ body.ion-palette-dark {
 
 /* Global gesture/overscroll tuning for mobile-like behavior */
 html, body, #app, ion-app {
-  touch-action: pan-x pan-y;     /* permitir desplazamiento en ambos ejes para habilitar swipe */
-  overscroll-behavior-x: none;   /* evita gesto de navegación hacia atrás/adelante del navegador */
+  touch-action: pan-x pan-y;     /* allow scrolling on both axes to enable swipe */
+  overscroll-behavior-x: none;   /* prevent browser back/forward gesture */
 }
 
 ion-content::part(scroll) {
   overscroll-behavior-x: contain;
 }
 
-/* Refuerzo en contenedores Ionic para bloquear gesto horizontal del navegador */
+/* Reinforce Ionic containers to prevent browser horizontal navigation gesture */
 ion-page, ion-content, ion-router-outlet {
-  touch-action: auto;            /* permitir gestos horizontales dentro del contenido */
+  touch-action: auto;            /* allow horizontal gestures inside the content */
   overscroll-behavior-x: none;
 }

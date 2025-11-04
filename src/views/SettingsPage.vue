@@ -37,9 +37,7 @@ const applyTheme = (isDark: boolean) => {
   const ionApp = document.querySelector('ion-app');
 
   html.classList.toggle('dark', isDark);
-  html.classList.toggle('ion-palette-dark', isDark);
   body.classList.toggle('ion-theme-dark', isDark);
-  body.classList.toggle('ion-palette-dark', isDark);
   body.classList.toggle('dark', isDark);
   if (ionApp) {
     ionApp.classList.toggle('dark', isDark);
@@ -60,7 +58,7 @@ watch(darkMode, (newValue) => {
 
 onMounted(() => {
   const saved = localStorage.getItem('darkMode');
-  // Solo respetar la preferencia guardada; si no existe, iniciar en claro
+  // Respect only the saved preference; if it doesn't exist, start in light mode
   darkMode.value = saved === 'true';
   applyTheme(darkMode.value);
   isInitialized.value = true;

@@ -46,7 +46,7 @@ import { ref, onMounted } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonItemDivider, IonItemGroup, IonLabel, IonIcon, IonButton, onIonViewWillEnter } from '@ionic/vue';
 import { trash } from 'ionicons/icons';
 
-// Función helper para storage
+// Storage helper function
 const getStorageItem = (key: string) => {
   return localStorage.getItem(key);
 };
@@ -98,7 +98,7 @@ onMounted(() => {
   loadHistory();
 });
 
-// Recargar historial cada vez que se entra a la vista
+// Reload history every time the view is entered
 onIonViewWillEnter(() => {
   loadHistory();
   console.log('History view entered, reloading data');

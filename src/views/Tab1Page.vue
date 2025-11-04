@@ -58,7 +58,7 @@
             </ion-item>
           </div>
 
-          <div class="bg-gray-50 dark:bg-neutral-950/50 dark:border dark:border-white/10 rounded-lg p-4 space-y-3">
+          <div class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Product Type</h3>
             <ion-radio-group v-model="form.productType" class="flex flex-col space-y-3" @ionChange="handleTouched('productType')">
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
@@ -91,7 +91,7 @@
           <p v-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.required.$invalid" class="validation-error">Vertical repeat is required</p>
           <p v-else-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.minValue.$invalid" class="validation-error">Vertical repeat has to be greater than or equal to 0</p>
 
-          <div v-if="form.productType === '1'" class="bg-gray-50 dark:bg-neutral-950/50 dark:border dark:border-white/10 rounded-lg p-4 space-y-3">
+          <div v-if="form.productType === '1'" class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Ripplefold Fullness</h3>
             <ion-select v-model="form.RFFullness" placeholder="Select fullness" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('RFFullness')">
               <ion-select-option value="60">60%</ion-select-option>
@@ -102,7 +102,7 @@
             <p v-if="shouldShowError('RFFullness') && v$.RFFullness.required.$invalid" class="validation-error">Ripplefold fullness is required</p>
           </div>
 
-          <div v-if="form.productType === '2'" class="bg-gray-50 dark:bg-neutral-950/50 dark:border dark:border-white/10 rounded-lg p-4 space-y-3">
+          <div v-if="form.productType === '2'" class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Pinch Pleat Fullness</h3>
             <ion-select v-model="form.PPFullness" placeholder="Select fullness" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('PPFullness')">
               <ion-select-option value="2">2</ion-select-option>
@@ -120,7 +120,7 @@
           <p v-if="shouldShowError('return') && v$.return.required.$invalid" class="validation-error">Return is required</p>
           <p v-else-if="shouldShowError('return') && v$.return.minValue.$invalid" class="validation-error">Return has to be greater than or equal to 0</p>
 
-          <div class="bg-gray-50 dark:bg-neutral-950/50 dark:border dark:border-white/10 rounded-lg p-4 space-y-3">
+          <div class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Opening</h3>
             <ion-radio-group v-model="form.opening" class="flex flex-col space-y-3 text-gray-700 dark:text-gray-100" @ionChange="handleTouched('opening')">
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
@@ -135,7 +135,7 @@
           </div>
           <p v-if="shouldShowError('opening') && v$.opening.required.$invalid" class="validation-error">Opening is required</p>
 
-          <div class="bg-gray-50 dark:bg-neutral-950/50 dark:border dark:border-white/10 rounded-lg p-4 space-y-3">
+          <div class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Allow Railroad</h3>
             <ion-radio-group v-model="form.railroad" class="flex flex-col space-y-3 text-gray-700 dark:text-gray-100" @ionChange="handleTouched('railroad')">
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
@@ -172,7 +172,7 @@ import ResultModal from '@/components/ResultModal.vue';
 import useVuelidate from '@vuelidate/core';
 import { required, minValue, helpers } from '@vuelidate/validators';
 
-// Función helper para storage (localStorage para compatibilidad)
+// Storage helpers (localStorage for compatibility)
 const getStorageItem = (key: string) => {
   return localStorage.getItem(key);
 };
@@ -240,7 +240,7 @@ const shouldShowError = (field: FormField) => {
   return (submitted.value || control.$dirty) && control.$invalid;
 };
 
-// Constantes
+// Constants
 const widthMargin = 10;
 const heightMargin = 10;
 const rfSnapSeparation = 4.25;
@@ -308,7 +308,7 @@ const runCalculation = async () => {
     fullness: form.productType === '2' ? form.PPFullness : form.RFFullness + "%"
   };
 
-  // Guardar en historial ANTES de mostrar el modal
+  // Store in history BEFORE showing the modal
   try {
     const value = getStorageItem('calculationHistory');
     const history = value ? JSON.parse(value) : [];
@@ -418,5 +418,17 @@ const parseStringToFraction = (value: string): string => {
   --padding-bottom: 0.875rem;
   --box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
   font-weight: 600;
+}
+
+/* Reusable section container for groups (modern, subtle) */
+.section-card {
+  background: #f9fafb; /* gray-50 */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+.dark .section-card {
+  background: rgba(17, 24, 39, 0.6); /* neutral-900 with transparency */
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>
