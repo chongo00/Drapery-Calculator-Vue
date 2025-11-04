@@ -39,5 +39,22 @@ const app = createApp(App)
   .use(router);
 
 router.isReady().then(() => {
+  // Apply saved dark mode preference at boot
+  try {
+    const saved = localStorage.getItem('darkMode');
+    const isDark = saved === 'true';
+    const html = document.documentElement;
+    const body = document.body;
+    const ionApp = document.querySelector('ion-app');
+    html.classList.toggle('dark', isDark);
+    body.classList.toggle('ion-theme-dark', isDark);
+    body.classList.toggle('dark', isDark);
+    if (ionApp) {
+      ionApp.classList.toggle('dark', isDark);
+      ionApp.classList.toggle('ion-theme-dark', isDark);
+    }
+    html.style.colorScheme = isDark ? 'dark' : 'light';
+  } catch (_) {}
+
   app.mount('#app');
 });

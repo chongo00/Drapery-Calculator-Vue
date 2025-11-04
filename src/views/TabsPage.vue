@@ -66,7 +66,7 @@ const onMove = (e: PointerEvent) => {
   const dx = e.clientX - startX; const dy = e.clientY - startY;
   const ax = Math.abs(dx); const ay = Math.abs(dy);
   // If a clear horizontal intent is detected, prevent browser back/forward gesture
-  if (ax > ay && ax > 10) {
+  if (ax > ay && ax > 8) {
     if (typeof e.preventDefault === 'function') {
       e.preventDefault();
       e.stopPropagation();
@@ -81,10 +81,10 @@ const onUp = (e: PointerEvent) => {
   const ax = Math.abs(dx); const ay = Math.abs(dy);
   const dt = Math.max(1, performance.now() - startTime);
   const v = ax / dt; // px/ms
-  // Mobile-friendly thresholds: discard mostly-vertical gestures
-  if (ay > 40 || ax <= ay) return;
-  const distanceOK = ax >= 35;  // moderate distance
-  const velocityOK = v >= 0.35; // moderate flick speed
+  // Mobile-friendly thresholds: allow slightly more vertical slop and lower swipe effort
+  if (ay > 80 || ax <= ay) return;
+  const distanceOK = ax >= 20;  // lower distance for easier swipe
+  const velocityOK = v >= 0.20; // lower flick speed threshold
   if (!distanceOK && !velocityOK) return;
   // Prevent browser back/forward overlay
   if (typeof e.preventDefault === 'function') {
@@ -127,8 +127,8 @@ const onTouchEnd = (e: TouchEvent) => {
   const ax = Math.abs(dx); const ay = Math.abs(dy);
   const dt = Math.max(1, performance.now() - startTime);
   const v = ax / dt;
-  if (ay > 40 || ax <= ay) return;
-  const distanceOK = ax >= 35;  const velocityOK = v >= 0.35;
+  if (ay > 80 || ax <= ay) return;
+  const distanceOK = ax >= 20;  const velocityOK = v >= 0.20;
   if (!distanceOK && !velocityOK) return;
   if (typeof e.preventDefault === 'function') {
     e.preventDefault();
