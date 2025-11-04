@@ -34,3 +34,14 @@ ion-page, ion-content, ion-router-outlet {
   touch-action: auto;            /* allow horizontal gestures inside the content */
   overscroll-behavior-x: none;
 }
+
+/* Title icon/text inline layout across all views */
+ion-title .title-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+ion-title .title-inline img {
+  display: inline-block;
+  vertical-align: middle;
+}
