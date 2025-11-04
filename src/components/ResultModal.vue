@@ -1,67 +1,83 @@
 <template>
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>Calculation Results</ion-title>
+  <ion-header class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-800 dark:to-indigo-900">
+    <ion-toolbar class="bg-transparent">
+      <ion-title class="text-white font-bold text-xl">✨ Calculation Results</ion-title>
       <ion-buttons slot="end">
-        <ion-button @click="closeModal">Close</ion-button>
+        <ion-button @click="copyResults" class="text-white" fill="clear">
+          <ion-icon :icon="copyOutline"></ion-icon>
+        </ion-button>
+        <ion-button @click="closeModal" class="text-white" fill="clear">
+          <ion-icon :icon="closeOutline"></ion-icon>
+        </ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
-  <ion-content class="ion-padding">
-    <ion-card>
-      <ion-card-content>
-        <ion-item>
-          <ion-label>
-            <strong>Width:</strong> {{ result.width }} <span class="fractions">{{ result.widthFraction }}</span> inches
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <strong>Height:</strong> {{ result.height }} <span class="fractions">{{ result.heightFraction }}</span> inches
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <strong>Product Type:</strong> {{ result.productType == '1' ? 'Ripplefold curtain' : 'Pinch Pleated curtain' }}
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <strong>Fullness:</strong> {{ result.fullness }}
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <strong>Required Fabric:</strong> {{ result.requiredFabric }} yards
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <strong>Fabric Orientation:</strong> {{ result.fabricOrientation }}
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <strong>Fabric Widths:</strong> {{ result.fabricWidths }}
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <strong>Fabric Cuts:</strong> {{ result.fabricCuts }} x {{ result.fabricCutLength }} <span class="fractions">{{ result.fabricCutsFraction }}</span> inches
-          </ion-label>
-        </ion-item>
-        <ion-item v-if="result.productType == '1'">
-          <ion-label>
-            <strong>Required Snaps:</strong> {{ result.requiredSnaps }}
-          </ion-label>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+  <ion-content class="ion-padding bg-gray-50 dark:bg-neutral-900">
+    <div v-if="copied" class="mb-4 p-3 bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 rounded-lg text-center animate-pulse">
+      ✅ Results copied to clipboard!
+    </div>
+    <div class="max-w-md mx-auto space-y-4 animate-fade-in">
+      <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-6 border-l-4 border-blue-600 hover:shadow-xl transition-shadow duration-300">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+          <ion-icon :icon="cutOutline" class="text-blue-600"></ion-icon>
+          Required Fabric
+        </h2>
+        <div class="text-center py-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-700 mb-4">
+          <p class="text-5xl font-extrabold text-blue-600 dark:text-blue-400 animate-scale-in">{{ result.requiredFabric }}</p>
+          <p class="text-xl text-gray-600 dark:text-gray-300 mt-2">yards</p>
+        </div>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
+            <span class="text-gray-600 dark:text-gray-400 font-medium">📏 Dimensions:</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.width }} {{ result.widthFraction }} × {{ result.height }} {{ result.heightFraction }}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
+            <span class="text-gray-600 dark:text-gray-400 font-medium">🪡 Product Type:</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.productType == '1' ? 'Ripplefold' : 'Pinch Pleated' }}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
+            <span class="text-gray-600 dark:text-gray-400 font-medium">📊 Fullness:</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.fullness }}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
+            <span class="text-gray-600 dark:text-gray-400 font-medium">↔️ Fabric Widths:</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.fabricWidths }}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
+            <span class="text-gray-600 dark:text-gray-400 font-medium">✂️ Fabric Cuts:</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.fabricCuts }}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
+            <span class="text-gray-600 dark:text-gray-400 font-medium">📐 Cut Length:</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.fabricCutLength }} {{ result.fabricCutsFraction }}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
+            <span class="text-gray-600 dark:text-gray-400 font-medium">🔄 Orientation:</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.fabricOrientation }}</span>
+          </div>
+          <div v-if="result.requiredSnaps > 0" class="flex justify-between items-center py-2 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
+            <span class="text-gray-600 dark:text-gray-400 font-medium">📍 Snaps Required:</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.requiredSnaps }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <ion-button expand="block" @click="copyResults" fill="outline" class="flex-1">
+          <ion-icon :icon="copyOutline" slot="start"></ion-icon>
+          Copy
+        </ion-button>
+        <ion-button expand="block" @click="closeModal" class="flex-1">
+          Close
+        </ion-button>
+      </div>
+    </div>
   </ion-content>
 </template>
 
 <script setup lang="ts">
-import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonCard, IonCardContent, IonItem, IonLabel, modalController } from '@ionic/vue';
+import { ref } from 'vue';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon, modalController } from '@ionic/vue';
+import { closeOutline, copyOutline, cutOutline } from 'ionicons/icons';
 
 interface Props {
   result: {
@@ -83,13 +99,88 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const copied = ref(false);
+
 const closeModal = () => {
   modalController.dismiss();
+};
+
+const copyResults = async () => {
+  const text = `Drapery Calculation Results\n\n` +
+    `Required Fabric: ${props.result.requiredFabric} yards\n` +
+    `Dimensions: ${props.result.width} ${props.result.widthFraction} × ${props.result.height} ${props.result.heightFraction}\n` +
+    `Product Type: ${props.result.productType == '1' ? 'Ripplefold' : 'Pinch Pleated'}\n` +
+    `Fullness: ${props.result.fullness}\n` +
+    `Fabric Widths: ${props.result.fabricWidths}\n` +
+    `Fabric Cuts: ${props.result.fabricCuts}\n` +
+    `Cut Length: ${props.result.fabricCutLength} ${props.result.fabricCutsFraction}\n` +
+    `Orientation: ${props.result.fabricOrientation}` +
+    (props.result.requiredSnaps > 0 ? `\nSnaps Required: ${props.result.requiredSnaps}` : '');
+
+  const fallbackCopy = () => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', 'true');
+    textarea.style.position = 'fixed';
+    textarea.style.top = '0';
+    textarea.style.left = '0';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+  };
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      fallbackCopy();
+    }
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 2000);
+  } catch (err) {
+    try {
+      fallbackCopy();
+      copied.value = true;
+      setTimeout(() => {
+        copied.value = false;
+      }, 2000);
+    } catch (fallbackError) {
+      console.error('Failed to copy results', fallbackError);
+    }
+  }
 };
 </script>
 
 <style scoped>
-.fractions {
-  font-style: italic;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.8);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 </style>

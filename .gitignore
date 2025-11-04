@@ -1,32 +1,80 @@
 # Specifies intentionally untracked files to ignore when using Git
 # http://git-scm.com/docs/gitignore
 
-*~
-*.sw[mnpcod]
-.tmp
-*.tmp
-*.tmp.*
-*.sublime-project
-*.sublime-workspace
+# OS-generated files
 .DS_Store
 Thumbs.db
-UserInterfaceState.xcuserstate
 $RECYCLE.BIN/
 
+# Temporary/system files
+*~
+*.sw[mnpcod]
+*.swp
+*.swo
+*.tmp
+*.tmp.*
+UserInterfaceState.xcuserstate
+
+# Editor project files
+*.sublime-project
+*.sublime-workspace
+
+# Logs
 *.log
 log.txt
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-/.idea
-/.ionic
-/.sass-cache
-/.sourcemaps
-/.versions
-/.vscode/*
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Dependency directories
+node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+
+# Testing artifacts
+coverage/
+cypress/screenshots/
+cypress/videos/
+
+# Ionic / Capacitor cache
+.ionic
+.sass-cache
+.sourcemaps
+.versions
+.capacitor/
+
+# Android native artifacts
+android/.gradle/
+android/app/build/
+android/build/
+android/captures/
+android/local.properties
+android/app/release/
+android/app/*.keystore
+*.keystore
+*.jks
+*.aab
+*.apk
+
+# iOS native artifacts
+ios/App/Pods/
+ios/App/build/
+ios/App/DerivedData/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+*.xcuserstate
+
+# IDE settings
+.idea/
+.vscode/*
 !/.vscode/extensions.json
-/coverage
-/dist
-/node_modules
-/platforms
-/plugins
-/www

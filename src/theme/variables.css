@@ -1,2 +1,36 @@
 /* For information on how to create your own theme, please see:
 http://ionicframework.com/docs/theming/ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html.dark,
+body.ion-theme-dark,
+body.ion-palette-dark {
+  color-scheme: dark;
+  --ion-background-color: #0f1115;
+  --ion-text-color: #e5e7eb;
+  --ion-toolbar-background: #111827;
+  --ion-item-background: #0f1115;
+}
+
+:root {
+  color-scheme: light;
+}
+
+/* Global gesture/overscroll tuning for mobile-like behavior */
+html, body, #app, ion-app {
+  touch-action: pan-y;           /* solo desplazamiento vertical */
+  overscroll-behavior-x: none;   /* evita gesto de navegación hacia atrás/adelante del navegador */
+}
+
+ion-content::part(scroll) {
+  overscroll-behavior-x: contain;
+}
+
+/* Refuerzo en contenedores Ionic para bloquear gesto horizontal del navegador */
+ion-page, ion-content, ion-router-outlet, ion-tabs {
+  touch-action: pan-y !important;
+  overscroll-behavior-x: none;
+}

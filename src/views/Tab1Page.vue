@@ -1,150 +1,185 @@
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Drapery Calculator</ion-title>
+  <ion-page class="bg-gradient-to-br from-blue-50 to-indigo-100">
+    <ion-header class="bg-white shadow-lg">
+      <ion-toolbar class="bg-transparent">
+        <ion-title class="text-2xl font-bold text-gray-800">Drapery Calculator</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Drapery Calculator</ion-title>
+    <ion-content class="ion-padding">
+      <ion-header collapse="condense" class="bg-white">
+        <ion-toolbar class="bg-transparent">
+          <ion-title size="large" class="text-xl font-semibold text-gray-700">Drapery Calculator</ion-title>
         </ion-toolbar>
       </ion-header>
 
-      <form @submit.prevent="calculate">
-        <ion-list>
-          <ion-item>
-            <ion-label position="stacked">Width (inches)</ion-label>
-            <ion-input v-model="form.width" type="number" :counter="true" :maxlength="10"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Width Fraction</ion-label>
-            <ion-select v-model="form.widthFraction" placeholder="Select">
-              <ion-select-option value="0">0</ion-select-option>
-              <ion-select-option value="0.125">1/8</ion-select-option>
-              <ion-select-option value="0.25">1/4</ion-select-option>
-              <ion-select-option value="0.375">3/8</ion-select-option>
-              <ion-select-option value="0.5">1/2</ion-select-option>
-              <ion-select-option value="0.625">5/8</ion-select-option>
-              <ion-select-option value="0.75">3/4</ion-select-option>
-              <ion-select-option value="0.875">7/8</ion-select-option>
-            </ion-select>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Height (inches)</ion-label>
-            <ion-input v-model="form.height" type="number" :counter="true" :maxlength="10"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Height Fraction</ion-label>
-            <ion-select v-model="form.heightFraction" placeholder="Select">
-              <ion-select-option value="0">0</ion-select-option>
-              <ion-select-option value="0.125">1/8</ion-select-option>
-              <ion-select-option value="0.25">1/4</ion-select-option>
-              <ion-select-option value="0.375">3/8</ion-select-option>
-              <ion-select-option value="0.5">1/2</ion-select-option>
-              <ion-select-option value="0.625">5/8</ion-select-option>
-              <ion-select-option value="0.75">3/4</ion-select-option>
-              <ion-select-option value="0.875">7/8</ion-select-option>
-            </ion-select>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Product</ion-label>
-            <ion-radio-group v-model="form.productType">
-              <ion-list-header>
-                <ion-label>Product Type</ion-label>
-              </ion-list-header>
-              <ion-item>
-                <ion-label>Ripplefold curtain</ion-label>
-                <ion-radio slot="start" value="1"></ion-radio>
+      <div class="max-w-md mx-auto bg-white dark:bg-neutral-950 rounded-xl shadow-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Calculate Your Fabric Needs</h2>
+        <form @submit.prevent="handleSubmit" class="space-y-4 form-anchor">
+          <div class="grid grid-cols-1 gap-4">
+            <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Width (inches)</ion-label>
+              <ion-input v-model="form.width" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('width')" @ionInput="handleTouched('width')"></ion-input>
+            </ion-item>
+            <p v-if="shouldShowError('width') && v$.width.required.$invalid" class="validation-error">Width is required</p>
+            <p v-else-if="shouldShowError('width') && v$.width.minValue.$invalid" class="validation-error">Width has to be greater than 0</p>
+            <p v-else-if="shouldShowError('width') && v$.width.integer.$invalid" class="validation-error">Width must be an integer value</p>
+            <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Width Fraction</ion-label>
+              <ion-select v-model="form.widthFraction" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('widthFraction')">
+                <ion-select-option value="0">0</ion-select-option>
+                <ion-select-option value="0.125">1/8</ion-select-option>
+                <ion-select-option value="0.25">1/4</ion-select-option>
+                <ion-select-option value="0.375">3/8</ion-select-option>
+                <ion-select-option value="0.5">1/2</ion-select-option>
+                <ion-select-option value="0.625">5/8</ion-select-option>
+                <ion-select-option value="0.75">3/4</ion-select-option>
+                <ion-select-option value="0.875">7/8</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Height (inches)</ion-label>
+              <ion-input v-model="form.height" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('height')" @ionInput="handleTouched('height')"></ion-input>
+            </ion-item>
+            <p v-if="shouldShowError('height') && v$.height.required.$invalid" class="validation-error">Height is required</p>
+            <p v-else-if="shouldShowError('height') && v$.height.minValue.$invalid" class="validation-error">Height has to be greater than 0</p>
+            <p v-else-if="shouldShowError('height') && v$.height.integer.$invalid" class="validation-error">Height must be an integer value</p>
+            <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Height Fraction</ion-label>
+              <ion-select v-model="form.heightFraction" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('heightFraction')">
+                <ion-select-option value="0">0</ion-select-option>
+                <ion-select-option value="0.125">1/8</ion-select-option>
+                <ion-select-option value="0.25">1/4</ion-select-option>
+                <ion-select-option value="0.375">3/8</ion-select-option>
+                <ion-select-option value="0.5">1/2</ion-select-option>
+                <ion-select-option value="0.625">5/8</ion-select-option>
+                <ion-select-option value="0.75">3/4</ion-select-option>
+                <ion-select-option value="0.875">7/8</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+
+          <div class="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Product Type</h3>
+            <ion-radio-group v-model="form.productType" class="flex flex-col space-y-3" @ionChange="handleTouched('productType')">
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+                <ion-label class="text-sm text-gray-700 dark:text-gray-100">Ripplefold curtain</ion-label>
+                <ion-radio slot="start" value="1" class="text-blue-500"></ion-radio>
               </ion-item>
-              <ion-item>
-                <ion-label>Pinch Pleated curtain</ion-label>
-                <ion-radio slot="start" value="2"></ion-radio>
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+                <ion-label class="text-sm text-gray-700 dark:text-gray-100">Pinch Pleated curtain</ion-label>
+                <ion-radio slot="start" value="2" class="text-blue-500"></ion-radio>
               </ion-item>
             </ion-radio-group>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Fabric width (inches)</ion-label>
-            <ion-select v-model="form.fabricWidth" placeholder="Select">
+          </div>
+          <p v-if="shouldShowError('productType') && v$.productType.required.$invalid" class="validation-error">Product is required</p>
+
+          <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+            <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Fabric Width (inches)</ion-label>
+            <ion-select v-model="form.fabricWidth" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('fabricWidth')">
               <ion-select-option value="54">54</ion-select-option>
               <ion-select-option value="108">108</ion-select-option>
               <ion-select-option value="110">110</ion-select-option>
               <ion-select-option value="118">118</ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Vertical repeat (inches)</ion-label>
-            <ion-input v-model="form.verticalRepeat" type="number"></ion-input>
+          <p v-if="shouldShowError('fabricWidth') && v$.fabricWidth.required.$invalid" class="validation-error">Fabric width is required</p>
+
+          <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+            <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Vertical Repeat (inches)</ion-label>
+            <ion-input v-model="form.verticalRepeat" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('verticalRepeat')"></ion-input>
           </ion-item>
-          <ion-item v-if="form.productType === '1'">
-            <ion-label position="stacked">Fullness (%)</ion-label>
-            <ion-select v-model="form.RFFullness" placeholder="Select">
+          <p v-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.required.$invalid" class="validation-error">Vertical repeat is required</p>
+          <p v-else-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.minValue.$invalid" class="validation-error">Vertical repeat has to be greater than or equal to 0</p>
+
+          <div v-if="form.productType === '1'" class="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Ripplefold Fullness</h3>
+            <ion-select v-model="form.RFFullness" placeholder="Select fullness" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('RFFullness')">
               <ion-select-option value="60">60%</ion-select-option>
               <ion-select-option value="80">80%</ion-select-option>
               <ion-select-option value="100">100%</ion-select-option>
               <ion-select-option value="120">120%</ion-select-option>
             </ion-select>
-          </ion-item>
-          <ion-item v-if="form.productType === '2'">
-            <ion-label position="stacked">Fullness</ion-label>
-            <ion-select v-model="form.PPFullness" placeholder="Select">
+            <p v-if="shouldShowError('RFFullness') && v$.RFFullness.required.$invalid" class="validation-error">Ripplefold fullness is required</p>
+          </div>
+
+          <div v-if="form.productType === '2'" class="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Pinch Pleat Fullness</h3>
+            <ion-select v-model="form.PPFullness" placeholder="Select fullness" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('PPFullness')">
               <ion-select-option value="2">2</ion-select-option>
               <ion-select-option value="2.5">2.5</ion-select-option>
               <ion-select-option value="3">3</ion-select-option>
               <ion-select-option value="3.5">3.5</ion-select-option>
             </ion-select>
+            <p v-if="shouldShowError('PPFullness') && v$.PPFullness.required.$invalid" class="validation-error">Pinch pleat fullness is required</p>
+          </div>
+
+          <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+            <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Return (inches)</ion-label>
+            <ion-input v-model="form.return" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('return')"></ion-input>
           </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Return (inches)</ion-label>
-            <ion-input v-model="form.return" type="number"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Opening</ion-label>
-            <ion-radio-group v-model="form.opening">
-              <ion-list-header>
-                <ion-label>Opening Type</ion-label>
-              </ion-list-header>
-              <ion-item>
-                <ion-label>On way</ion-label>
-                <ion-radio slot="start" value="1"></ion-radio>
+          <p v-if="shouldShowError('return') && v$.return.required.$invalid" class="validation-error">Return is required</p>
+          <p v-else-if="shouldShowError('return') && v$.return.minValue.$invalid" class="validation-error">Return has to be greater than or equal to 0</p>
+
+          <div class="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Opening</h3>
+            <ion-radio-group v-model="form.opening" class="flex flex-col space-y-3 text-gray-700 dark:text-gray-100" @ionChange="handleTouched('opening')">
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+                <ion-label class="text-sm">On way</ion-label>
+                <ion-radio slot="start" value="1" class="text-blue-500"></ion-radio>
               </ion-item>
-              <ion-item>
-                <ion-label>Center open</ion-label>
-                <ion-radio slot="start" value="2"></ion-radio>
-              </ion-item>
-            </ion-radio-group>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Allow Railroad</ion-label>
-            <ion-radio-group v-model="form.railroad">
-              <ion-list-header>
-                <ion-label>Allow Railroad</ion-label>
-              </ion-list-header>
-              <ion-item>
-                <ion-label>Yes</ion-label>
-                <ion-radio slot="start" value="1"></ion-radio>
-              </ion-item>
-              <ion-item>
-                <ion-label>No</ion-label>
-                <ion-radio slot="start" value="0"></ion-radio>
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+                <ion-label class="text-sm">Center open</ion-label>
+                <ion-radio slot="start" value="2" class="text-blue-500"></ion-radio>
               </ion-item>
             </ion-radio-group>
-          </ion-item>
-        </ion-list>
-        <ion-button expand="block" type="submit">Calculate</ion-button>
-      </form>
+          </div>
+          <p v-if="shouldShowError('opening') && v$.opening.required.$invalid" class="validation-error">Opening is required</p>
+
+          <div class="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Allow Railroad</h3>
+            <ion-radio-group v-model="form.railroad" class="flex flex-col space-y-3 text-gray-700 dark:text-gray-100" @ionChange="handleTouched('railroad')">
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+                <ion-label class="text-sm">Yes</ion-label>
+                <ion-radio slot="start" value="1" class="text-blue-500"></ion-radio>
+              </ion-item>
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+                <ion-label class="text-sm">No</ion-label>
+                <ion-radio slot="start" value="0" class="text-blue-500"></ion-radio>
+              </ion-item>
+            </ion-radio-group>
+          </div>
+          <p v-if="shouldShowError('railroad') && v$.railroad.required.$invalid" class="validation-error">Please select an option</p>
+
+          <div v-if="showErrorBanner" class="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg" role="alert">
+            <strong class="font-semibold">Oops!</strong>
+            <span class="ml-1">There are errors...</span>
+          </div>
+
+          <ion-button expand="block" type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md transition duration-200">Calculate Fabric Needs</ion-button>
+        </form>
+      </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { reactive, computed } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { 
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonRadioGroup, IonRadio, IonListHeader, IonButton
+  IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonRadioGroup, IonRadio, IonButton
 } from '@ionic/vue';
 import { modalController } from '@ionic/vue';
 import ResultModal from '@/components/ResultModal.vue';
+import useVuelidate from '@vuelidate/core';
+import { required, minValue, helpers } from '@vuelidate/validators';
+
+// Función helper para storage (localStorage para compatibilidad)
+const getStorageItem = (key: string) => {
+  return localStorage.getItem(key);
+};
+
+const setStorageItem = (key: string, value: string) => {
+  localStorage.setItem(key, value);
+};
 
 const form = reactive({
   width: '',
@@ -161,6 +196,50 @@ const form = reactive({
   railroad: '0'
 });
 
+type FormField = keyof typeof form;
+
+const rules = computed(() => ({
+  width: {
+    required,
+    minValue: minValue(1),
+    integer: helpers.withParams({ type: 'integer' }, (value: string) => {
+      if (!value) return true;
+      return Number.isInteger(Number(value));
+    })
+  },
+  height: {
+    required,
+    minValue: minValue(1),
+    integer: helpers.withParams({ type: 'integer' }, (value: string) => {
+      if (!value) return true;
+      return Number.isInteger(Number(value));
+    })
+  },
+  RFFullness: { required },
+  PPFullness: { required },
+  return: { required, minValue: minValue(0) },
+  opening: { required },
+  railroad: { required }
+}));
+
+const v$ = useVuelidate(rules, form);
+const submitted = ref(false);
+const showErrorBanner = ref(false);
+
+const handleTouched = (field: FormField) => {
+  showErrorBanner.value = false;
+  const control = v$.value[field];
+  if (control) {
+    control.$touch();
+  }
+};
+
+const shouldShowError = (field: FormField) => {
+  const control = v$.value[field];
+  if (!control) return false;
+  return (submitted.value || control.$dirty) && control.$invalid;
+};
+
 // Constantes
 const widthMargin = 10;
 const heightMargin = 10;
@@ -170,22 +249,19 @@ const ripplefoldFullness80 = 2.0;
 const ripplefoldFullness100 = 2.2;
 const ripplefoldFullness120 = 2.4;
 
-const calculate = async () => {
-  let _panels = parseInt(form.opening);
+const runCalculation = async () => {
+  const _panels = parseInt(form.opening);
   
-  let _fullness: number;
+  let _fullness = parseFloat(form.PPFullness);
   if (form.productType === '1') {
+    _fullness = ripplefoldFullness100;
     if (form.RFFullness === "60") {
       _fullness = ripplefoldFullness60;
     } else if (form.RFFullness === "80") {
       _fullness = ripplefoldFullness80;
-    } else if (form.RFFullness === "100") {
-      _fullness = ripplefoldFullness100;
     } else if (form.RFFullness === "120") {
       _fullness = ripplefoldFullness120;
     }
-  } else {
-    _fullness = parseFloat(form.PPFullness);
   }
 
   const _totalHeight = (parseFloat(form.height) + parseFloat(form.heightFraction)) + heightMargin;
@@ -232,6 +308,19 @@ const calculate = async () => {
     fullness: form.productType === '2' ? form.PPFullness : form.RFFullness + "%"
   };
 
+  // Guardar en historial ANTES de mostrar el modal
+  try {
+    const value = getStorageItem('calculationHistory');
+    const history = value ? JSON.parse(value) : [];
+    const newEntry = { ...result, timestamp: new Date().toISOString() };
+    history.unshift(newEntry);
+    const updatedHistory = history.slice(0, 50);
+    setStorageItem('calculationHistory', JSON.stringify(updatedHistory));
+    console.log('✓ Calculation saved to history:', newEntry);
+  } catch (error) {
+    console.error('✗ Failed to save calculation to history:', error);
+  }
+
   const modal = await modalController.create({
     component: ResultModal,
     componentProps: {
@@ -239,6 +328,17 @@ const calculate = async () => {
     }
   });
   await modal.present();
+};
+
+const handleSubmit = async () => {
+  submitted.value = true;
+  showErrorBanner.value = false;
+  const isValid = await v$.value.$validate();
+  if (!isValid) {
+    showErrorBanner.value = true;
+    return;
+  }
+  await runCalculation();
 };
 
 const parseDecimalToFraction = (number: number): string => {
@@ -280,3 +380,30 @@ const parseStringToFraction = (value: string): string => {
   return "";
 };
 </script>
+
+<style scoped>
+:deep(ion-content::part(scroll)) {
+  overscroll-behavior-y: contain;
+  padding-bottom: 16px;
+}
+
+.form-anchor {
+  overflow-anchor: none; /* avoid scroll jump when validation text mounts/unmounts */
+}
+
+.validation-error {
+  margin-top: 0.25rem;
+  padding-left: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626; /* red-600 */
+}
+
+.dark .validation-error {
+  color: #f87171; /* lighter red for dark mode */
+}
+
+.dark .validation-error {
+  color: #f87171; /* lighter red for dark mode */
+}
+</style>
