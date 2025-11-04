@@ -118,6 +118,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 :deep(ion-tabs) {
-  touch-action: pan-y; /* evita gesto de retroceso del navegador y hace el swipe más fluido */
+  touch-action: pan-x pan-y; /* permitir gestos horizontales y verticales */
+  overscroll-behavior-x: contain; /* evitar gesto de back/forward del navegador */
 }
 </style>

@@ -1,29 +1,29 @@
 <template>
-  <ion-page class="bg-gradient-to-br from-blue-50 to-indigo-100">
-    <ion-header class="bg-white shadow-lg">
+  <ion-page class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-950">
+    <ion-header class="bg-white dark:bg-neutral-950 shadow-lg">
       <ion-toolbar class="bg-transparent">
-        <ion-title class="text-2xl font-bold text-gray-800">Drapery Calculator</ion-title>
+        <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100">Drapery Calculator</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
-      <ion-header collapse="condense" class="bg-white">
+    <ion-content class="ion-padding bg-transparent">
+      <ion-header collapse="condense" class="bg-white dark:bg-neutral-950">
         <ion-toolbar class="bg-transparent">
-          <ion-title size="large" class="text-xl font-semibold text-gray-700">Drapery Calculator</ion-title>
+          <ion-title size="large" class="text-xl font-semibold text-gray-700 dark:text-gray-100">Drapery Calculator</ion-title>
         </ion-toolbar>
       </ion-header>
 
-      <div class="max-w-md mx-auto bg-white dark:bg-neutral-950 rounded-xl shadow-lg p-6">
+      <div class="max-w-md mx-auto bg-white dark:bg-neutral-900/60 dark:border dark:border-white/10 rounded-xl shadow-lg p-6">
         <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Calculate Your Fabric Needs</h2>
         <form @submit.prevent="handleSubmit" class="space-y-4 form-anchor">
           <div class="grid grid-cols-1 gap-4">
-            <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+            <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Width (inches)</ion-label>
               <ion-input v-model="form.width" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('width')" @ionInput="handleTouched('width')"></ion-input>
             </ion-item>
             <p v-if="shouldShowError('width') && v$.width.required.$invalid" class="validation-error">Width is required</p>
             <p v-else-if="shouldShowError('width') && v$.width.minValue.$invalid" class="validation-error">Width has to be greater than 0</p>
             <p v-else-if="shouldShowError('width') && v$.width.integer.$invalid" class="validation-error">Width must be an integer value</p>
-            <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+            <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Width Fraction</ion-label>
               <ion-select v-model="form.widthFraction" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('widthFraction')">
                 <ion-select-option value="0">0</ion-select-option>
@@ -36,14 +36,14 @@
                 <ion-select-option value="0.875">7/8</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+            <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Height (inches)</ion-label>
               <ion-input v-model="form.height" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('height')" @ionInput="handleTouched('height')"></ion-input>
             </ion-item>
             <p v-if="shouldShowError('height') && v$.height.required.$invalid" class="validation-error">Height is required</p>
             <p v-else-if="shouldShowError('height') && v$.height.minValue.$invalid" class="validation-error">Height has to be greater than 0</p>
             <p v-else-if="shouldShowError('height') && v$.height.integer.$invalid" class="validation-error">Height must be an integer value</p>
-            <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+            <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Height Fraction</ion-label>
               <ion-select v-model="form.heightFraction" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('heightFraction')">
                 <ion-select-option value="0">0</ion-select-option>
@@ -58,7 +58,7 @@
             </ion-item>
           </div>
 
-          <div class="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 space-y-3">
+          <div class="bg-gray-50 dark:bg-neutral-950/50 dark:border dark:border-white/10 rounded-lg p-4 space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Product Type</h3>
             <ion-radio-group v-model="form.productType" class="flex flex-col space-y-3" @ionChange="handleTouched('productType')">
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
@@ -73,7 +73,7 @@
           </div>
           <p v-if="shouldShowError('productType') && v$.productType.required.$invalid" class="validation-error">Product is required</p>
 
-          <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+          <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
             <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Fabric Width (inches)</ion-label>
             <ion-select v-model="form.fabricWidth" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('fabricWidth')">
               <ion-select-option value="54">54</ion-select-option>
@@ -84,14 +84,14 @@
           </ion-item>
           <p v-if="shouldShowError('fabricWidth') && v$.fabricWidth.required.$invalid" class="validation-error">Fabric width is required</p>
 
-          <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+          <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
             <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Vertical Repeat (inches)</ion-label>
             <ion-input v-model="form.verticalRepeat" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('verticalRepeat')"></ion-input>
           </ion-item>
           <p v-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.required.$invalid" class="validation-error">Vertical repeat is required</p>
           <p v-else-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.minValue.$invalid" class="validation-error">Vertical repeat has to be greater than or equal to 0</p>
 
-          <div v-if="form.productType === '1'" class="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 space-y-3">
+          <div v-if="form.productType === '1'" class="bg-gray-50 dark:bg-neutral-950/50 dark:border dark:border-white/10 rounded-lg p-4 space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Ripplefold Fullness</h3>
             <ion-select v-model="form.RFFullness" placeholder="Select fullness" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('RFFullness')">
               <ion-select-option value="60">60%</ion-select-option>
@@ -102,7 +102,7 @@
             <p v-if="shouldShowError('RFFullness') && v$.RFFullness.required.$invalid" class="validation-error">Ripplefold fullness is required</p>
           </div>
 
-          <div v-if="form.productType === '2'" class="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 space-y-3">
+          <div v-if="form.productType === '2'" class="bg-gray-50 dark:bg-neutral-950/50 dark:border dark:border-white/10 rounded-lg p-4 space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Pinch Pleat Fullness</h3>
             <ion-select v-model="form.PPFullness" placeholder="Select fullness" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('PPFullness')">
               <ion-select-option value="2">2</ion-select-option>
@@ -113,14 +113,14 @@
             <p v-if="shouldShowError('PPFullness') && v$.PPFullness.required.$invalid" class="validation-error">Pinch pleat fullness is required</p>
           </div>
 
-          <ion-item class="bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 rounded-lg">
+          <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
             <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Return (inches)</ion-label>
             <ion-input v-model="form.return" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('return')"></ion-input>
           </ion-item>
           <p v-if="shouldShowError('return') && v$.return.required.$invalid" class="validation-error">Return is required</p>
           <p v-else-if="shouldShowError('return') && v$.return.minValue.$invalid" class="validation-error">Return has to be greater than or equal to 0</p>
 
-          <div class="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 space-y-3">
+          <div class="bg-gray-50 dark:bg-neutral-950/50 dark:border dark:border-white/10 rounded-lg p-4 space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Opening</h3>
             <ion-radio-group v-model="form.opening" class="flex flex-col space-y-3 text-gray-700 dark:text-gray-100" @ionChange="handleTouched('opening')">
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
@@ -135,7 +135,7 @@
           </div>
           <p v-if="shouldShowError('opening') && v$.opening.required.$invalid" class="validation-error">Opening is required</p>
 
-          <div class="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 space-y-3">
+          <div class="bg-gray-50 dark:bg-neutral-950/50 dark:border dark:border-white/10 rounded-lg p-4 space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Allow Railroad</h3>
             <ion-radio-group v-model="form.railroad" class="flex flex-col space-y-3 text-gray-700 dark:text-gray-100" @ionChange="handleTouched('railroad')">
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
@@ -155,7 +155,7 @@
             <span class="ml-1">There are errors...</span>
           </div>
 
-          <ion-button expand="block" type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md transition duration-200">Calculate Fabric Needs</ion-button>
+          <ion-button expand="block" type="submit" class="calculate-btn">Calculate Fabric Needs</ion-button>
         </form>
       </div>
     </ion-content>
@@ -405,5 +405,18 @@ const parseStringToFraction = (value: string): string => {
 
 .dark .validation-error {
   color: #f87171; /* lighter red for dark mode */
+}
+
+/* Nicer primary action button without double-background look */
+.calculate-btn {
+  --background: #2563eb; /* blue-600 */
+  --background-hover: #1d4ed8; /* blue-700 */
+  --background-activated: #1e40af; /* blue-800 */
+  --color: #ffffff;
+  --border-radius: 0.75rem; /* rounded-lg */
+  --padding-top: 0.875rem; /* py-3.5 approx */
+  --padding-bottom: 0.875rem;
+  --box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
+  font-weight: 600;
 }
 </style>

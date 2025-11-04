@@ -60,14 +60,8 @@ watch(darkMode, (newValue) => {
 
 onMounted(() => {
   const saved = localStorage.getItem('darkMode');
-  if (saved !== null) {
-    darkMode.value = saved === 'true';
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    darkMode.value = true;
-  } else {
-    darkMode.value = false;
-  }
-
+  // Solo respetar la preferencia guardada; si no existe, iniciar en claro
+  darkMode.value = saved === 'true';
   applyTheme(darkMode.value);
   isInitialized.value = true;
 });
