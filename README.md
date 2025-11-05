@@ -266,17 +266,95 @@ npm run lint
 ```
 
 ### 2. Pruebas manuales recomendadas
-1. **Test 1 – Cálculo básico**
-   - Width `100`, Height `84`, Product `Ripplefold`, Fabric `54`, Return `6`, Opening `Center open`, Railroad `No`.
-   - Resultado esperado: modal de resultados con `Required Fabric: 14 yards`, botones Copy funcionando.
-2. **Validaciones**
-   - Dejar `Width` vacío → mensaje “Width is required”.
-   - Ingresar `Width 50.5` → mensaje “Width must be an integer value”.
-   - Seleccionar Pinch Pleated sin fullness → mensaje “Pinch pleat fullness is required”.
-3. **Tema oscuro**
-   - Activar toggle en Settings, recargar la página y confirmar que el modo oscuro persiste.
-4. **Historial**
-   - Tras un cálculo exitoso, abrir la pestaña History y verificar que el registro aparece.
+
+> Nota: Las fracciones se redondean a incrementos de 1/8". Las yardas se calculan como `ceil(pulgadas_totales / 36)`.
+
+1. **Cálculo base – Ripplefold 100% (1 panel, Regular)**
+   - Width `100`, Width Fraction `0`
+   - Height `84`, Height Fraction `0`
+   - Product `Ripplefold`, Fullness `100%`
+   - Fabric Width `54`, Return `6`, Opening `One way`, Railroad `No`, Vertical Repeat `0`
+   - Resultado esperado:
+     - Required Fabric: `14 yards`
+     - Fabric Widths: `5`
+     - Cuts: `5 x 94`
+     - Orientation: `Regular`
+     - Snaps: `52`
+
+2. **Ripplefold 60% (2 paneles) con Railroad (aplicado)**
+   - Width `144`, Height `96`, fracciones `0`
+   - Product `Ripplefold`, Fullness `60%`
+   - Fabric Width `108`, Opening `Center open`, Return `6`, Railroad `Yes`, Vertical Repeat `0`
+   - Resultado esperado:
+     - Orientation: `Railroad`
+     - Required Fabric: `9 yards`
+     - Fabric Widths: `1`
+     - Cuts: `2 x 145 5/8`
+     - Snaps: `62`
+
+3. **Pinch Pleated 3.0 con fracciones**
+   - Width `100`, Width Fraction `1/2`
+   - Height `84`, Height Fraction `3/8`
+   - Product `Pinch Pleated`, Fullness `3.0`
+   - Fabric Width `54`, Opening `One way`, Return `6`, Railroad `No`, Vertical Repeat `0`
+   - Resultado esperado:
+     - Orientation: `Regular`
+     - Required Fabric: `16 yards`
+     - Fabric Widths: `6`
+     - Cuts: `6 x 94 3/8`
+     - Snaps: `N/A` (solo Ripplefold)
+
+4. **Pinch Pleated 2.5 con Vertical Repeat y 2 paneles**
+   - Width `120`, Height `90`, fracciones `0`
+   - Product `Pinch Pleated`, Fullness `2.5`
+   - Fabric Width `54`, Opening `Center open`, Return `6`, Railroad `No`, Vertical Repeat `10`
+   - Resultado esperado:
+     - Orientation: `Regular`
+     - Required Fabric: `24 yards`
+     - Fabric Widths: `7`
+     - Cuts: `7 x 120`
+
+5. **Ripplefold 120% (2 paneles) con Railroad (aplicado)**
+   - Width `100`, Height `84`, fracciones `0`
+   - Product `Ripplefold`, Fullness `120%`
+   - Fabric Width `118`, Opening `Center open`, Return `6`, Railroad `Yes`, Vertical Repeat `0`
+   - Resultado esperado:
+     - Orientation: `Railroad`
+     - Required Fabric: `8 yards`
+     - Fabric Widths: `1`
+     - Cuts: `2 x 136`
+     - Snaps: `58`
+
+6. **Fracciones y redondeo de corte**
+   - Con orientación `Regular` (p.ej., Fabric `54`), ajustar Height a `83` + `5/8` y Vertical Repeat `0`.
+   - Resultado esperado: `fabricCutLength = 93 5/8`.
+
+7. **Efecto del Fabric Width**
+   - Partiendo del Test 1, cambiar Fabric Width a `118`.
+   - Resultado esperado:
+     - Fabric Widths: `2`
+     - Cuts: `2 x 94`
+     - Required Fabric: `6 yards`
+
+8. **Efecto del Return sobre el número de anchos**
+   - Width `118`, Product `Ripplefold 100%`, Height `84`, Fabric `54`, Opening `One way`, Railroad `No`.
+   - Caso A: `Return 0` → Fabric Widths `5`, Required Fabric `14 yards`.
+   - Caso B: `Return 6` → Fabric Widths `6`, Required Fabric `16 yards`.
+
+9. **Validaciones**
+   - Dejar `Width` vacío → “Width is required”.
+   - Ingresar `Width 50.5` (sin fracción) → “Width must be an integer value”.
+   - Cambiar a `Pinch Pleated` y limpiar `Fullness` → “Pinch pleat fullness is required”.
+   - No seleccionar `Opening` o `Allow Railroad` → error de campo requerido.
+
+10. **Tema oscuro y persistencia**
+   - Activar el toggle en Settings, recargar la página y confirmar persistencia.
+
+11. **Gestos y navegación por tabs**
+   - Deslizar horizontalmente para moverse entre Calculator ↔ History ↔ Settings (una pasada suave debe bastar).
+
+12. **Historial**
+   - Tras cada cálculo exitoso, abrir History y verificar que se agrega el registro con fecha y datos correctos.
 
 ### 3. Dispositivos a cubrir
 - Android emulador (API 34) y al menos un dispositivo físico (Android 10+).
