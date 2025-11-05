@@ -61,11 +61,11 @@
           <div class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Product Type</h3>
             <ion-radio-group v-model="form.productType" class="flex flex-col space-y-3" @ionChange="handleTouched('productType')">
-              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.productType = '1'; handleTouched('productType')">
                 <ion-label class="text-sm text-gray-700 dark:text-gray-100">Ripplefold curtain</ion-label>
                 <ion-radio slot="start" value="1" class="text-blue-500"></ion-radio>
               </ion-item>
-              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.productType = '2'; handleTouched('productType')">
                 <ion-label class="text-sm text-gray-700 dark:text-gray-100">Pinch Pleated curtain</ion-label>
                 <ion-radio slot="start" value="2" class="text-blue-500"></ion-radio>
               </ion-item>
@@ -123,11 +123,11 @@
           <div class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Opening</h3>
             <ion-radio-group v-model="form.opening" class="flex flex-col space-y-3 text-gray-700 dark:text-gray-100" @ionChange="handleTouched('opening')">
-              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.opening = '1'; handleTouched('opening')">
                 <ion-label class="text-sm">On way</ion-label>
                 <ion-radio slot="start" value="1" class="text-blue-500"></ion-radio>
               </ion-item>
-              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.opening = '2'; handleTouched('opening')">
                 <ion-label class="text-sm">Center open</ion-label>
                 <ion-radio slot="start" value="2" class="text-blue-500"></ion-radio>
               </ion-item>
@@ -138,11 +138,11 @@
           <div class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Allow Railroad</h3>
             <ion-radio-group v-model="form.railroad" class="flex flex-col space-y-3 text-gray-700 dark:text-gray-100" @ionChange="handleTouched('railroad')">
-              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.railroad = '1'; handleTouched('railroad')">
                 <ion-label class="text-sm">Yes</ion-label>
                 <ion-radio slot="start" value="1" class="text-blue-500"></ion-radio>
               </ion-item>
-              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg">
+              <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.railroad = '0'; handleTouched('railroad')">
                 <ion-label class="text-sm">No</ion-label>
                 <ion-radio slot="start" value="0" class="text-blue-500"></ion-radio>
               </ion-item>
