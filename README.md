@@ -356,6 +356,14 @@ npm run lint
 12. **Historial**
    - Tras cada cálculo exitoso, abrir History y verificar que se agrega el registro con fecha y datos correctos.
 
+13. **Orientación Railroad vs Regular**
+   - **Railroad bloqueado (Regular)**
+     - Entradas: Width 160, Height 108, Width Fraction 0, Height Fraction 0, Product Ripplefold (Fullness 100%), Fabric Width 118, Return 3, Hem 8, Opening: One Way y luego Center Open, Railroad: Sí.
+     - Resultado esperado: Orientación **Regular** (por panelHeight = 118 >= fabric width), Fabric Widths 4, Fabric Cuts 4, Cut Length 118, Required Fabric 14 yards, Snaps 83 (One Way) / 84 (Center Open).
+   - **Railroad permitido**
+     - Entradas: Width 160, Height 109, Width Fraction 0, Height Fraction 0, Product Ripplefold (Fullness 100%), Fabric Width 118, Return 3, Hem 4, Opening: One Way, Railroad: Sí.
+     - Resultado esperado: Orientación **Railroad**, Fabric Widths 1, Fabric Cuts 1, Cut Length 365, Required Fabric 11 yards, Snaps 83.
+
 ### 3. Dispositivos a cubrir
 - Android emulador (API 34) y al menos un dispositivo físico (Android 10+).
 - iOS simulador (iPhone 15) y, si es posible, un dispositivo físico.
@@ -402,4 +410,4 @@ Los cálculos se almacenan en `localStorage`; no se requiere servidor ni base de
 
 ---
 
-> Mantén este README actualizado con cualquier cambio en requisitos de las tiendas o en el proceso interno. Es la guía oficial para futuras publicaciones.
+

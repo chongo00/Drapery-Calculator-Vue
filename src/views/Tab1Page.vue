@@ -113,12 +113,20 @@
             <p v-if="shouldShowError('PPFullness') && v$.PPFullness.required.$invalid" class="validation-error">Pinch pleat fullness is required</p>
           </div>
 
-          <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-            <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Return (inches)</ion-label>
-            <ion-input v-model="form.return" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('return')"></ion-input>
-          </ion-item>
+          <div class="grid grid-cols-2 gap-4">
+            <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Return (inches)</ion-label>
+              <ion-input v-model="form.return" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('return')"></ion-input>
+            </ion-item>
+            <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Hem (inches)</ion-label>
+              <ion-input v-model="form.hem" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('hem')"></ion-input>
+            </ion-item>
+          </div>
           <p v-if="shouldShowError('return') && v$.return.required.$invalid" class="validation-error">Return is required</p>
           <p v-else-if="shouldShowError('return') && v$.return.minValue.$invalid" class="validation-error">Return has to be greater than or equal to 0</p>
+          <p v-if="shouldShowError('hem') && v$.hem.required.$invalid" class="validation-error">Hem is required</p>
+          <p v-else-if="shouldShowError('hem') && v$.hem.minValue.$invalid" class="validation-error">Hem has to be greater than or equal to 0</p>
 
           <div class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Opening</h3>
@@ -193,6 +201,7 @@ const form = reactive({
   RFFullness: '100',
   PPFullness: '2.5',
   return: '0',
+  hem: '0',
   opening: '1',
   railroad: '0'
 });
@@ -219,6 +228,7 @@ const rules = computed(() => ({
   RFFullness: { required },
   PPFullness: { required },
   return: { required, minValue: minValue(0) },
+  hem: { required, minValue: minValue(0) },
   opening: { required },
   railroad: { required }
 }));
@@ -243,7 +253,7 @@ const shouldShowError = (field: FormField) => {
 
 // Constants
 const widthMargin = 10;
-const heightMargin = 10;
+const easeAllowance = 2;
 const rfSnapSeparation = 4.25;
 const ripplefoldFullness60 = 1.8;
 const ripplefoldFullness80 = 2.0;
@@ -265,7 +275,8 @@ const runCalculation = async () => {
     }
   }
 
-  const _totalHeight = (parseFloat(form.height) + parseFloat(form.heightFraction)) + heightMargin;
+  const drop = (parseFloat(form.height) + parseFloat(form.heightFraction));
+  const panelHeight = drop + parseFloat(form.hem) + easeAllowance;
   const _totalWidth = ((parseFloat(form.width) + parseFloat(form.widthFraction)) * _fullness) + (_panels * (parseFloat(form.return) + widthMargin));
 
   let _requiredWidths: number;
@@ -274,7 +285,7 @@ const runCalculation = async () => {
   let _requiredCuts: number;
   let _fabricOrientation: string;
 
-  if ((form.railroad === '1') && (_totalHeight < parseFloat(form.fabricWidth))) {
+  if ((form.railroad === '1') && (panelHeight < parseFloat(form.fabricWidth))) {
     _fabricOrientation = "Railroad";
     _requiredWidths = 1;
     _requiredCuts = _panels;
@@ -284,7 +295,7 @@ const runCalculation = async () => {
     _fabricOrientation = "Regular";
     _requiredWidths = Math.ceil(_totalWidth / parseFloat(form.fabricWidth));
     _requiredCuts = _requiredWidths;
-    _requiredCutLength = _totalHeight + parseFloat(form.verticalRepeat);
+    _requiredCutLength = panelHeight + parseFloat(form.verticalRepeat);
     _requiredFabric = _requiredWidths * _requiredCutLength;
   }
   
@@ -306,7 +317,9 @@ const runCalculation = async () => {
     widthFraction: parseStringToFraction(form.widthFraction),
     height: form.height,
     heightFraction: parseStringToFraction(form.heightFraction),
-    fullness: form.productType === '2' ? form.PPFullness : form.RFFullness + "%"
+    fullness: form.productType === '2' ? form.PPFullness : form.RFFullness + "%",
+    hem: parseFloat(form.hem),
+    easeAllowance
   };
 
   // Store in history BEFORE showing the modal
