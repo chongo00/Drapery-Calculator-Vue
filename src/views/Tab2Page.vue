@@ -125,8 +125,8 @@ const copyItem = async (calc: Calculation) => {
     `Dimensions: ${calc.width} ${calc.widthFraction} × ${calc.height} ${calc.heightFraction}\n` +
     `Product Type: ${calc.productType == '1' ? 'Ripplefold' : 'Pinch Pleated'}\n` +
     `Fullness: ${calc.fullness}\n` +
-    `Hem: ${calc.hem} in\n` +
-    `Ease Allowance: ${calc.easeAllowance} in\n` +
+    `Hem: ${calc.hem}\n` +
+    `Ease Allowance: ${calc.easeAllowance}\n` +
     `Fabric Widths: ${calc.fabricWidths}\n` +
     `Fabric Cuts: ${calc.fabricCuts}\n` +
     `Cut Length: ${calc.fabricCutLength} ${calc.fabricCutsFraction}\n` +

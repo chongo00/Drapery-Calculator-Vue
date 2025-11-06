@@ -121,8 +121,8 @@ const copyResults = async () => {
     `Dimensions: ${props.result.width} ${props.result.widthFraction} × ${props.result.height} ${props.result.heightFraction}\n` +
     `Product Type: ${props.result.productType == '1' ? 'Ripplefold' : 'Pinch Pleated'}\n` +
     `Fullness: ${props.result.fullness}\n` +
-    `Hem: ${props.result.hem} in\n` +
-    `Ease Allowance: ${props.result.easeAllowance} in\n` +
+    `Hem: ${props.result.hem}\n` +
+    `Ease Allowance: ${props.result.easeAllowance}\n` +
     `Fabric Widths: ${props.result.fabricWidths}\n` +
     `Fabric Cuts: ${props.result.fabricCuts}\n` +
     `Cut Length: ${props.result.fabricCutLength} ${props.result.fabricCutsFraction}\n` +
