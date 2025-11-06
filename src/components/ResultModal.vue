@@ -32,7 +32,7 @@
             <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.width }} {{ result.widthFraction }} × {{ result.height }} {{ result.heightFraction }}</span>
           </div>
           <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
-            <span class="text-gray-600 dark:text-gray-400 font-medium">🪡 Product Type:</span>
+            <span class="text-gray-600 dark:text-gray-400 font-medium">📦 Product Type:</span>
             <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.productType == '1' ? 'Ripplefold' : 'Pinch Pleated' }}</span>
           </div>
           <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
@@ -53,7 +53,9 @@
           </div>
           <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
             <span class="text-gray-600 dark:text-gray-400 font-medium">🔄 Orientation:</span>
-            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.fabricOrientation }}</span>
+            <span :class="['inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide border', orientationBadgeClass(result.fabricOrientation)]">
+              {{ result.fabricOrientation }}
+            </span>
           </div>
           <div v-if="result.requiredSnaps > 0" class="flex justify-between items-center py-2 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
             <span class="text-gray-600 dark:text-gray-400 font-medium">📍 Snaps Required:</span>
@@ -94,12 +96,20 @@ interface Props {
     height: string;
     heightFraction: string;
     fullness: string;
+    hem: number;
+    easeAllowance: number;
   };
 }
 
 const props = defineProps<Props>();
 
 const copied = ref(false);
+
+const orientationBadgeClass = (orientation: string) => {
+  return orientation === 'Railroad'
+    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-400/40'
+    : 'bg-sky-500/15 text-sky-400 border-sky-400/40';
+};
 
 const closeModal = () => {
   modalController.dismiss();
@@ -111,6 +121,8 @@ const copyResults = async () => {
     `Dimensions: ${props.result.width} ${props.result.widthFraction} × ${props.result.height} ${props.result.heightFraction}\n` +
     `Product Type: ${props.result.productType == '1' ? 'Ripplefold' : 'Pinch Pleated'}\n` +
     `Fullness: ${props.result.fullness}\n` +
+    `Hem: ${props.result.hem} in\n` +
+    `Ease Allowance: ${props.result.easeAllowance} in\n` +
     `Fabric Widths: ${props.result.fabricWidths}\n` +
     `Fabric Cuts: ${props.result.fabricCuts}\n` +
     `Cut Length: ${props.result.fabricCutLength} ${props.result.fabricCutsFraction}\n` +

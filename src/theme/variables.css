@@ -15,6 +15,13 @@ body.ion-palette-dark {
   --ion-item-background: #0f1115;
 }
 
+html.dark ion-action-sheet,
+body.ion-theme-dark ion-action-sheet,
+body.ion-palette-dark ion-action-sheet {
+  --background: #0f1115;
+  --button-color: #ffffff;
+}
+
 :root {
   color-scheme: light;
 }
