@@ -54,7 +54,9 @@ router.isReady().then(() => {
       ionApp.classList.toggle('ion-theme-dark', isDark);
     }
     html.style.colorScheme = isDark ? 'dark' : 'light';
-  } catch (_) {}
+  } catch (err) {
+    void err;
+  }
 
   app.mount('#app');
 });
