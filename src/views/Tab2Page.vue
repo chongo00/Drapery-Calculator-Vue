@@ -28,7 +28,11 @@
               <h2 class="font-semibold text-gray-800 dark:text-gray-100">Fabric: {{ calc.requiredFabric }} yards</h2>
               <p class="text-gray-600 dark:text-gray-300">Width: {{ calc.width }} {{ calc.widthFraction }} | Height: {{ calc.height }} {{ calc.heightFraction }}</p>
               <p class="text-gray-600 dark:text-gray-300">Product: {{ calc.productType == '1' ? 'Ripplefold' : 'Pinch Pleated' }} | Fullness: {{ calc.fullness }}</p>
-              <p class="text-gray-600 dark:text-gray-300">Hem: {{ calc.hem }} in | Ease: {{ calc.easeAllowance }} in</p>
+              <p v-if="(typeof calc.hem === 'number' && calc.hem > 0) || (typeof calc.easeAllowance === 'number' && calc.easeAllowance > 0)" class="text-gray-600 dark:text-gray-300">
+                <template v-if="typeof calc.hem === 'number' && calc.hem > 0">Hem: {{ calc.hem }}</template>
+                <template v-if="(typeof calc.hem === 'number' && calc.hem > 0) && (typeof calc.easeAllowance === 'number' && calc.easeAllowance > 0)"> | </template>
+                <template v-if="typeof calc.easeAllowance === 'number' && calc.easeAllowance > 0">Ease: {{ calc.easeAllowance }}</template>
+              </p>
               <p class="text-gray-600 dark:text-gray-300 flex items-center gap-2">
                 Orientation:
                 <span :class="['inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide border', orientationBadgeClass(calc.fabricOrientation)]">
@@ -121,8 +125,8 @@ const copyItem = async (calc: Calculation) => {
     `Dimensions: ${calc.width} ${calc.widthFraction} × ${calc.height} ${calc.heightFraction}\n` +
     `Product Type: ${calc.productType == '1' ? 'Ripplefold' : 'Pinch Pleated'}\n` +
     `Fullness: ${calc.fullness}\n` +
-    `Hem: ${calc.hem} in\n` +
-    `Ease Allowance: ${calc.easeAllowance} in\n` +
+    `Hem: ${calc.hem}\n` +
+    `Ease Allowance: ${calc.easeAllowance}\n` +
     `Fabric Widths: ${calc.fabricWidths}\n` +
     `Fabric Cuts: ${calc.fabricCuts}\n` +
     `Cut Length: ${calc.fabricCutLength} ${calc.fabricCutsFraction}\n` +
