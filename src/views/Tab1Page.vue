@@ -15,7 +15,7 @@
       <div class="max-w-md mx-auto bg-white dark:bg-neutral-900/60 dark:border dark:border-white/10 rounded-xl shadow-lg p-6">
         <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Calculate Your Fabric Needs</h2>
         <form @submit.prevent="handleSubmit" class="space-y-4 form-anchor">
-          <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-4">
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Width (inches)</ion-label>
               <ion-input v-model="form.width" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('width')" @ionInput="handleTouched('width')"></ion-input>
@@ -33,12 +33,6 @@
                 <ion-select-option value="0.875">7/8</ion-select-option>
               </ion-select>
             </ion-item>
-          </div>
-          <p v-if="shouldShowError('width') && v$.width.required.$invalid" class="validation-error">Width is required</p>
-          <p v-else-if="shouldShowError('width') && v$.width.minValue.$invalid" class="validation-error">Width has to be greater than 0</p>
-          <p v-else-if="shouldShowError('width') && v$.width.integer.$invalid" class="validation-error">Width must be an integer value</p>
-
-          <div class="grid grid-cols-2 gap-4">
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Height (inches)</ion-label>
               <ion-input v-model="form.height" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('height')" @ionInput="handleTouched('height')"></ion-input>
@@ -57,6 +51,9 @@
               </ion-select>
             </ion-item>
           </div>
+          <p v-if="shouldShowError('width') && v$.width.required.$invalid" class="validation-error">Width is required</p>
+          <p v-else-if="shouldShowError('width') && v$.width.minValue.$invalid" class="validation-error">Width has to be greater than 0</p>
+          <p v-else-if="shouldShowError('width') && v$.width.integer.$invalid" class="validation-error">Width must be an integer value</p>
           <p v-if="shouldShowError('height') && v$.height.required.$invalid" class="validation-error">Height is required</p>
           <p v-else-if="shouldShowError('height') && v$.height.minValue.$invalid" class="validation-error">Height has to be greater than 0</p>
           <p v-else-if="shouldShowError('height') && v$.height.integer.$invalid" class="validation-error">Height must be an integer value</p>
@@ -76,7 +73,7 @@
           </div>
           <p v-if="shouldShowError('productType') && v$.productType.required.$invalid" class="validation-error">Product is required</p>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-4">
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Fabric Width (inches)</ion-label>
               <ion-select v-model="form.fabricWidth" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('fabricWidth')">
@@ -113,7 +110,7 @@
             <p v-if="shouldShowError('PPFullness') && v$.PPFullness.required.$invalid" class="validation-error">Pinch pleat fullness is required</p>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-4">
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Return (inches)</ion-label>
               <ion-input v-model="form.return" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('return')"></ion-input>
