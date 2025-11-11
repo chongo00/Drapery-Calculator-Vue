@@ -11,7 +11,17 @@ Guía completa para que cualquier integrante del equipo pueda construir, probar 
 2. [Checklist general antes de cada build](#-checklist-general-antes-de-cada-build)
 3. [Generar iconos y recursos](#-generar-iconos-y-recursos)
 4. [Android (Google Play)](#-android-google-play)
+   - [Requisitos esenciales](#-requisitos-esenciales-android)
+   - [Keystore (una sola vez)](#-keystore-una-sola-vez)
+   - [Opcion A: Android Studio](#-opcion-a-android-studio-principiantes)
+   - [Opcion B: Solo terminal](#-opcion-b-solo-terminal-sin-android-studio)
+   - [Empaquetado y publicación](#-empaquetado-y-publicación-en-google-play)
 5. [iOS (App Store)](#-ios-app-store)
+   - [Requisitos esenciales](#-requisitos-esenciales-ios)
+   - [Certificados y perfiles](#-certificados-y-perfiles-una-sola-vez)
+   - [Opcion A: Xcode](#-opcion-a-xcode-recomendado)
+   - [Opcion B: Solo terminal](#-opcion-b-solo-terminal-sin-xcode)
+   - [TestFlight y App Store](#-testflight-y-app-store)
 6. [Pruebas y QA](#-pruebas-y-qa)
 7. [Entrega a la empresa](#-entrega-a-la-empresa)
 8. [FAQ](#-faq)
@@ -66,48 +76,33 @@ npm run dev
 
 ## 🤖 Android (Google Play)
 
-### 1. Requisitos previos
-- PC con Windows, macOS o Linux.
-- [Android Studio](https://developer.android.com/studio) instalado (incluye JDK 17 y emulador).
-- Herramienta `keytool` (viene con Java) para crear el keystore.
-- Cuenta Google. *(Para publicar oficialmente necesitas una cuenta de Google Play Console: pago único de 25 USD).* 
+### 🔌 Requisitos esenciales (Android)
+- PC con Windows, macOS o Linux con al menos 15 GB libres.
+- [Node.js](https://nodejs.org/) 18 LTS o 20 LTS y Git (ya instalados desde la sección anterior).
+- Java 17 (incluido en Android Studio) o [Temurin JDK 17](https://adoptium.net/) si no usarás Android Studio.
+- Cuenta de Google Play Console (pago único 25 USD) para publicar.
+- Opcional pero recomendado: [Android Studio](https://developer.android.com/studio) para un flujo visual guiado.
+- Herramientas de línea de comandos: `keytool` (viene con Java), `adb` (Android Platform Tools) y `bundletool` (descargar desde [GitHub](https://github.com/google/bundletool/releases)).
 
-### 2. Preparar el proyecto Android
-1. Genera la versión web y sincroniza Capacitor:
-   ```bash
-   npm run build
-   npx cap sync android
-   ```
-2. Abre el proyecto nativo:
-   ```bash
-   npx cap open android
-   ```
-   Android Studio se abrirá con la carpeta `android/`.
-3. Cuando Android Studio lo solicite, pulsa **Sync Now** para descargar dependencias.
+> ⚠️ **Nunca pierdas el keystore ni sus contraseñas.** Si se extravían, Google no permitirá actualizar la app publicada.
 
-### 3. Actualizar SDK y ajustes recomendados
-1. En Android Studio ve a **Help > Check for Updates** y aplica la última versión estable.
-2. Abre **SDK Manager** y asegura que el último SDK de Android (API más reciente) esté instalado.
-3. Si aparece el banner "Recommended actions" o "Update Gradle plugin", haz clic en **Apply Update** para que el proyecto use el SDK/base build tools más recientes.
-4. Verifica en `android/build.gradle` o `android/variables.gradle` que `compileSdkVersion` y `targetSdkVersion` coincidan con el nivel requerido por Google Play (actualízalos si hace falta y vuelve a sincronizar).
-5. Revisa la ventana **Build > Build Analyzer** y corrige advertencias importantes (librerías obsoletas, incompatibilidades, etc.) antes de continuar.
-
-### 4. Crear y configurar el keystore (solo la primera vez)
-1. En una terminal dentro del proyecto ejecuta:
+### 🔐 Keystore (una sola vez)
+1. Abre una terminal en la raíz del proyecto.
+2. Ejecuta (reemplaza los datos entre `< >`):
    ```bash
    keytool -genkey -v -keystore drapery.keystore -alias drapery \
      -keyalg RSA -keysize 2048 -validity 10000
    ```
-2. Completa los datos solicitados (nombre, organización, etc.).
-3. Copia `drapery.keystore` a `android/app/` **(no subir a Git)**.
-4. Abre `android/gradle.properties` y añade:
+3. Responde a las preguntas con los datos de la empresa.
+4. Copia `drapery.keystore` a `android/app/` y guarda las contraseñas en un gestor seguro.
+5. Abre `android/gradle.properties` y agrega:
    ```
    MYAPP_UPLOAD_STORE_FILE=drapery.keystore
    MYAPP_UPLOAD_KEY_ALIAS=drapery
-   MYAPP_UPLOAD_STORE_PASSWORD=<tu-contraseña>
-   MYAPP_UPLOAD_KEY_PASSWORD=<tu-contraseña>
+   MYAPP_UPLOAD_STORE_PASSWORD=<contraseña keystore>
+   MYAPP_UPLOAD_KEY_PASSWORD=<contraseña clave>
    ```
-5. En `android/app/build.gradle`, dentro de `android { ... }`, agrega:
+6. Revisa `android/app/build.gradle`. Dentro de `android { ... }` deben existir:
    ```gradle
    signingConfigs {
        release {
@@ -127,124 +122,255 @@ npm run dev
    }
    ```
 
-### 5. Actualizar versión antes del build
-1. Edita `android/app/build.gradle`:
-   ```gradle
-   versionCode  ## incrementa en +1
-   versionName "1.1.0.2"  // cambia a la versión que vas a publicar
+### 🛠️ Opción A: Android Studio (principiantes)
+1. **Preparar archivos web**
+   ```bash
+   npm run build
+   npx cap sync android
    ```
-2. Guarda el archivo y sincroniza (Android Studio mostrará un aviso para "Sync now").
+2. **Abrir el proyecto nativo**
+   ```bash
+   npx cap open android
+   ```
+   Android Studio abrirá la carpeta `android/`. Pulsa **Sync Now** si aparece.
+3. **Actualizar herramientas**
+   - Menú **Help > Check for Updates**.
+   - `Tools > SDK Manager`: instala el SDK más reciente (API 34 o superior).
+   - Si ves banners de "Recommended actions", pulsa **Apply Update**.
+4. **Incrementar la versión**
+   - Abre `android/app/build.gradle`.
+   - Cambia `versionCode` (+1) y `versionName` (ej. `1.1.0.3`).
+   - Guarda; si aparece un aviso, pulsa **Sync Now**.
+5. **Generar paquete de publicación (.aab)**
+   - Menú **Build > Generate Signed Bundle / APK...**.
+   - Selecciona **Android App Bundle**, clic en **Next**.
+   - Escoge tu keystore `drapery.keystore`, introduce contraseñas y alias.
+   - Variante `release` → **Finish**. Archivo resultante: `android/app/release/app-release.aab`.
+6. **Generar APK de pruebas (.apk)**
+   - Menú **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
+   - Android Studio mostrará una notificación con el botón **locate** para abrir la carpeta `app/build/outputs/apk/`.
+   - Sube ese `app-debug.apk` a testers o instálalo con `adb install`.
+7. **Probar antes de subir**
+   - **Emulador**: botón 🟢▶ y selecciona un dispositivo virtual.
+   - **Dispositivo físico**: activa *Opciones de desarrollador > Depuración USB*, conecta por cable y pulsa ▶.
+   - **Probar el .aab**: descarga [bundletool](https://developer.android.com/tools/bundletool) y ejecuta:
+     ```bash
+     java -jar bundletool.jar build-apks --bundle app-release.aab --output app.apks --mode universal
+     java -jar bundletool.jar install-apks --apks app.apks
+     ```
 
-### 6. Generar el Android App Bundle (AAB)
-1. En Android Studio ve a **Build > Generate Signed Bundle / APK**.
-2. Selecciona **Android App Bundle** y haz clic en **Next**.
-3. Elige el keystore (`drapery.keystore`), ingresa las contraseñas y selecciona el alias `drapery`.
-4. Deja la variante `release` y finaliza. El AAB quedará en `android/app/release/app-release.aab`.
-5. Opcional: renómbralo a `drapery-calculator-v1.1.0.2.aab` para claridad.
+### 💻 Opción B: Solo terminal (sin Android Studio)
+1. **Instalar SDK de Android por CLI**
+   - Descarga *Command Line Tools* desde Android Studio > sección *Download Options*.
+   - Descomprime en `C:\Android\cmdline-tools\latest` (Windows) o `~/Library/Android/sdk/cmdline-tools/latest` (macOS).
+   - Define variables de entorno:
+     - Windows: Panel de control → Variables del sistema → añade `ANDROID_HOME=C:\Android` y suma `%ANDROID_HOME%\platform-tools` al `PATH`.
+     - macOS/Linux: agrega a tu `~/.zshrc` o `~/.bashrc`:
+       ```bash
+       export ANDROID_HOME=$HOME/Library/Android/sdk
+       export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+       ```
+2. **Descargar SDKs mínimos**
+   ```bash
+   sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+   yes | sdkmanager --licenses
+   ```
+3. **Sincronizar los recursos web**
+   ```bash
+   npm run build
+   npx cap sync android
+   ```
+4. **Actualizar versión de la app**
+   - Edita `android/app/build.gradle` con cualquier editor de texto.
+   - Incrementa `versionCode` y ajusta `versionName`.
+5. **Construir el bundle `.aab` firmado**
+   ```bash
+   cd android
+   ./gradlew bundleRelease
+   ```
+   El archivo quedará en `app/build/outputs/bundle/release/app-release.aab`.
+6. **Construir APK y probar en dispositivos**
+   ```bash
+   ./gradlew assembleRelease   # genera app-release.apk (firmado)
+   ./gradlew assembleDebug     # genera app-debug.apk (sin firma de release)
+   adb devices                 # verifica que el dispositivo esté conectado
+   adb install -r app/build/outputs/apk/release/app-release.apk
+   ```
+7. **Generar APK universal desde el `.aab`** (útil cuando Play Store exige `.aab` pero necesitas un APK único para testers):
+   ```bash
+   java -jar bundletool.jar build-apks --bundle app/build/outputs/bundle/release/app-release.aab \
+     --output app-release.apks --mode universal
+   java -jar bundletool.jar install-apks --apks app-release.apks
+   ```
+8. **Limpiar y repetir cuando todo esté correcto**
+   ```bash
+   ./gradlew clean
+   cd ..
+   ```
 
-### 7. Probar la app antes de subir
-- **Emulador**: en Android Studio, pulsa el botón ▶️ (Run) con un dispositivo virtual seleccionado.
-- **Dispositivo físico**: activa "Depuración USB" en tu teléfono, conéctalo y pulsa ▶️.
-- **Probar el .aab en un dispositivo**:
-  ```bash
-  java -jar bundletool.jar build-apks --bundle app-release.aab --output app.apks --mode universal
-  java -jar bundletool.jar install-apks --apks app.apks
-  ```
+> 📝 Si no guardas contraseñas en `gradle.properties`, puedes pasarlas al vuelo: `./gradlew bundleRelease -PMYAPP_UPLOAD_STORE_PASSWORD=...`.
 
-### 8. Publicar en Google Play Console
-1. En https://play.google.com/console crea la aplicación (si es la primera vez).
-2. Completa ficha de Play Store: nombre, descripción, screenshots, políticas.
-3. Ve a **Release > Production** (o "Internal testing" para pruebas).
-4. Sube el archivo `.aab`, añade notas de versión y guarda.
-5. Revisa las secciones de contenido (clasificación por edades, privacidad, target SDK).
-6. Envía para revisión. Google suele tardar 1–3 días hábiles.
+### 📦 Empaquetado y publicación en Google Play
+1. Entra a [Google Play Console](https://play.google.com/console) y crea la app si es la primera vez.
+2. Completa la ficha de Play Store (nombre, descripción, screenshots, políticas, clasificación por edades, privacidad).
+3. Ve a **Release > Testing** y crea primero un track de **Internal testing** para validaciones internas:
+   - Sube el `.aab` generado.
+   - Agrega testers (correos Gmail) y publica.
+   - Valida instalación automática en los dispositivos de QA.
+4. Cuando todo funcione, crea una **Production release**:
+   - Reutiliza el `.aab` validado.
+   - Escribe notas de lanzamiento claras.
+   - Revisa advertencias en la consola (nivel de API, permisos, políticas).
+5. Envía a revisión. Google suele tardar de 24 h a 72 h.
+6. Guarda un registro de:
+   - Ruta del `.aab` final.
+   - Versión y `versionCode` enviados.
+   - Fecha/hora de subida y capturas de pantalla del estado de la consola.
 
-### 9. Opciones de testeo gratuito
-- Distribuye una pista de *Internal testing* para el equipo (se agregan correos Gmail).
-- Usa `adb install app-debug.apk` para builds de depuración (generadas con **Run**).
-- Mantén registro de feedback y errores en el issue del release.
+> ✅ Después de publicar, vuelve al checklist inicial y marca los puntos completados para documentar el release.
 
 ---
 
 ## 🍎 iOS (App Store)
 
-### 1. Requisitos previos
-- Mac con macOS actualizado (no hay alternativa oficial en Windows/Linux).
-- [Xcode](https://developer.apple.com/xcode/) instalado (App Store).
-- Xcode Command Line Tools: abre Terminal y ejecuta `xcode-select --install`.
-- Cuenta Apple ID gratuita para pruebas locales + cuenta Apple Developer (99 USD/año) para publicar.
+### 🧰 Requisitos esenciales (iOS)
+- Mac con macOS actualizado (mínimo 15 GB libres).
+- Cuenta Apple ID gratuita para pruebas locales y cuenta Apple Developer Program (99 USD/año) para distribuir en App Store/TestFlight.
+- [Xcode](https://developer.apple.com/xcode/) (opción recomendada) o, para flujo sin IDE, Xcode Command Line Tools (`xcode-select --install`).
+- Certificados y perfiles de aprovisionamiento vigentes (ver siguiente sección).
+- Herramientas de línea de comandos útiles: `xcodebuild`, `xcrun`, [Transporter](https://apps.apple.com/app/transporter/id1450874784) o `fastlane`.
 
-### 2. Preparar el proyecto iOS
-1. Genera la versión web y sincroniza Capacitor:
+> ⚠️ Es obligatorio usar un Mac. Apple no permite compilar ni firmar apps iOS desde Windows o Linux.
+
+### 🪪 Certificados y perfiles (una sola vez)
+1. Ingresa a [Apple Developer](https://developer.apple.com/account/) con la cuenta del equipo.
+2. En **Certificates, Identifiers & Profiles** crea o renueva:
+   - Certificado **iOS Distribution** (`.cer`).
+   - Identificador de la app (`Bundle ID`, p.ej., `com.tuempresa.drapery`).
+   - Perfil de aprovisionamiento **App Store** y, opcionalmente, **Development** para pruebas en dispositivos.
+3. Descarga los certificados y perfiles.
+4. Haz doble clic en cada certificado y perfil para instalarlos en el llavero y en Xcode.
+5. Crea un Apple ID alternativo o habilita la [contraseña específica de app](https://appleid.apple.com/) que usarás en Transporter o `xcrun altool`.
+
+### 🛠️ Opcion A: Xcode (recomendado)
+1. **Sincronizar el proyecto iOS**
+   ```bash
+   npm run build
+   npx cap sync ios
+   npx cap open ios
+   ```
+   Se abrirá `ios/App/App.xcworkspace` en Xcode.
+2. **Actualizar herramientas**
+   - App Store ▶ actualiza Xcode a la versión estable más reciente.
+   - En Xcode, menú **Preferences > Locations** comprueba que `Command Line Tools` apunte a la versión actual.
+   - Si ves el banner "Update to recommended settings", pulsa **Perform Changes**.
+3. **Configurar firma automática**
+   - Selecciona el proyecto (ícono azul) ► target `App` ► pestaña **Signing & Capabilities**.
+   - Activa **Automatically manage signing**.
+   - Elige tu `Team` y asegúrate de que el `Bundle Identifier` coincide con el creado en Apple Developer.
+4. **Ajustar versión antes de compilar**
+   - Pestaña **General > Identity**: actualiza `Version` (ej. 1.1.0.3) y `Build` (incrementa en +1 cada envío).
+   - Menú **Product > Clean Build Folder** (`Shift + Cmd + K`).
+5. **Probar la app**
+   - **Simulador**: selecciona un dispositivo (p. ej., *iPhone 15*) en la barra superior y pulsa ▶.
+   - **Dispositivo físico**:
+     1. Conecta el iPhone por USB.
+     2. En el iPhone, ve a *Settings > General > VPN & Device Management* y confía en tu Apple ID.
+     3. En Xcode, selecciona el dispositivo real y pulsa ▶ (con Apple ID gratuito la build expira en 7 días).
+6. **Crear un archivo de distribución (.ipa)**
+   - Menú **Product > Archive**.
+   - En el **Organizer**, selecciona la build ► **Distribute App**.
+   - Elige **App Store Connect** ▶ **Upload** (para TestFlight/App Store) o **Export** (para Ad Hoc/Enterprise).
+   - Sigue el asistente (firma, encriptación, bitcode). Al finalizar obtendrás un `.ipa` listo.
+7. **Checklist rápido tras el archive**
+   - Verifica que no haya advertencias en la pestaña **Issues**.
+   - Guarda el `.xcarchive` en `~/Library/Developer/Xcode/Archives/<fecha>/` para futuras referencias.
+
+### 💻 Opcion B: Solo terminal (sin Xcode)
+Este flujo usa `xcodebuild` y Transporter. Necesitas haber instalado previamente los certificados/perfiles.
+
+1. **Instalar herramientas CLI**
+   ```bash
+   xcode-select --install    # solo la primera vez
+   sudo xcodebuild -license  # acepta la licencia
+   ```
+2. **Generar y sincronizar recursos**
    ```bash
    npm run build
    npx cap sync ios
    ```
-2. Abre el workspace en Xcode:
+3. **Crear el archivo `.xcarchive`**
    ```bash
-   npx cap open ios
+   cd ios/App
+   xcodebuild -scheme App \
+     -configuration Release \
+     -archivePath ../build/App.xcarchive archive
    ```
-   Xcode abrirá `ios/App/App.xcworkspace`.
-3. Si Xcode solicita convertir el proyecto a una versión más reciente, acepta.
+4. **Preparar `ExportOptions.plist`**
+   En `ios/App/`, crea `ExportOptions.plist` con este contenido (ajusta `teamID` y `bundleIdentifier`):
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+   <plist version="1.0">
+     <dict>
+       <key>method</key>
+       <string>app-store</string>
+       <key>teamID</key>
+       <string>TEAMID1234</string>
+       <key>bundleIdentifier</key>
+       <string>com.tuempresa.drapery</string>
+       <key>uploadBitcode</key>
+       <false/>
+       <key>compileBitcode</key>
+       <false/>
+       <key>signingStyle</key>
+       <string>automatic</string>
+     </dict>
+   </plist>
+   ```
+5. **Exportar el `.ipa`**
+   ```bash
+   xcodebuild -exportArchive \
+     -archivePath ../build/App.xcarchive \
+     -exportOptionsPlist ExportOptions.plist \
+     -exportPath ../build/export
+   ```
+   El archivo aparecerá en `ios/build/export/App.ipa`.
+6. **Subir a App Store Connect sin Xcode**
+   - Instala Transporter desde la App Store (abre `Applications/Transporter.app` una vez para iniciar sesión), o usa el CLI:
+     ```bash
+     xcrun altool --upload-app -t ios \
+       -f ../build/export/App.ipa \
+       -u <correo-apple-id> \
+       -p <contraseña-específica-app>
+     ```
+   - Transporter mostrará "Upload Successful" cuando finalice.
+7. **Verificar estado**
+   - Ve a [App Store Connect](https://appstoreconnect.apple.com/) ▶ **My Apps** ▶ selecciona la app.
+   - En la pestaña **Activity** aparecerá la build procesándose (puede tardar 10–30 minutos).
 
-### 3. Actualizar SDK y aplicar ajustes recomendados
-1. Abre la App Store y asegura que Xcode está en la última versión estable.
-2. Dentro de Xcode, ve a **Preferences > Components** y descarga los simuladores/SDKs más recientes si faltan.
-3. Cuando aparezca el banner "Update to recommended settings" pulsa **Perform Changes** para migrar el proyecto a la configuración más reciente.
-4. En el panel del proyecto, pestaña **Build Settings**, confirma que `Base SDK` está en el iOS más reciente y que `iOS Deployment Target` cumple con los requisitos actuales de App Store.
-5. Revisa la pestaña **Warnings** en el reporte de build o usa `Shift + Command + K` (Clean) seguido de **Product > Build** para detectar librerías obsoletas. Resuelve cualquier advertencia crítica antes de continuar.
+> 📝 Mantén respaldos del `ExportOptions.plist` y del `.xcarchive` junto con el `.ipa` para auditar versiones futuras.
 
-### 4. Configurar firma y Bundle Identifier
-1. En Xcode, en la barra lateral, selecciona el proyecto (ícono azul) y el target `App`.
-2. En la pestaña **Signing & Capabilities**:
-   - Marca "Automatically manage signing".
-   - Selecciona tu Team (Apple ID / Developer account).
-   - Define un `Bundle Identifier` único (ejemplo `com.tuempresa.drapery`).
-3. Abre https://developer.apple.com/account/ e inicia sesión.
-   - En **Certificates, Identifiers & Profiles**, renueva los certificados y perfiles de aprovisionamiento que estén por expirar.
-   - Descarga los nuevos perfiles y agrégalos con doble clic (se abrirán en Xcode).
+### 🚀 TestFlight y App Store
+1. Inicia sesión en [App Store Connect](https://appstoreconnect.apple.com/).
+2. Ve a **My Apps > Drapery Calculator**.
+3. En **TestFlight**:
+   - Asegura que la build cambió a estado **Ready to Test**.
+   - Crea un grupo interno y agrega correos Apple ID.
+   - Envía invitaciones y solicita feedback estructurado.
+4. Para publicar en App Store:
+   - Completa las secciones de **App Information**, **Pricing and Availability** y **App Privacy**.
+   - Sube screenshots requeridos (al menos iPhone 6.7", 6.5" y 5.5").
+   - En **App Store > Prepare for Submission**, selecciona la build, añade notas para el revisor y pulsa **Submit for Review**.
+   - Apple suele responder en 24–48 h. Supervisa el estado hasta ver **Ready for Sale**.
+5. Documenta internamente la versión enviada (número de build, fecha, enlaces a `.ipa`, capturas del estado y cualquier requisito pendiente).
 
-### 5. Verificar credenciales de firma localmente
-- En **Signing & Capabilities**, asegúrate de que el perfil de aprovisionamiento correcto aparece sin advertencias.
-- Si hay un símbolo de advertencia amarillo, pulsa "Download Manual Profiles" o utiliza el botón "Try Again" para que Xcode sincronice las credenciales.
+> ✅ Tras la aprobación, actualiza el changelog y comunica al equipo la fecha de publicación y enlaces de seguimiento.
 
-### 6. Actualizar versión y número de build
-1. En la pestaña **General > Identity**, ajusta:
-   - `Version`: versión pública (ej. 1.1.0.3).
-   - `Build`: contador interno (empieza en 1 y aumenta cada subida a TestFlight/App Store).
-
-### 7. Verificar recursos
-- Abre `Assets.xcassets` y confirma que existen los iconos y splash generados (gracias a `npx capacitor-assets generate`).
-
-### 8. Pruebas locales
-- **Simulador**: selecciona un dispositivo (iPhone 15, por ejemplo) en el menú superior y pulsa ▶️ (Run). Espera a que se compile y verificar.
-- **Dispositivo físico**:
-  1. Conecta el iPhone por USB.
-  2. En el dispositivo ve a *Settings > General > VPN & Device Management* y confía en tu Apple ID.
-  3. En Xcode selecciona el dispositivo y pulsa ▶️. (Con Apple ID gratuito la app expira en 7 días.)
-
-### 9. Generar archivo para distribución
-1. En Xcode: **Product > Archive**. Al finalizar se abrirá el **Organizer**.
-2. Selecciona la build recién creada y pulsa **Distribute App**.
-3. Elige **App Store Connect** y luego **Upload** (para TestFlight/App Store) o **Export** (para Ad Hoc/Enterprise).
-4. Completa el asistente (firmas, información de encriptación, etc.).
-
-### 10. TestFlight
-1. Ingresa a https://appstoreconnect.apple.com/.
-2. En **My Apps > Drapery Calculator > TestFlight**, espera a que aparezca la build (5–20 minutos).
-3. Crea un grupo interno y agrega testers (correos Apple ID).
-4. Envía invitaciones y recopila feedback.
-
-### 11. Publicación en App Store
-1. Completa las secciones: información general, precios, disponibilidad, política de privacidad.
-2. Sube screenshots y texto de marketing (resoluciones obligatorias: iPhone 6.7", 6.5", 5.5" al menos).
-3. Responde el cuestionario de privacidad (App Privacy) y el formulario de cumplimiento de encriptación (ITAR).
-4. Selecciona la build en **App Store > Prepare for Submission**.
-5. Añade notas para el revisor si es necesario y pulsa **Submit for Review**. Apple tarda 1–2 días en responder.
-
-### 12. Recursos útiles
+### 📎 Recursos útiles
 - [Guía oficial de envío a App Store](https://developer.apple.com/app-store/submissions/)
 - [Documentación Capacitor iOS](https://capacitorjs.com/docs/ios)
+- [Guía de ExportOptions.plist](https://help.apple.com/xcode/mac/current/#/dev3a05256b8)
 
 ---
 
