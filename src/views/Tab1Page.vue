@@ -15,14 +15,11 @@
       <div class="max-w-md mx-auto bg-white dark:bg-neutral-900/60 dark:border dark:border-white/10 rounded-xl shadow-lg p-6">
         <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Calculate Your Fabric Needs</h2>
         <form @submit.prevent="handleSubmit" class="space-y-4 form-anchor">
-          <div class="grid grid-cols-1 gap-4">
+          <div class="space-y-4">
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Width (inches)</ion-label>
               <ion-input v-model="form.width" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('width')" @ionInput="handleTouched('width')"></ion-input>
             </ion-item>
-            <p v-if="shouldShowError('width') && v$.width.required.$invalid" class="validation-error">Width is required</p>
-            <p v-else-if="shouldShowError('width') && v$.width.minValue.$invalid" class="validation-error">Width has to be greater than 0</p>
-            <p v-else-if="shouldShowError('width') && v$.width.integer.$invalid" class="validation-error">Width must be an integer value</p>
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Width Fraction</ion-label>
               <ion-select v-model="form.widthFraction" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('widthFraction')">
@@ -40,9 +37,6 @@
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Height (inches)</ion-label>
               <ion-input v-model="form.height" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('height')" @ionInput="handleTouched('height')"></ion-input>
             </ion-item>
-            <p v-if="shouldShowError('height') && v$.height.required.$invalid" class="validation-error">Height is required</p>
-            <p v-else-if="shouldShowError('height') && v$.height.minValue.$invalid" class="validation-error">Height has to be greater than 0</p>
-            <p v-else-if="shouldShowError('height') && v$.height.integer.$invalid" class="validation-error">Height must be an integer value</p>
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Height Fraction</ion-label>
               <ion-select v-model="form.heightFraction" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('heightFraction')">
@@ -57,6 +51,12 @@
               </ion-select>
             </ion-item>
           </div>
+          <p v-if="shouldShowError('width') && v$.width.required.$invalid" class="validation-error">Width is required</p>
+          <p v-else-if="shouldShowError('width') && v$.width.minValue.$invalid" class="validation-error">Width has to be greater than 0</p>
+          <p v-else-if="shouldShowError('width') && v$.width.integer.$invalid" class="validation-error">Width must be an integer value</p>
+          <p v-if="shouldShowError('height') && v$.height.required.$invalid" class="validation-error">Height is required</p>
+          <p v-else-if="shouldShowError('height') && v$.height.minValue.$invalid" class="validation-error">Height has to be greater than 0</p>
+          <p v-else-if="shouldShowError('height') && v$.height.integer.$invalid" class="validation-error">Height must be an integer value</p>
 
           <div class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Product Type</h3>
@@ -73,23 +73,20 @@
           </div>
           <p v-if="shouldShowError('productType') && v$.productType.required.$invalid" class="validation-error">Product is required</p>
 
-          <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-            <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Fabric Width (inches)</ion-label>
-            <ion-select v-model="form.fabricWidth" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('fabricWidth')">
-              <ion-select-option value="54">54</ion-select-option>
-              <ion-select-option value="108">108</ion-select-option>
-              <ion-select-option value="110">110</ion-select-option>
-              <ion-select-option value="118">118</ion-select-option>
-            </ion-select>
-          </ion-item>
+          <div class="space-y-4">
+            <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Fabric Width (inches)</ion-label>
+              <ion-select v-model="form.fabricWidth" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('fabricWidth')">
+                <ion-select-option v-for="opt in appSettings.fabricWidthOptions" :key="opt" :value="String(opt)">{{ opt }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Vertical Repeat (inches)</ion-label>
+              <ion-input v-model="form.verticalRepeat" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('verticalRepeat')"></ion-input>
+            </ion-item>
+          </div>
           <p v-if="shouldShowError('fabricWidth') && v$.fabricWidth.required.$invalid" class="validation-error">Fabric width is required</p>
-
-          <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-            <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Vertical Repeat (inches)</ion-label>
-            <ion-input v-model="form.verticalRepeat" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('verticalRepeat')"></ion-input>
-          </ion-item>
-          <p v-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.required.$invalid" class="validation-error">Vertical repeat is required</p>
-          <p v-else-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.minValue.$invalid" class="validation-error">Vertical repeat has to be greater than or equal to 0</p>
+          <p v-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.minValue.$invalid" class="validation-error">Vertical repeat has to be greater than or equal to 0</p>
 
           <div v-if="form.productType === '1'" class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Ripplefold Fullness</h3>
@@ -113,7 +110,7 @@
             <p v-if="shouldShowError('PPFullness') && v$.PPFullness.required.$invalid" class="validation-error">Pinch pleat fullness is required</p>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-4">
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
               <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Return (inches)</ion-label>
               <ion-input v-model="form.return" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('return')"></ion-input>
@@ -180,6 +177,7 @@ import ResultModal from '@/components/ResultModal.vue';
 import useVuelidate from '@vuelidate/core';
 import { required, minValue, helpers } from '@vuelidate/validators';
 import appIcon from '../../icons/icon-128.webp';
+import { useSettings } from '@/composables/useSettings';
 
 // Storage helpers (localStorage for compatibility)
 const getStorageItem = (key: string) => {
@@ -230,7 +228,9 @@ const rules = computed(() => ({
   return: { required, minValue: minValue(0) },
   hem: { required, minValue: minValue(0) },
   opening: { required },
-  railroad: { required }
+  railroad: { required },
+  verticalRepeat: { minValue: minValue(0) },
+  fabricWidth: { required }
 }));
 
 const v$ = useVuelidate(rules, form);
@@ -251,33 +251,21 @@ const shouldShowError = (field: FormField) => {
   return (submitted.value || control.$dirty) && control.$invalid;
 };
 
-// Constants
-const widthMargin = 10;
-const easeAllowance = 2;
-const rfSnapSeparation = 4.25;
-const ripplefoldFullness60 = 1.8;
-const ripplefoldFullness80 = 2.0;
-const ripplefoldFullness100 = 2.2;
-const ripplefoldFullness120 = 2.4;
+// Settings
+const { state: appSettings } = useSettings();
 
 const runCalculation = async () => {
   const _panels = parseInt(form.opening);
   
   let _fullness = parseFloat(form.PPFullness);
   if (form.productType === '1') {
-    _fullness = ripplefoldFullness100;
-    if (form.RFFullness === "60") {
-      _fullness = ripplefoldFullness60;
-    } else if (form.RFFullness === "80") {
-      _fullness = ripplefoldFullness80;
-    } else if (form.RFFullness === "120") {
-      _fullness = ripplefoldFullness120;
-    }
+    const map = appSettings.ripplefoldFullness as any;
+    _fullness = map[form.RFFullness] ?? map['100'];
   }
 
   const drop = (parseFloat(form.height) + parseFloat(form.heightFraction));
-  const panelHeight = drop + parseFloat(form.hem) + easeAllowance;
-  const _totalWidth = ((parseFloat(form.width) + parseFloat(form.widthFraction)) * _fullness) + (_panels * (parseFloat(form.return) + widthMargin));
+  const panelHeight = drop + parseFloat(form.hem) + appSettings.easeAllowance;
+  const _totalWidth = ((parseFloat(form.width) + parseFloat(form.widthFraction)) * _fullness) + (_panels * (parseFloat(form.return) + appSettings.widthMargin));
 
   let _requiredWidths: number;
   let _requiredFabric: number;
@@ -285,7 +273,9 @@ const runCalculation = async () => {
   let _requiredCuts: number;
   let _fabricOrientation: string;
 
-  if ((form.railroad === '1') && (panelHeight < parseFloat(form.fabricWidth))) {
+  const fabricW = parseFloat(form.fabricWidth);
+  const allowRailroad = (form.railroad === '1') && (appSettings.railroadStrict ? (panelHeight < fabricW) : (panelHeight <= fabricW));
+  if (allowRailroad) {
     _fabricOrientation = "Railroad";
     _requiredWidths = 1;
     _requiredCuts = _panels;
@@ -301,7 +291,8 @@ const runCalculation = async () => {
   
   let _requiredSnaps = 0;
   if (form.productType === '1') {
-    _requiredSnaps = _panels * Math.ceil(((parseFloat(form.width) + parseFloat(form.widthFraction)) * _fullness / _panels) / rfSnapSeparation);
+    const sep = appSettings.rfSnapSeparation;
+    _requiredSnaps = _panels * Math.ceil(((parseFloat(form.width) + parseFloat(form.widthFraction)) * _fullness / _panels) / sep);
   }
 
   const result = {
@@ -319,7 +310,7 @@ const runCalculation = async () => {
     heightFraction: parseStringToFraction(form.heightFraction),
     fullness: form.productType === '2' ? form.PPFullness : form.RFFullness + "%",
     hem: parseFloat(form.hem),
-    easeAllowance
+    easeAllowance: appSettings.easeAllowance
   };
 
   // Store in history BEFORE showing the modal
