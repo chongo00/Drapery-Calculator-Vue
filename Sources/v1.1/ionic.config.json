@@ -1,0 +1,7 @@
+{
+  "name": "com.blindsbook.draperycalculator",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
