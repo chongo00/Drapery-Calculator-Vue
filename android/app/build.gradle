@@ -7,7 +7,9 @@ android {
         applicationId "com.blindsbook.draperycalculator"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+    // versionCode must be an integer. Original value '1.1.0.3' is invalid for Android.
+    // Use a numeric code (e.g. 11003) derived from semantic version 1.1.0.3 -> 11003
+    versionCode 11003
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
