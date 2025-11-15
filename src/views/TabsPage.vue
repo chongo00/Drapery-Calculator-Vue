@@ -3,17 +3,17 @@
     <ion-tabs>
       <ion-router-outlet swipe-gesture="false"></ion-router-outlet>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button tab="tab1" href="/tabs/tab1" routerDirection="root" @click.prevent="onTab('/tabs/tab1')">
+  <ion-tab-button tab="tab1" href="/tabs/tab1" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="calculator" />
           <ion-label>Calculator</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="tab2" href="/tabs/tab2" routerDirection="root" @click.prevent="onTab('/tabs/tab2')">
+  <ion-tab-button tab="tab2" href="/tabs/tab2" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="list" />
           <ion-label>History</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="settings" href="/tabs/settings" routerDirection="root" @click.prevent="onTab('/tabs/settings')">
+  <ion-tab-button tab="settings" href="/tabs/settings" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="settings" />
           <ion-label>Settings</ion-label>
         </ion-tab-button>

@@ -208,7 +208,146 @@ npm run dev
    cd ..
    ```
 
+---
+
+## 🔧 Pasos exactos que usamos (Windows) — build y prueba de APK
+
+Estos son los pasos que ejecuté en este repositorio desde una máquina Windows y que dieron resultado para generar el APK de pruebas (`app-debug.apk`). Los incluyo aquí para que puedas reproducir exactamente lo mismo.
+
+1. En la raíz del repositorio, instalar dependencias (si no están todavía):
+```powershell
+npm ci
+```
+
+2. Construir los assets web con Vite y sincronizar con Capacitor:
+```powershell
+npm run build
+npx cap sync android
+```
+
+3. Asegurar que tienes un JDK compatible.
+   - Nota importante: con la versión del Android Gradle Plugin usada en este proyecto, la compilación puede requerir Java 21. Si ves un error similar a "error: invalid source release: 21" instala JDK 21.
+   - En mi caso instalé Eclipse Temurin JDK 21 y establecí `JAVA_HOME` apuntando al JDK 21 antes de ejecutar Gradle.
+
+4. Ejecutar el ensamblado (Android) para generar el APK de pruebas:
+```powershell
+cd android
+.\gradlew.bat assembleDebug --refresh-dependencies --stacktrace
+```
+
+5. Ruta del APK debug generado (local):
+```
+android\app\build\outputs\apk\debug\app-debug.apk
+```
+
+6. (Opcional) Generar el Android App Bundle (`.aab`) para publicación:
+```powershell
+cd android
+.\gradlew.bat bundleRelease
+# Resultado esperado (bundle firmado si configuraste signingConfigs):
+# android\app\build\outputs\bundle\release\app-release.aab
+```
+
+7. Intento de instalación en dispositivo físico (nota sobre detección):
+   - Comando para instalar en un dispositivo conectado por USB y autorizado:
+   ```powershell
+   adb install -r android\app\build\outputs\apk\debug\app-debug.apk
+   ```
+   - Si `adb devices` no lista tu teléfono, asegúrate en el dispositivo de tener habilitadas:
+     1. Opciones de desarrollador
+     2. Depuración USB (USB debugging)
+     3. Que aceptes el diálogo de autorización de depuración en el teléfono (aparecerá la primera vez que conectes).
+   - En la sesión donde probé, `adb` estuvo disponible en `C:\Android\platform-tools` y tuve que añadirlo temporalmente al `PATH` de la sesión.
+
+8. Notas sobre errores comunes y cómo los resolvimos en esta máquina
+   - Error "invalid source release: 21": se resolvió instalando JDK 21 (Eclipse Temurin) y apuntando `JAVA_HOME` a esa instalación en la sesión.
+   - Fallos por dependencias o tiempo de descarga: se aumentaron timeouts en `android/gradle.properties` y se reintentó (`--refresh-dependencies`).
+   - Error de `versionCode` no entero: revisa `android/app/build.gradle` si gradle falla con la evaluación de `defaultConfig`.
+
+---
+
+
 > 📝 Si no guardas contraseñas en `gradle.properties`, puedes pasarlas al vuelo: `./gradlew bundleRelease -PMYAPP_UPLOAD_STORE_PASSWORD=...`.
+
+## 🖥️ Flujo CLI completo (Windows PowerShell) — construir e instalar APK sin Android Studio
+
+Esta sección reúne todos los comandos exactos que usamos en Windows PowerShell para que una persona sin experiencia pueda reproducir el proceso completo de generación e instalación de un APK de prueba, sin abrir Android Studio.
+
+Requisitos previos (resumen):
+- Node.js y npm instalados.
+- JDK (recomendado: Temurin JDK 21 si tu AGP lo requiere). Asegúrate de apuntar `JAVA_HOME` a la instalación.
+- Android SDK Platform Tools (contiene `adb`) y Command Line Tools (contiene `sdkmanager`).
+- Variables de entorno: `ANDROID_SDK_ROOT` o `ANDROID_HOME` apuntando al SDK.
+
+Pasos (PowerShell) — copiar/compilar/instalar:
+
+1) Abrir PowerShell en la raíz del repo y (si es la primera vez) instalar dependencias:
+```powershell
+npm ci
+```
+
+2) Generar los assets web (Vite) y crear `dist/`:
+```powershell
+npm run build
+```
+
+3) Copiar `dist/` al folder de assets nativo (esto es lo que hace `npx cap copy`/`npx cap sync` pero en Windows a veces es más fiable hacer copia manual):
+```powershell
+robocopy ".\dist" "${PWD}\android\app\src\main\assets\public" /mir
+```
+
+4) (Opcional) Si `robocopy` no existe, usa `xcopy` o copia manual con el Explorador.
+
+5) Compilar APK debug con Gradle wrapper (usa la que viene en el repo):
+```powershell
+cd android
+.\gradlew.bat assembleDebug --refresh-dependencies --stacktrace
+```
+
+6) Localizar `adb` (si no está en PATH). Comandos para detectar ruta común y usarla directamente:
+```powershell
+# $env:LOCALAPPDATA o $env:USERPROFILE son rutas donde suele instalarse el SDK en Windows
+if (Test-Path "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe") { $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" } 
+elseif (Test-Path "$env:USERPROFILE\AppData\Local\Android\Sdk\platform-tools\adb.exe") { $adb = "$env:USERPROFILE\AppData\Local\Android\Sdk\platform-tools\adb.exe" } 
+else { $adb = 'adb' }
+$adb devices
+```
+
+7) Desinstalar la app anterior (opcional pero recomendable para evitar conflictos):
+```powershell
+& $adb uninstall com.blindsbook.draperycalculator
+```
+
+8) Instalar la APK recién construida:
+```powershell
+& $adb install -r "${PWD}\app\build\outputs\apk\debug\app-debug.apk"
+```
+
+9) Arrancar la app en el dispositivo:
+```powershell
+& $adb shell am start -n com.blindsbook.draperycalculator/.MainActivity
+```
+
+10) Volcar logs si algo falla (crea un archivo local con los últimos logs):
+```powershell
+& $adb logcat -d > D:\temp_logcat_after_install.txt
+```
+
+Consejos y notas para principiantes
+- Si `adb devices` devuelve vacío, en el teléfono activa *Opciones de desarrollador > Depuración USB* y acepta el diálogo de autorización.
+- Si Gradle falla por versión de Java, instala Temurin JDK 21 y en PowerShell apunta la variable para la sesión:
+```powershell
+$env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-21'
+$env:Path = "$env:JAVA_HOME\bin;" + $env:Path
+```
+- Si la compilación usa `npx cap sync android` en lugar de copiar manual, puedes ejecutar:
+```powershell
+npx cap sync android
+```
+pero nuestro flujo reproducible usa `robocopy` para garantizar que el contenido de `dist/` esté exactamente en `android/app/src/main/assets/public`.
+
+Si quieres, puedo añadir en el repo un script PowerShell `scripts/build-install.ps1` que automatice estos pasos (build + robocopy + gradle + install). Dime y lo creo.
+
 
 ### 📦 Empaquetado y publicación en Google Play
 1. Entra a [Google Play Console](https://play.google.com/console) y crea la app si es la primera vez.
@@ -230,6 +369,139 @@ npm run dev
 > ✅ Después de publicar, vuelve al checklist inicial y marca los puntos completados para documentar el release.
 
 ---
+
+## 🔐 Firmado y entrega (Release) — Android & iOS
+
+Esta sección explica el flujo adicional a la creación de una "app de prueba" (APK debug). Aquí cubrimos cómo firmar correctamente la app con la clave de la empresa, generar el AAB para Google Play y preparar el IPA para App Store. Estos artefactos son los que se entregan a la empresa o se suben a las tiendas.
+
+IMPORTANTE: las claves privadas, certificados y contraseñas son secretos. Nunca los subas al repositorio. Usa un gestor seguro (Bitwarden, 1Password, Azure Key Vault, HashiCorp Vault) o variables de entorno en CI.
+
+---
+
+### Android — crear keystore y generar `app-release.aab` firmado
+
+1) Generar (o obtener) el keystore de la empresa.
+
+   - Si no tienes uno, crea un keystore local (hazlo en la máquina de la empresa o en tu entorno seguro):
+      ```powershell
+      keytool -genkey -v -keystore drapery.keystore -alias drapery \
+         -keyalg RSA -keysize 2048 -validity 10000
+      ```
+      Guarda `drapery.keystore` en un lugar seguro (no en Git).
+
+2) Añadir la referencia para Gradle (mejor vía variables de entorno en CI):
+
+   - Opción A (temporal, no subir a Git): coloca en `android/gradle.properties`:
+      ```properties
+      MYAPP_UPLOAD_STORE_FILE=drapery.keystore
+      MYAPP_UPLOAD_KEY_ALIAS=drapery
+      MYAPP_UPLOAD_STORE_PASSWORD=tu_store_password
+      MYAPP_UPLOAD_KEY_PASSWORD=tu_key_password
+      ```
+
+   - Opción B (más segura): no escribir contraseñas en archivos, exporta variables en la sesión o CI:
+      ```powershell
+      $env:MYAPP_UPLOAD_STORE_FILE='drapery.keystore'
+      $env:MYAPP_UPLOAD_KEY_ALIAS='drapery'
+      $env:MYAPP_UPLOAD_STORE_PASSWORD='...'
+      $env:MYAPP_UPLOAD_KEY_PASSWORD='...'
+      ```
+
+3) Configurar `android/app/build.gradle` signingConfigs (si no está):
+
+   ```gradle
+   signingConfigs {
+      release {
+         storeFile file(MYAPP_UPLOAD_STORE_FILE)
+         storePassword MYAPP_UPLOAD_STORE_PASSWORD
+         keyAlias MYAPP_UPLOAD_KEY_ALIAS
+         keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+      }
+   }
+
+   buildTypes {
+      release {
+         signingConfig signingConfigs.release
+         minifyEnabled false
+         shrinkResources false
+      }
+   }
+   ```
+
+4) Generar el AAB firmado (release):
+
+   ```powershell
+   cd android
+   # Si usas variables de entorno, expórtalas como se mostró arriba.
+   .\gradlew.bat bundleRelease --no-daemon --stacktrace
+   ```
+
+   Resultado esperado:
+   - `android/app/build/outputs/bundle/release/app-release.aab`
+
+5) Comprobar y empaquetar para entrega a la empresa
+
+   - Calcula checksum para verificar integridad:
+      ```powershell
+      Get-FileHash .\app\build\outputs\bundle\release\app-release.aab -Algorithm SHA256
+      ```
+   - Entrega el `.aab` y el checksum por un canal seguro (SFTP/Drive con acceso controlado).
+
+6) (Opcional) Generar APK universal desde AAB para testers con `bundletool`:
+
+   ```powershell
+   java -jar bundletool.jar build-apks --bundle app-release.aab --output app-release.apks --mode universal
+   java -jar bundletool.jar install-apks --apks app-release.apks
+   ```
+
+---
+
+### iOS — preparar y firmar para App Store
+
+1) Certificados y provisioning (una sola vez)
+
+   - En Apple Developer Console crea/descarga:
+      - Apple Distribution certificate (.cer)
+      - App ID (Bundle Identifier)
+      - Provisioning profile App Store
+   - Instala los certificados en tu llavero macOS (Keychain Access) y coloca el provisioning profile en Xcode.
+
+2) Archivar y exportar con Xcode (recomendado GUI)
+
+   - En macOS: `npx cap sync ios`, abre `ios/App/App.xcworkspace` en Xcode.
+   - Selecciona target `App` → `Signing & Capabilities` → selecciona tu Team y provisioning.
+   - Product > Archive → Organizer > Distribute App → App Store Connect (o Export → Ad Hoc/Enterprise).
+
+3) Línea de comandos (sin GUI)
+
+   - Archive con `xcodebuild`:
+      ```bash
+      cd ios/App
+      xcodebuild -scheme App -configuration Release -archivePath ../build/App.xcarchive archive
+      ```
+   - Exporta `.ipa` (crea `ExportOptions.plist` con método `app-store` y tu `teamID`):
+      ```bash
+      xcodebuild -exportArchive -archivePath ../build/App.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath ../build/export
+      ```
+
+4) Subir a App Store Connect
+
+   - Usa Transporter (GUI) o `xcrun altool` / `xcrun notarytool` o `fastlane pilot`.
+   - Ejemplo con `xcrun altool` (necesitas app-specific password si usas Apple ID):
+      ```bash
+      xcrun altool --upload-app -f ./App.ipa -t ios -u "apple@miempresa.com" -p "APP_SPECIFIC_PASSWORD"
+      ```
+
+---
+
+### Recomendaciones de seguridad y CI
+
+- No subas keystore ni contraseñas a Git. Usa variables de entorno en los runners (GitHub Actions secrets, GitLab CI variables, Azure Pipelines secure files).
+- Para iOS, considera `fastlane match` para compartir certificados/profiles de forma cifrada entre el equipo.
+- Genera y comparte checksums SHA256 del `.aab`/.ipa con la empresa para verificar integridad.
+
+Si quieres, automatizo esto creando un script PowerShell `scripts/build-release.ps1` y/o un `Fastfile` para `fastlane` y lo añado al repo (sin credenciales). Dime cuál prefieres y lo creo.
+
 
 ## 🍎 iOS (App Store)
 

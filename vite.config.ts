@@ -7,7 +7,11 @@ import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/Drapery-Calculator-Vue/',
+  // Use a relative base so built assets load correctly from the file:// served
+  // location that Capacitor uses on Android/iOS. Previously this project used
+  // an absolute base which caused the APK to reference "/Drapery-Calculator-Vue/..."
+  // and the WebView failed to find the JS/CSS files, producing a black screen.
+  base: './',
   plugins: [
     vue(),
     legacy()
