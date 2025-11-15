@@ -1,0 +1,96 @@
+hr {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.scroll-content{
+    background: #f5f5f5;
+}
+ion-app.ios [padding] .scroll-content{
+    padding-top: 10px;
+}
+
+ion-item{
+    margin-bottom: 10px !important;
+}
+ion-list ion-item{
+    margin-bottom: 0px !important;
+}
+ion-label{
+    margin: 10px 8px 5px 5px !important
+}
+.list-ios{
+    margin: 5px 0 0px;
+}
+ion-label strong{
+    color: red;
+    font-size: 12px;
+}
+
+.item-md.item-input.ng-valid.item-input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner, .item-md.item-input.ng-valid.input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner{
+    border-bottom-color: #dedede; 
+    -webkit-box-shadow: none; 
+    box-shadow: none; 
+}
+
+.button{
+    background-color: #1873b7;
+}
+
+.footer .toolbar{
+    padding: 10px;
+    font-size: 12px;
+    color: darkgrey;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+}
+
+.footer .toolbar a{
+    text-decoration: none;
+}
+
+.fractions{
+    font-size: 14px;
+}
+#result ion-label{
+    font-size: 15px !important;
+}
+#result ion-card-content{
+    padding: 5px 5px !important;
+}
+
+#result ion-item{
+    margin-bottom: 0px !important;
+}
+
+#result  ion-label strong{
+    color: black;
+    font-size: 15px;
+}
+
+#result {
+    width: 100% !important; 
+    margin: 0px !important; 
+    margin-bottom: 10px !important; 
+}
+
+.item-block {
+    min-height: 3.5rem;
+}
+
+
+.toolbar-ios{
+    height: 70px;
+}
+.content-ios .scroll-content{
+    padding-top: 10px !important;
+}
+
+img {
+    max-width: none;
+}
+
+.toolbar-ios ion-title{
+    padding: 0 64px 1px;
+}

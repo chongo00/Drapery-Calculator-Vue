@@ -1,0 +1,68 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      <a href="https://www.blindsbook.com">
+        <img alt="logo"  src="assets/imgs/bb_logo.png">
+      </a>
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+  <ion-card id="result">
+    <ion-card-content>
+    <ion-item >
+      <ion-label>
+        <strong>Width :</strong> {{width}} <span class="fractions">{{widthFraction}}</span> inches
+      </ion-label>
+    </ion-item>
+    <ion-item >
+      <ion-label>
+        <strong>Height :</strong> {{height}} <span class="fractions">{{heightFraction}}</span> inches
+      </ion-label>
+    </ion-item>
+    <ion-item >
+        <ion-label>
+          <strong>Product Type :</strong> {{ productType == 1 ? 'Ripplefold curtain' : 'Pinch Pleated curtain' }}
+        </ion-label>
+    </ion-item>
+    <ion-item >
+        <ion-label>
+          <strong>Fullness :</strong> {{fullness}}
+        </ion-label>
+    </ion-item>
+    <ion-item >
+      <ion-label>
+        <strong>Required Fabric :</strong> {{requiredFabric}} yards
+      </ion-label>
+    </ion-item>
+    <ion-item >
+      <ion-label>
+        <strong>Fabric Orientation :</strong> {{fabricOrientation}}
+      </ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>
+        <strong>Fabric Widths :</strong> {{fabricWidths}}
+      </ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>
+        <strong>Fabric Cuts :</strong> {{fabricCuts}} x {{ fabricCutLength }}  <span class="fractions">{{ fabricCutsFraction }}</span> inches 
+      </ion-label>
+    </ion-item>
+    <ion-item [hidden]="productType == 2">
+      <ion-label>
+        <strong>Required Snaps :</strong> {{requiredSnaps}}
+      </ion-label>
+    </ion-item>
+    </ion-card-content>
+  </ion-card>
+ <button ion-button block (click)="closeModal()">Close</button>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <div>Save time & money with the complete software for your window covering business</div>
+    <div><a href="https://www.blindsbook.com">www.blindsbook.com</a></div>
+  </ion-toolbar>
+</ion-footer>
