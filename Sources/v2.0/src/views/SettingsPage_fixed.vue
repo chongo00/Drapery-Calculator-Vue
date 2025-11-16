@@ -94,7 +94,7 @@
 
         <div class="border-t pt-4">
           <h3 class="text-md font-medium text-gray-800 dark:text-gray-100 mb-2">About</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-300">Drapery Calculator v1.1.0.5</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">Drapery Calculator v{{ appVersion }}</p>
           <p class="text-sm text-gray-600 dark:text-gray-300">Calculate fabric needs for curtains efficiently.</p>
         </div>
       </div>
@@ -107,6 +107,10 @@ import { ref, watch, onMounted, computed } from 'vue'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonToggle, IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonInput, IonButton } from '@ionic/vue'
 import { useSettings, type RipplefoldFullnessMap } from '@/composables/useSettings'
 import appIcon from '../../icons/icon-128.webp'
+import packageInfo from '../../package.json';
+
+// Dynamically retrieve the app version
+const appVersion = packageInfo.version;
 
 // Theme toggle (Dark Mode)
 const darkMode = ref(false)

@@ -140,9 +140,9 @@ const onTouchEnd = (e: TouchEvent) => {
 };
 const onTouchCancel = () => { isPointerActive = false; };
 
-const onTab = (path: string) => {
-  router.push(path);
-};
+//const onTab = (path: string) => {
+//  router.push(path);
+//};
 
 onMounted(() => {
   window.addEventListener('pointerdown', onDown, { passive: false, capture: true });
