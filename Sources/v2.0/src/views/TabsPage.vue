@@ -5,17 +5,17 @@
       <ion-tab-bar slot="bottom">
   <ion-tab-button tab="tab1" href="/tabs/tab1" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="calculator" />
-          <ion-label>Calculator</ion-label>
+          <ion-label>{{ t.tabs.calculator }}</ion-label>
         </ion-tab-button>
 
   <ion-tab-button tab="tab2" href="/tabs/tab2" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="list" />
-          <ion-label>History</ion-label>
+          <ion-label>{{ t.tabs.history }}</ion-label>
         </ion-tab-button>
 
   <ion-tab-button tab="settings" href="/tabs/settings" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="settings" />
-          <ion-label>Settings</ion-label>
+          <ion-label>{{ t.tabs.settings }}</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
@@ -28,6 +28,9 @@ import { onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
 import { calculator, list, settings } from 'ionicons/icons';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const route = useRoute();
@@ -172,5 +175,54 @@ onBeforeUnmount(() => {
 :deep(ion-tabs) {
   touch-action: pan-y; /* allow vertical scroll, block browser horizontal nav */
   overscroll-behavior-x: contain; /* contain back/forward gesture */
+}
+
+/* Dark mode styles for tab bar */
+:deep(ion-tab-bar) {
+  --background: #ffffff;
+  --color: #4a5568;
+  --color-selected: #2563eb;
+}
+
+.dark :deep(ion-tab-bar),
+html.dark :deep(ion-tab-bar),
+body.ion-theme-dark :deep(ion-tab-bar) {
+  --background: #111827;
+  --color: #9ca3af;
+  --color-selected: #60a5fa;
+  background-color: #111827;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:deep(ion-tab-button) {
+  --color: #4a5568;
+  --color-selected: #2563eb;
+}
+
+.dark :deep(ion-tab-button),
+html.dark :deep(ion-tab-button),
+body.ion-theme-dark :deep(ion-tab-button) {
+  --color: #9ca3af;
+  --color-selected: #60a5fa;
+}
+
+:deep(ion-tab-button.tab-selected) {
+  --color: #2563eb;
+}
+
+.dark :deep(ion-tab-button.tab-selected),
+html.dark :deep(ion-tab-button.tab-selected),
+body.ion-theme-dark :deep(ion-tab-button.tab-selected) {
+  --color: #60a5fa;
+}
+
+:deep(ion-label) {
+  color: var(--color);
+}
+
+.dark :deep(ion-label),
+html.dark :deep(ion-label),
+body.ion-theme-dark :deep(ion-label) {
+  color: var(--color);
 }
 </style>

@@ -5,7 +5,7 @@
         <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100">
           <span class="title-inline">
             <img :src="appIcon" class="w-7 h-7 rounded" alt="" />
-            <span>Settings</span>
+            <span>{{ t.settings.title }}</span>
           </span>
         </ion-title>
       </ion-toolbar>
@@ -13,36 +13,54 @@
 
     <ion-content class="ion-padding bg-transparent">
       <div class="max-w-md md:max-w-3xl mx-auto bg-white dark:bg-neutral-900 rounded-xl shadow-lg p-6 space-y-6">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">App Preferences</h2>
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ t.settings.appPreferences }}</h2>
 
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Dark Mode</span>
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.settings.darkMode }}</span>
           <ion-toggle v-model="darkMode" slot="end" class="text-blue-500"></ion-toggle>
+        </div>
+
+        <div class="flex items-center justify-between gap-4">
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.settings.language }}</span>
+          <ion-select :value="currentLanguage" @ionChange="onLanguageChange" interface="action-sheet" class="text-gray-700 dark:text-gray-100 language-select">
+            <ion-select-option value="en">English</ion-select-option>
+            <ion-select-option value="es">Español</ion-select-option>
+            <ion-select-option value="fr">Français</ion-select-option>
+            <ion-select-option value="pt">Português</ion-select-option>
+          </ion-select>
+        </div>
+
+        <div class="flex items-center justify-between gap-4">
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.settings.measurementSystem }}</span>
+          <ion-select :value="measurementSystem.system" @ionChange="onMeasurementSystemChange" interface="action-sheet" class="text-gray-700 dark:text-gray-100">
+            <ion-select-option value="imperial">{{ t.settings.imperial }}</ion-select-option>
+            <ion-select-option value="metric">{{ t.settings.metric }}</ion-select-option>
+          </ion-select>
         </div>
 
         <ion-accordion-group class="mt-4">
           <ion-accordion value="advanced">
             <ion-item slot="header" class="advanced-accordion-header rounded-lg">
-              <ion-label class="font-medium">Advanced Calculation Settings</ion-label>
+              <ion-label class="font-medium">{{ t.settings.advancedCalculationSettings }}</ion-label>
             </ion-item>
             <div slot="content" class="p-3 space-y-4 advanced-settings">
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <ion-item lines="none" class="bg-gray-50 dark:bg-neutral-800 rounded-lg align-left-input">
-                  <ion-label position="stacked">Side margin per panel (in)</ion-label>
-                  <ion-input :modelValue="String(settings.widthMargin)" type="number" @ionInput="onNumberInput('widthMargin', $event)"></ion-input>
+                  <ion-label position="stacked">{{ t.settings.sideMarginPerPanel }} ({{ measurementSystem.getUnitLabel() }})</ion-label>
+                  <ion-input :modelValue="formatSettingValue(settings.widthMargin)" type="number" @ionInput="onNumberInput('widthMargin', $event)"></ion-input>
                 </ion-item>
                 <ion-item lines="none" class="bg-gray-50 dark:bg-neutral-800 rounded-lg align-left-input">
-                  <ion-label position="stacked">Ease allowance (in)</ion-label>
-                  <ion-input :modelValue="String(settings.easeAllowance)" type="number" @ionInput="onNumberInput('easeAllowance', $event)"></ion-input>
+                  <ion-label position="stacked">{{ t.settings.easeAllowance }} ({{ measurementSystem.getUnitLabel() }})</ion-label>
+                  <ion-input :modelValue="formatSettingValue(settings.easeAllowance)" type="number" @ionInput="onNumberInput('easeAllowance', $event)"></ion-input>
                 </ion-item>
                 <ion-item lines="none" class="bg-gray-50 dark:bg-neutral-800 rounded-lg align-left-input">
-                  <ion-label position="stacked">Snap separation (in)</ion-label>
-                  <ion-input :modelValue="String(settings.rfSnapSeparation)" type="number" step="0.01" @ionInput="onNumberInput('rfSnapSeparation', $event)"></ion-input>
-                  <p v-if="snapSepInvalid" class="text-xs font-semibold text-red-600 dark:text-red-400 pt-1">Must be greater than 0</p>
+                  <ion-label position="stacked">{{ t.settings.snapSeparation }} ({{ measurementSystem.getUnitLabel() }})</ion-label>
+                  <ion-input :modelValue="formatSettingValue(settings.rfSnapSeparation)" type="number" step="0.01" @ionInput="onNumberInput('rfSnapSeparation', $event)"></ion-input>
+                  <p v-if="snapSepInvalid" class="text-xs font-semibold text-red-600 dark:text-red-400 pt-1">{{ t.settings.mustBeGreaterThanZero }}</p>
                 </ion-item>
                 <ion-item lines="none" class="bg-gray-50 dark:bg-neutral-800 rounded-lg railroad-toggle-item">
-                  <ion-label position="stacked">Railroad strict</ion-label>
-                  <p class="railroad-hint text-xs text-gray-500 dark:text-gray-200">Only if panel height &lt; fabric width</p>
+                  <ion-label position="stacked">{{ t.settings.railroadStrict }}</ion-label>
+                  <p class="railroad-hint text-xs text-gray-500 dark:text-gray-200">{{ t.settings.onlyIfPanelHeightLessThanFabricWidth }}</p>
                   <div class="railroad-toggle-shell">
                     <ion-toggle class="railroad-toggle" :checked="settings.railroadStrict" @ionChange="onBooleanChange('railroadStrict', $event)" />
                   </div>
@@ -50,7 +68,7 @@
               </div>
 
               <div class="space-y-2">
-                <div class="text-sm font-semibold text-gray-700 dark:text-gray-200">Ripplefold fullness factors</div>
+                <div class="text-sm font-semibold text-gray-700 dark:text-gray-200">{{ t.settings.ripplefoldFullnessFactors }}</div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <ion-item lines="none" class="bg-gray-50 dark:bg-neutral-800 rounded-lg">
                     <ion-label position="stacked" class="whitespace-nowrap text-center">60%</ion-label>
@@ -72,30 +90,30 @@
               </div>
 
               <div class="space-y-2">
-                <div class="text-sm font-semibold text-gray-700 dark:text-gray-200">Fabric Width options (inches)</div>
+                <div class="text-sm font-semibold text-gray-700 dark:text-gray-200">{{ t.settings.fabricWidthOptions }} ({{ measurementSystem.getUnitLabel() }})</div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <ion-item v-for="(value, i) in fabricWidthDrafts" :key="i" lines="none" class="bg-gray-50 dark:bg-neutral-800 rounded-lg">
                     <ion-label position="stacked" class="text-center">#{{ i + 1 }}</ion-label>
-                    <ion-input type="number" inputmode="numeric" :modelValue="value" @ionInput="onFabricWidthChange(i, $event)"></ion-input>
+                    <ion-input type="number" inputmode="numeric" :step="measurementSystem.isMetric ? '0.1' : '1'" :modelValue="value" @ionInput="onFabricWidthChange(i, $event)"></ion-input>
                   </ion-item>
                 </div>
                 <div class="flex gap-2 pt-1">
-                  <ion-button size="small" fill="outline" @click="addFabricWidth">Add width</ion-button>
-                  <ion-button size="small" fill="clear" color="medium" @click="clearLastFabricWidth">Clear last</ion-button>
+                  <ion-button size="small" fill="outline" @click="addFabricWidth">{{ t.settings.addWidth }}</ion-button>
+                  <ion-button size="small" fill="clear" color="medium" @click="clearLastFabricWidth">{{ t.settings.clearLast }}</ion-button>
                 </div>
               </div>
 
               <div class="pt-2">
-                <ion-button fill="outline" size="small" @click="handleReset">Restore defaults</ion-button>
+                <ion-button fill="outline" size="small" @click="handleReset">{{ t.settings.restoreDefaults }}</ion-button>
               </div>
             </div>
           </ion-accordion>
         </ion-accordion-group>
 
         <div class="border-t pt-4">
-          <h3 class="text-md font-medium text-gray-800 dark:text-gray-100 mb-2">About</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-300">Drapery Calculator v1.1.0.5</p>
-          <p class="text-sm text-gray-600 dark:text-gray-300">Calculate fabric needs for curtains efficiently.</p>
+          <h3 class="text-md font-medium text-gray-800 dark:text-gray-100 mb-2">{{ t.settings.about }}</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ t.settings.version }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ t.settings.description }}</p>
         </div>
       </div>
     </ion-content>
@@ -104,9 +122,14 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from 'vue'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonToggle, IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonInput, IonButton } from '@ionic/vue'
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonToggle, IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption } from '@ionic/vue'
 import { useSettings, type RipplefoldFullnessMap } from '@/composables/useSettings'
+import { useI18n } from '@/composables/useI18n'
+import { useMeasurementSystem } from '@/composables/useMeasurementSystem'
 import appIcon from '../../icons/icon-128.webp'
+
+const { t, language, setLanguage } = useI18n()
+const measurementSystem = useMeasurementSystem()
 
 // Theme toggle (Dark Mode)
 const darkMode = ref(false)
@@ -141,8 +164,11 @@ onMounted(() => {
 // Settings state
 const { state: settings, reset } = useSettings()
 
-// Fabric width options editing helpers
-const fabricWidthDrafts = ref<string[]>(settings.fabricWidthOptions.map((n) => String(n)))
+// Fabric width options editing helpers - convert from inches to current system for display
+const fabricWidthDrafts = ref<string[]>(settings.fabricWidthOptions.map((n) => {
+  const converted = measurementSystem.fromInches(n);
+  return converted.value.toFixed(measurementSystem.isMetric ? 1 : 0);
+}))
 if (!fabricWidthDrafts.value.length) fabricWidthDrafts.value = ['']
 
 const normalizeFabricWidths = () => {
@@ -153,9 +179,22 @@ const normalizeFabricWidths = () => {
   drafts.forEach((raw, index) => {
     const trimmed = String(raw ?? '').trim()
     if (!trimmed) { drafts[index] = ''; return }
-    const parsed = parseInt(trimmed, 10)
-    if (Number.isInteger(parsed) && parsed > 0 && !seen.has(parsed)) { seen.add(parsed); validNumbers.push(parsed); drafts[index] = String(parsed) }
-    else drafts[index] = ''
+    const parsed = parseFloat(trimmed)
+    if (!isNaN(parsed) && parsed > 0) {
+      // Convert from current system to inches for storage
+      const inches = measurementSystem.toInches(parsed, measurementSystem.getUnitLabel())
+      if (!seen.has(inches)) {
+        seen.add(inches)
+        validNumbers.push(inches)
+        // Update display value
+        const converted = measurementSystem.fromInches(inches)
+        drafts[index] = converted.value.toFixed(measurementSystem.isMetric ? 1 : 0)
+      } else {
+        drafts[index] = ''
+      }
+    } else {
+      drafts[index] = ''
+    }
   })
 
   if (!drafts.length) drafts.push('')
@@ -188,7 +227,9 @@ const snapSepInvalid = computed(() => Number(settings.rfSnapSeparation) <= 0)
 const setNumber = (key: 'widthMargin' | 'easeAllowance' | 'rfSnapSeparation', value: any) => {
   const num = parseFloat(String(value ?? ''))
   if (!isFinite(num) || num < 0) return
-  (settings as any)[key] = num
+  // Convert from current system to inches for storage
+  const inches = measurementSystem.toInches(num, measurementSystem.getUnitLabel())
+  ;(settings as any)[key] = inches
 }
 const setBoolean = (key: 'railroadStrict', checked: any) => { (settings as any)[key] = !!checked }
 const setFullness = (k: keyof RipplefoldFullnessMap, value: any) => {
@@ -197,15 +238,49 @@ const setFullness = (k: keyof RipplefoldFullnessMap, value: any) => {
   settings.ripplefoldFullness[k] = num
 }
 
+const currentLanguage = computed(() => language.value)
+
+const onLanguageChange = (e: any) => {
+  const newLang = e?.detail?.value
+  if (newLang && (newLang === 'en' || newLang === 'es' || newLang === 'fr' || newLang === 'pt')) {
+    setLanguage(newLang)
+  }
+}
+
+const onMeasurementSystemChange = (e: any) => {
+  const newSystem = e?.detail?.value
+  if (newSystem === 'imperial' || newSystem === 'metric') {
+    measurementSystem.setSystem(newSystem)
+  }
+}
+
+// Format setting values for display (convert from inches to current system)
+const formatSettingValue = (inches: number): string => {
+  const converted = measurementSystem.fromInches(inches)
+  return converted.value.toFixed(2)
+}
+
 const onNumberInput = (k: 'widthMargin' | 'easeAllowance' | 'rfSnapSeparation', e: any) => setNumber(k, e?.detail?.value)
 const onBooleanChange = (k: 'railroadStrict', e: any) => setBoolean(k, e?.detail?.checked)
 const onFullnessInput = (k: keyof RipplefoldFullnessMap, e: any) => setFullness(k, e?.detail?.value)
 const handleReset = () => {
   reset()
-  fabricWidthDrafts.value = settings.fabricWidthOptions.map((n) => String(n))
+  fabricWidthDrafts.value = settings.fabricWidthOptions.map((n) => {
+    const converted = measurementSystem.fromInches(n);
+    return converted.value.toFixed(measurementSystem.isMetric ? 1 : 0);
+  })
   if (!fabricWidthDrafts.value.length) fabricWidthDrafts.value = ['']
   normalizeFabricWidths()
 }
+
+// Watch measurement system changes to update fabric width display
+watch(() => measurementSystem.system.value, () => {
+  fabricWidthDrafts.value = settings.fabricWidthOptions.map((n) => {
+    const converted = measurementSystem.fromInches(n);
+    return converted.value.toFixed(measurementSystem.isMetric ? 1 : 0);
+  })
+  if (!fabricWidthDrafts.value.length) fabricWidthDrafts.value = ['']
+})
 </script>
 
 <style scoped>

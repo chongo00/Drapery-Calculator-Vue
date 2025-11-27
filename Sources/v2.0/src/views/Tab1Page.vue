@@ -2,27 +2,27 @@
   <ion-page class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-950">
     <ion-header class="bg-white dark:bg-neutral-950 shadow-lg">
       <ion-toolbar class="bg-transparent">
-        <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>Drapery Calculator</span></span></ion-title>
+        <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>{{ t.calculator.title }}</span></span></ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding bg-transparent">
       <ion-header collapse="condense" class="bg-white dark:bg-neutral-950">
         <ion-toolbar class="bg-transparent">
-          <ion-title size="large" class="text-xl font-semibold text-gray-700 dark:text-gray-100"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>Drapery Calculator</span></span></ion-title>
+          <ion-title size="large" class="text-xl font-semibold text-gray-700 dark:text-gray-100"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>{{ t.calculator.title }}</span></span></ion-title>
         </ion-toolbar>
       </ion-header>
 
       <div class="max-w-md mx-auto bg-white dark:bg-neutral-900/60 dark:border dark:border-white/10 rounded-xl shadow-lg p-6">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Calculate Your Fabric Needs</h2>
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ t.calculator.calculateFabricNeeds }}</h2>
         <form @submit.prevent="handleSubmit" class="space-y-4 form-anchor">
           <div class="space-y-4">
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Width (inches)</ion-label>
-              <ion-input v-model="form.width" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('width')" @ionInput="handleTouched('width')"></ion-input>
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.calculator.width }} ({{ measurementSystem.getUnitLabel() }})</ion-label>
+              <ion-input v-model="form.width" type="number" :step="measurementSystem.isMetric ? '0.1' : '1'" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('width')" @ionInput="handleTouched('width')"></ion-input>
             </ion-item>
-            <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Width Fraction</ion-label>
-              <ion-select v-model="form.widthFraction" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('widthFraction')">
+            <ion-item v-if="measurementSystem.isImperial" lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.calculator.widthFraction }}</ion-label>
+              <ion-select v-model="form.widthFraction" :placeholder="t.calculator.select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('widthFraction')">
                 <ion-select-option value="0">0</ion-select-option>
                 <ion-select-option value="0.125">1/8</ion-select-option>
                 <ion-select-option value="0.25">1/4</ion-select-option>
@@ -34,12 +34,12 @@
               </ion-select>
             </ion-item>
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Height (inches)</ion-label>
-              <ion-input v-model="form.height" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('height')" @ionInput="handleTouched('height')"></ion-input>
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.calculator.height }} ({{ measurementSystem.getUnitLabel() }})</ion-label>
+              <ion-input v-model="form.height" type="number" :step="measurementSystem.isMetric ? '0.1' : '1'" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('height')" @ionInput="handleTouched('height')"></ion-input>
             </ion-item>
-            <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Height Fraction</ion-label>
-              <ion-select v-model="form.heightFraction" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('heightFraction')">
+            <ion-item v-if="measurementSystem.isImperial" lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.calculator.heightFraction }}</ion-label>
+              <ion-select v-model="form.heightFraction" :placeholder="t.calculator.select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('heightFraction')">
                 <ion-select-option value="0">0</ion-select-option>
                 <ion-select-option value="0.125">1/8</ion-select-option>
                 <ion-select-option value="0.25">1/4</ion-select-option>
@@ -51,116 +51,116 @@
               </ion-select>
             </ion-item>
           </div>
-          <p v-if="shouldShowError('width') && v$.width.required.$invalid" class="validation-error">Width is required</p>
-          <p v-else-if="shouldShowError('width') && v$.width.minValue.$invalid" class="validation-error">Width has to be greater than 0</p>
-          <p v-else-if="shouldShowError('width') && v$.width.integer.$invalid" class="validation-error">Width must be an integer value</p>
-          <p v-if="shouldShowError('height') && v$.height.required.$invalid" class="validation-error">Height is required</p>
-          <p v-else-if="shouldShowError('height') && v$.height.minValue.$invalid" class="validation-error">Height has to be greater than 0</p>
-          <p v-else-if="shouldShowError('height') && v$.height.integer.$invalid" class="validation-error">Height must be an integer value</p>
+          <p v-if="shouldShowError('width') && v$.width.required.$invalid" class="validation-error">{{ t.calculator.widthRequired }}</p>
+          <p v-else-if="shouldShowError('width') && v$.width.minValue.$invalid" class="validation-error">{{ t.calculator.widthGreaterThanZero }}</p>
+          <p v-else-if="shouldShowError('width') && v$.width.integer.$invalid" class="validation-error">{{ t.calculator.widthMustBeInteger }}</p>
+          <p v-if="shouldShowError('height') && v$.height.required.$invalid" class="validation-error">{{ t.calculator.heightRequired }}</p>
+          <p v-else-if="shouldShowError('height') && v$.height.minValue.$invalid" class="validation-error">{{ t.calculator.heightGreaterThanZero }}</p>
+          <p v-else-if="shouldShowError('height') && v$.height.integer.$invalid" class="validation-error">{{ t.calculator.heightMustBeInteger }}</p>
 
           <div class="section-card space-y-3">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Product Type</h3>
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">{{ t.calculator.productType }}</h3>
             <ion-radio-group v-model="form.productType" class="flex flex-col space-y-3" @ionChange="handleTouched('productType')">
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.productType = '1'; handleTouched('productType')">
-                <ion-label class="text-sm text-gray-700 dark:text-gray-100">Ripplefold curtain</ion-label>
+                <ion-label class="text-sm text-gray-700 dark:text-gray-100">{{ t.calculator.ripplefoldCurtain }}</ion-label>
                 <ion-radio slot="start" value="1" class="text-blue-500"></ion-radio>
               </ion-item>
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.productType = '2'; handleTouched('productType')">
-                <ion-label class="text-sm text-gray-700 dark:text-gray-100">Pinch Pleated curtain</ion-label>
+                <ion-label class="text-sm text-gray-700 dark:text-gray-100">{{ t.calculator.pinchPleatedCurtain }}</ion-label>
                 <ion-radio slot="start" value="2" class="text-blue-500"></ion-radio>
               </ion-item>
             </ion-radio-group>
           </div>
-          <p v-if="shouldShowError('productType') && v$.productType.required.$invalid" class="validation-error">Product is required</p>
+          <p v-if="shouldShowError('productType') && v$.productType.required.$invalid" class="validation-error">{{ t.calculator.productRequired }}</p>
 
           <div class="space-y-4">
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Fabric Width (inches)</ion-label>
-              <ion-select v-model="form.fabricWidth" placeholder="Select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('fabricWidth')">
-                <ion-select-option v-for="opt in appSettings.fabricWidthOptions" :key="opt" :value="String(opt)">{{ opt }}</ion-select-option>
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.calculator.fabricWidth }} ({{ measurementSystem.getUnitLabel() }})</ion-label>
+              <ion-select v-model="form.fabricWidth" :placeholder="t.calculator.select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('fabricWidth')">
+                <ion-select-option v-for="opt in fabricWidthOptionsDisplay" :key="opt.value" :value="opt.value">{{ opt.label }}</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Vertical Repeat (inches)</ion-label>
-              <ion-input v-model="form.verticalRepeat" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('verticalRepeat')"></ion-input>
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.calculator.verticalRepeat }} ({{ measurementSystem.getUnitLabel() }})</ion-label>
+              <ion-input v-model="form.verticalRepeat" type="number" :step="measurementSystem.isMetric ? '0.1' : '1'" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('verticalRepeat')"></ion-input>
             </ion-item>
           </div>
-          <p v-if="shouldShowError('fabricWidth') && v$.fabricWidth.required.$invalid" class="validation-error">Fabric width is required</p>
-          <p v-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.minValue.$invalid" class="validation-error">Vertical repeat has to be greater than or equal to 0</p>
+          <p v-if="shouldShowError('fabricWidth') && v$.fabricWidth.required.$invalid" class="validation-error">{{ t.calculator.fabricWidthRequired }}</p>
+          <p v-if="shouldShowError('verticalRepeat') && v$.verticalRepeat.minValue.$invalid" class="validation-error">{{ t.calculator.verticalRepeatGreaterThanOrEqualZero }}</p>
 
           <div v-if="form.productType === '1'" class="section-card space-y-3">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Ripplefold Fullness</h3>
-            <ion-select v-model="form.RFFullness" placeholder="Select fullness" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('RFFullness')">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">{{ t.calculator.ripplefoldFullness }}</h3>
+            <ion-select v-model="form.RFFullness" :placeholder="t.calculator.select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('RFFullness')">
               <ion-select-option value="60">60%</ion-select-option>
               <ion-select-option value="80">80%</ion-select-option>
               <ion-select-option value="100">100%</ion-select-option>
               <ion-select-option value="120">120%</ion-select-option>
             </ion-select>
-            <p v-if="shouldShowError('RFFullness') && v$.RFFullness.required.$invalid" class="validation-error">Ripplefold fullness is required</p>
+            <p v-if="shouldShowError('RFFullness') && v$.RFFullness.required.$invalid" class="validation-error">{{ t.calculator.ripplefoldFullnessRequired }}</p>
           </div>
 
           <div v-if="form.productType === '2'" class="section-card space-y-3">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Pinch Pleat Fullness</h3>
-            <ion-select v-model="form.PPFullness" placeholder="Select fullness" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('PPFullness')">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">{{ t.calculator.pinchPleatFullness }}</h3>
+            <ion-select v-model="form.PPFullness" :placeholder="t.calculator.select" interface="action-sheet" class="text-gray-700 dark:text-gray-100" @ionChange="handleTouched('PPFullness')">
               <ion-select-option value="2">2</ion-select-option>
               <ion-select-option value="2.5">2.5</ion-select-option>
               <ion-select-option value="3">3</ion-select-option>
               <ion-select-option value="3.5">3.5</ion-select-option>
             </ion-select>
-            <p v-if="shouldShowError('PPFullness') && v$.PPFullness.required.$invalid" class="validation-error">Pinch pleat fullness is required</p>
+            <p v-if="shouldShowError('PPFullness') && v$.PPFullness.required.$invalid" class="validation-error">{{ t.calculator.pinchPleatFullnessRequired }}</p>
           </div>
 
           <div class="space-y-4">
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Return (inches)</ion-label>
-              <ion-input v-model="form.return" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('return')"></ion-input>
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.calculator.return }} ({{ measurementSystem.getUnitLabel() }})</ion-label>
+              <ion-input v-model="form.return" type="number" :step="measurementSystem.isMetric ? '0.1' : '1'" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('return')"></ion-input>
             </ion-item>
             <ion-item lines="none" class="bg-gray-50 dark:bg-transparent dark:text-gray-100 rounded-lg dark:border dark:border-white/10">
-              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">Hem (inches)</ion-label>
-              <ion-input v-model="form.hem" type="number" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('hem')"></ion-input>
+              <ion-label position="stacked" class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.calculator.hem }} ({{ measurementSystem.getUnitLabel() }})</ion-label>
+              <ion-input v-model="form.hem" type="number" :step="measurementSystem.isMetric ? '0.1' : '1'" class="text-gray-700 dark:text-gray-100" @ionBlur="handleTouched('hem')"></ion-input>
             </ion-item>
           </div>
-          <p v-if="shouldShowError('return') && v$.return.required.$invalid" class="validation-error">Return is required</p>
-          <p v-else-if="shouldShowError('return') && v$.return.minValue.$invalid" class="validation-error">Return has to be greater than or equal to 0</p>
-          <p v-if="shouldShowError('hem') && v$.hem.required.$invalid" class="validation-error">Hem is required</p>
-          <p v-else-if="shouldShowError('hem') && v$.hem.minValue.$invalid" class="validation-error">Hem has to be greater than or equal to 0</p>
+          <p v-if="shouldShowError('return') && v$.return.required.$invalid" class="validation-error">{{ t.calculator.returnRequired }}</p>
+          <p v-else-if="shouldShowError('return') && v$.return.minValue.$invalid" class="validation-error">{{ t.calculator.returnGreaterThanOrEqualZero }}</p>
+          <p v-if="shouldShowError('hem') && v$.hem.required.$invalid" class="validation-error">{{ t.calculator.hemRequired }}</p>
+          <p v-else-if="shouldShowError('hem') && v$.hem.minValue.$invalid" class="validation-error">{{ t.calculator.hemGreaterThanOrEqualZero }}</p>
 
           <div class="section-card space-y-3">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Opening</h3>
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">{{ t.calculator.opening }}</h3>
             <ion-radio-group v-model="form.opening" class="flex flex-col space-y-3 text-gray-700 dark:text-gray-100" @ionChange="handleTouched('opening')">
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.opening = '1'; handleTouched('opening')">
-                <ion-label class="text-sm">On way</ion-label>
+                <ion-label class="text-sm">{{ t.calculator.onWay }}</ion-label>
                 <ion-radio slot="start" value="1" class="text-blue-500"></ion-radio>
               </ion-item>
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.opening = '2'; handleTouched('opening')">
-                <ion-label class="text-sm">Center open</ion-label>
+                <ion-label class="text-sm">{{ t.calculator.centerOpen }}</ion-label>
                 <ion-radio slot="start" value="2" class="text-blue-500"></ion-radio>
               </ion-item>
             </ion-radio-group>
           </div>
-          <p v-if="shouldShowError('opening') && v$.opening.required.$invalid" class="validation-error">Opening is required</p>
+          <p v-if="shouldShowError('opening') && v$.opening.required.$invalid" class="validation-error">{{ t.calculator.openingRequired }}</p>
 
           <div class="section-card space-y-3">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">Allow Railroad</h3>
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">{{ t.calculator.allowRailroad }}</h3>
             <ion-radio-group v-model="form.railroad" class="flex flex-col space-y-3 text-gray-700 dark:text-gray-100" @ionChange="handleTouched('railroad')">
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.railroad = '1'; handleTouched('railroad')">
-                <ion-label class="text-sm">Yes</ion-label>
+                <ion-label class="text-sm">{{ t.common.yes }}</ion-label>
                 <ion-radio slot="start" value="1" class="text-blue-500"></ion-radio>
               </ion-item>
               <ion-item button :detail="false" lines="none" class="bg-transparent dark:bg-transparent rounded-lg cursor-pointer" @click="form.railroad = '0'; handleTouched('railroad')">
-                <ion-label class="text-sm">No</ion-label>
+                <ion-label class="text-sm">{{ t.common.no }}</ion-label>
                 <ion-radio slot="start" value="0" class="text-blue-500"></ion-radio>
               </ion-item>
             </ion-radio-group>
           </div>
-          <p v-if="shouldShowError('railroad') && v$.railroad.required.$invalid" class="validation-error">Please select an option</p>
+          <p v-if="shouldShowError('railroad') && v$.railroad.required.$invalid" class="validation-error">{{ t.calculator.pleaseSelectOption }}</p>
 
           <div v-if="showErrorBanner" class="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg" role="alert">
-            <strong class="font-semibold">Oops!</strong>
-            <span class="ml-1">There are errors...</span>
+            <strong class="font-semibold">{{ t.calculator.oops }}</strong>
+            <span class="ml-1">{{ t.calculator.thereAreErrors }}</span>
           </div>
 
-          <ion-button expand="block" type="submit" class="calculate-btn">Calculate Fabric Needs</ion-button>
+          <ion-button expand="block" type="submit" class="calculate-btn">{{ t.calculator.calculateFabricNeeds }}</ion-button>
         </form>
       </div>
     </ion-content>
@@ -168,7 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, watch } from 'vue';
 import { 
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonRadioGroup, IonRadio, IonButton
 } from '@ionic/vue';
@@ -178,6 +178,11 @@ import useVuelidate from '@vuelidate/core';
 import { required, minValue, helpers } from '@vuelidate/validators';
 import appIcon from '../../icons/icon-128.webp';
 import { useSettings } from '@/composables/useSettings';
+import { useI18n } from '@/composables/useI18n';
+import { useMeasurementSystem } from '@/composables/useMeasurementSystem';
+
+const { t } = useI18n();
+const measurementSystem = useMeasurementSystem();
 
 // Storage helpers (localStorage for compatibility)
 const getStorageItem = (key: string) => {
@@ -209,19 +214,23 @@ type FormField = keyof typeof form;
 const rules = computed(() => ({
   width: {
     required,
-    minValue: minValue(1),
-    integer: helpers.withParams({ type: 'integer' }, (value: string) => {
-      if (!value) return true;
-      return Number.isInteger(Number(value));
-    })
+    minValue: minValue(0.1),
+    ...(measurementSystem.isImperial.value ? {
+      integer: helpers.withParams({ type: 'integer' }, (value: string) => {
+        if (!value) return true;
+        return Number.isInteger(Number(value));
+      })
+    } : {})
   },
   height: {
     required,
-    minValue: minValue(1),
-    integer: helpers.withParams({ type: 'integer' }, (value: string) => {
-      if (!value) return true;
-      return Number.isInteger(Number(value));
-    })
+    minValue: minValue(0.1),
+    ...(measurementSystem.isImperial.value ? {
+      integer: helpers.withParams({ type: 'integer' }, (value: string) => {
+        if (!value) return true;
+        return Number.isInteger(Number(value));
+      })
+    } : {})
   },
   RFFullness: { required },
   PPFullness: { required },
@@ -254,6 +263,25 @@ const shouldShowError = (field: FormField) => {
 // Settings
 const { state: appSettings } = useSettings();
 
+// Fabric width options converted to current measurement system
+const fabricWidthOptionsDisplay = computed(() => {
+  return appSettings.fabricWidthOptions.map(width => {
+    const converted = measurementSystem.fromInches(width);
+    return {
+      value: String(width), // Store original inches value for calculations
+      label: `${converted.value.toFixed(1)} ${converted.unit}`
+    };
+  });
+});
+
+// Watch measurement system changes and reset fractions if switching to metric
+watch(() => measurementSystem.system.value, (newSystem) => {
+  if (newSystem === 'metric') {
+    form.widthFraction = '0';
+    form.heightFraction = '0';
+  }
+});
+
 const runCalculation = async () => {
   const _panels = parseInt(form.opening);
   
@@ -263,9 +291,18 @@ const runCalculation = async () => {
     _fullness = map[form.RFFullness] ?? map['100'];
   }
 
-  const drop = (parseFloat(form.height) + parseFloat(form.heightFraction));
-  const panelHeight = drop + parseFloat(form.hem) + appSettings.easeAllowance;
-  const _totalWidth = ((parseFloat(form.width) + parseFloat(form.widthFraction)) * _fullness) + (_panels * (parseFloat(form.return) + appSettings.widthMargin));
+  // Convert input values from current system to inches for calculations
+  const widthInches = measurementSystem.toInches(parseFloat(form.width) || 0, measurementSystem.getUnitLabel()) + 
+                      (measurementSystem.isImperial ? parseFloat(form.widthFraction) : 0);
+  const heightInches = measurementSystem.toInches(parseFloat(form.height) || 0, measurementSystem.getUnitLabel()) + 
+                       (measurementSystem.isImperial ? parseFloat(form.heightFraction) : 0);
+  const hemInches = measurementSystem.toInches(parseFloat(form.hem) || 0, measurementSystem.getUnitLabel());
+  const returnInches = measurementSystem.toInches(parseFloat(form.return) || 0, measurementSystem.getUnitLabel());
+  const verticalRepeatInches = measurementSystem.toInches(parseFloat(form.verticalRepeat) || 0, measurementSystem.getUnitLabel());
+
+  const drop = heightInches;
+  const panelHeight = drop + hemInches + appSettings.easeAllowance;
+  const _totalWidth = (widthInches * _fullness) + (_panels * (returnInches + appSettings.widthMargin));
 
   let _requiredWidths: number;
   let _requiredFabric: number;
@@ -295,22 +332,37 @@ const runCalculation = async () => {
     _requiredSnaps = _panels * Math.ceil(((parseFloat(form.width) + parseFloat(form.widthFraction)) * _fullness / _panels) / sep);
   }
 
+  // Format dimensions for display in current system
+  const widthDisplay = measurementSystem.fromInches(widthInches);
+  const heightDisplay = measurementSystem.fromInches(heightInches);
+  const hemDisplay = measurementSystem.fromInches(hemInches);
+  const cutLengthDisplay = measurementSystem.fromInches(_requiredCutLength);
+
   const result = {
     requiredFabric: Math.ceil(_requiredFabric / 36),
     fabricWidths: _requiredWidths,
     fabricCuts: _requiredCuts,
-    fabricCutsFraction: parseDecimalToFraction(_requiredCutLength) === "1" ? "" : parseDecimalToFraction(_requiredCutLength),
-    fabricCutLength: parseDecimalToFraction(_requiredCutLength) === "1" ? Math.floor(_requiredCutLength + 1) : Math.floor(_requiredCutLength),
+    fabricCutsFraction: measurementSystem.isImperial 
+      ? (parseDecimalToFraction(_requiredCutLength) === "1" ? "" : parseDecimalToFraction(_requiredCutLength))
+      : "",
+    fabricCutLength: measurementSystem.isImperial
+      ? (parseDecimalToFraction(_requiredCutLength) === "1" ? Math.floor(_requiredCutLength + 1) : Math.floor(_requiredCutLength))
+      : Math.round(cutLengthDisplay.value * 10) / 10,
     requiredSnaps: _requiredSnaps,
     productType: form.productType,
     fabricOrientation: _fabricOrientation,
-    width: form.width,
-    widthFraction: parseStringToFraction(form.widthFraction),
-    height: form.height,
-    heightFraction: parseStringToFraction(form.heightFraction),
+    width: widthDisplay.value.toFixed(measurementSystem.isMetric ? 1 : 0),
+    widthFraction: measurementSystem.isImperial ? parseStringToFraction(form.widthFraction) : "",
+    height: heightDisplay.value.toFixed(measurementSystem.isMetric ? 1 : 0),
+    heightFraction: measurementSystem.isImperial ? parseStringToFraction(form.heightFraction) : "",
+    widthUnit: widthDisplay.unit,
+    heightUnit: heightDisplay.unit,
+    cutLengthUnit: cutLengthDisplay.unit,
     fullness: form.productType === '2' ? form.PPFullness : form.RFFullness + "%",
-    hem: parseFloat(form.hem),
-    easeAllowance: appSettings.easeAllowance
+    hem: hemDisplay.value.toFixed(measurementSystem.isMetric ? 1 : 0),
+    hemUnit: hemDisplay.unit,
+    easeAllowance: appSettings.easeAllowance,
+    measurementSystem: measurementSystem.system.value
   };
 
   // Store in history BEFORE showing the modal
