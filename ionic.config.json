@@ -1,7 +1,0 @@
-{
-  "name": "Drapery-Calculator-Vue",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "vue-vite"
-}

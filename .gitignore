@@ -1,6 +1,15 @@
 # Specifies intentionally untracked files to ignore when using Git
 # http://git-scm.com/docs/gitignore
 
+# IMPORTANTE: Solo la carpeta Sources/ debe estar en el repositorio
+# Todo lo demás se mantiene local para desarrollo
+
+# Ignorar TODO excepto Sources/
+/*
+!/Sources/
+!.gitignore
+!README.md
+
 # OS-generated files
 .DS_Store
 Thumbs.db
@@ -22,59 +31,10 @@ UserInterfaceState.xcuserstate
 # Logs
 *.log
 log.txt
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Environment & secrets
-.env
-.env.*
-!.env.example
 
 # Dependency directories
 node_modules/
 
-# Build outputs
-dist/
-dist-ssr/
-
-# Testing artifacts
-coverage/
-cypress/screenshots/
-cypress/videos/
-
-# Ionic / Capacitor cache
-.ionic
-.sass-cache
-.sourcemaps
-.versions
-.capacitor/
-
-# Android native artifacts
-android/.gradle/
-android/app/build/
-android/build/
-android/captures/
-android/local.properties
-android/app/release/
-android/app/*.keystore
-*.keystore
-*.jks
-*.aab
-*.apk
-
-# iOS native artifacts
-ios/App/Pods/
-ios/App/build/
-ios/App/DerivedData/
-ios/App/App.xcodeproj/xcuserdata/
-ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
-ios/App/App.xcworkspace/xcuserdata/
-ios/App/App.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
-*.xcuserstate
-
 # IDE settings
 .idea/
-.vscode/*
-!/.vscode/extensions.json
+.vscode/
