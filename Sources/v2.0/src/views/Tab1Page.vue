@@ -53,10 +53,10 @@
           </div>
           <p v-if="shouldShowError('width') && v$.width.required.$invalid" class="validation-error">{{ t.calculator.widthRequired }}</p>
           <p v-else-if="shouldShowError('width') && v$.width.minValue.$invalid" class="validation-error">{{ t.calculator.widthGreaterThanZero }}</p>
-          <p v-else-if="shouldShowError('width') && v$.width.integer.$invalid" class="validation-error">{{ t.calculator.widthMustBeInteger }}</p>
+          <p v-else-if="shouldShowError('width') && (v$.width.integer as any)?.$invalid" class="validation-error">{{ t.calculator.widthMustBeInteger }}</p>
           <p v-if="shouldShowError('height') && v$.height.required.$invalid" class="validation-error">{{ t.calculator.heightRequired }}</p>
           <p v-else-if="shouldShowError('height') && v$.height.minValue.$invalid" class="validation-error">{{ t.calculator.heightGreaterThanZero }}</p>
-          <p v-else-if="shouldShowError('height') && v$.height.integer.$invalid" class="validation-error">{{ t.calculator.heightMustBeInteger }}</p>
+          <p v-else-if="shouldShowError('height') && (v$.height.integer as any)?.$invalid" class="validation-error">{{ t.calculator.heightMustBeInteger }}</p>
 
           <div class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">{{ t.calculator.productType }}</h3>

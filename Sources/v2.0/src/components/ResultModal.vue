@@ -124,18 +124,18 @@ const closeModal = () => {
 };
 
 const copyResults = async () => {
-  const text = `${t.results.title}\n\n` +
-    `${t.results.requiredFabric}: ${props.result.requiredFabric} ${t.results.yards}\n` +
-    `${t.results.dimensions} ${props.result.width}${props.result.widthFraction ? ' ' + props.result.widthFraction : ''} ${props.result.widthUnit || 'in'} × ${props.result.height}${props.result.heightFraction ? ' ' + props.result.heightFraction : ''} ${props.result.heightUnit || 'in'}\n` +
-    `${t.results.productType} ${props.result.productType == '1' ? t.results.ripplefold : t.results.pinchPleated}\n` +
-    `${t.results.fullness} ${props.result.fullness}\n` +
-    `${t.calculator.hem}: ${props.result.hem} ${props.result.hemUnit || 'in'}\n` +
-    `${t.settings.easeAllowance}: ${props.result.easeAllowance}\n` +
-    `${t.results.fabricWidths} ${props.result.fabricWidths}\n` +
-    `${t.results.fabricCuts} ${props.result.fabricCuts}\n` +
-    `${t.results.cutLength} ${props.result.fabricCutLength}${props.result.fabricCutsFraction ? ' ' + props.result.fabricCutsFraction : ''} ${props.result.cutLengthUnit || 'in'}\n` +
-    `${t.results.orientation} ${props.result.fabricOrientation === 'Railroad' ? t.results.railroad : t.results.regular}` +
-    (props.result.requiredSnaps > 0 ? `\n${t.results.snapsRequired} ${props.result.requiredSnaps}` : '');
+  const text = `${t.value.results.title}\n\n` +
+    `${t.value.results.requiredFabric}: ${props.result.requiredFabric} ${t.value.results.yards}\n` +
+    `${t.value.results.dimensions} ${props.result.width}${props.result.widthFraction ? ' ' + props.result.widthFraction : ''} ${props.result.widthUnit || 'in'} × ${props.result.height}${props.result.heightFraction ? ' ' + props.result.heightFraction : ''} ${props.result.heightUnit || 'in'}\n` +
+    `${t.value.results.productType} ${props.result.productType == '1' ? t.value.results.ripplefold : t.value.results.pinchPleated}\n` +
+    `${t.value.results.fullness} ${props.result.fullness}\n` +
+    `${t.value.calculator.hem}: ${props.result.hem} ${props.result.hemUnit || 'in'}\n` +
+    `${t.value.settings.easeAllowance}: ${props.result.easeAllowance}\n` +
+    `${t.value.results.fabricWidths} ${props.result.fabricWidths}\n` +
+    `${t.value.results.fabricCuts} ${props.result.fabricCuts}\n` +
+    `${t.value.results.cutLength} ${props.result.fabricCutLength}${props.result.fabricCutsFraction ? ' ' + props.result.fabricCutsFraction : ''} ${props.result.cutLengthUnit || 'in'}\n` +
+    `${t.value.results.orientation} ${props.result.fabricOrientation === 'Railroad' ? t.value.results.railroad : t.value.results.regular}` +
+    (props.result.requiredSnaps > 0 ? `\n${t.value.results.snapsRequired} ${props.result.requiredSnaps}` : '');
 
   const fallbackCopy = () => {
     const textarea = document.createElement('textarea');

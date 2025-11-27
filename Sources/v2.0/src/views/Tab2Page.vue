@@ -127,18 +127,18 @@ const deleteItem = (index: number) => {
 };
 
 const copyItem = async (calc: Calculation) => {
-  const text = `${t.results.title}\n\n` +
-    `${t.results.requiredFabric}: ${calc.requiredFabric} ${t.results.yards}\n` +
-    `${t.results.dimensions} ${calc.width}${calc.widthFraction ? ' ' + calc.widthFraction : ''} ${calc.widthUnit || 'in'} × ${calc.height}${calc.heightFraction ? ' ' + calc.heightFraction : ''} ${calc.heightUnit || 'in'}\n` +
-    `${t.results.productType} ${calc.productType == '1' ? t.results.ripplefold : t.results.pinchPleated}\n` +
-    `${t.results.fullness} ${calc.fullness}\n` +
-    `${t.calculator.hem}: ${calc.hem} ${calc.hemUnit || 'in'}\n` +
-    `${t.settings.easeAllowance}: ${calc.easeAllowance}\n` +
-    `${t.results.fabricWidths} ${calc.fabricWidths}\n` +
-    `${t.results.fabricCuts} ${calc.fabricCuts}\n` +
-    `${t.results.cutLength} ${calc.fabricCutLength}${calc.fabricCutsFraction ? ' ' + calc.fabricCutsFraction : ''} ${calc.cutLengthUnit || 'in'}\n` +
-    `${t.results.orientation} ${calc.fabricOrientation === 'Railroad' ? t.results.railroad : t.results.regular}` +
-    (calc.requiredSnaps > 0 ? `\n${t.results.snapsRequired} ${calc.requiredSnaps}` : '');
+  const text = `${t.value.results.title}\n\n` +
+    `${t.value.results.requiredFabric}: ${calc.requiredFabric} ${t.value.results.yards}\n` +
+    `${t.value.results.dimensions} ${calc.width}${calc.widthFraction ? ' ' + calc.widthFraction : ''} ${calc.widthUnit || 'in'} × ${calc.height}${calc.heightFraction ? ' ' + calc.heightFraction : ''} ${calc.heightUnit || 'in'}\n` +
+    `${t.value.results.productType} ${calc.productType == '1' ? t.value.results.ripplefold : t.value.results.pinchPleated}\n` +
+    `${t.value.results.fullness} ${calc.fullness}\n` +
+    `${t.value.calculator.hem}: ${calc.hem} ${calc.hemUnit || 'in'}\n` +
+    `${t.value.settings.easeAllowance}: ${calc.easeAllowance}\n` +
+    `${t.value.results.fabricWidths} ${calc.fabricWidths}\n` +
+    `${t.value.results.fabricCuts} ${calc.fabricCuts}\n` +
+    `${t.value.results.cutLength} ${calc.fabricCutLength}${calc.fabricCutsFraction ? ' ' + calc.fabricCutsFraction : ''} ${calc.cutLengthUnit || 'in'}\n` +
+    `${t.value.results.orientation} ${calc.fabricOrientation === 'Railroad' ? t.value.results.railroad : t.value.results.regular}` +
+    (calc.requiredSnaps > 0 ? `\n${t.value.results.snapsRequired} ${calc.requiredSnaps}` : '');
 
   const fallbackCopy = () => {
     const textarea = document.createElement('textarea');
