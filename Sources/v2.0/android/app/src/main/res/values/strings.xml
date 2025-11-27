@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Drapery-Calculator-Vue</string>
+    <string name="title_activity_main">Drapery-Calculator-Vue</string>
+    <string name="package_name">com.blindsbook.draperycalculator</string>
+    <string name="custom_url_scheme">com.blindsbook.draperycalculator</string>
+</resources>

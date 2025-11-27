@@ -1,0 +1,78 @@
+/* For information on how to create your own theme, please see:
+http://ionicframework.com/docs/theming/ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html.dark,
+body.ion-theme-dark,
+body.ion-palette-dark {
+  color-scheme: dark;
+  --ion-background-color: #0f1115;
+  --ion-text-color: #e5e7eb;
+  --ion-toolbar-background: #111827;
+  --ion-item-background: #0f1115;
+}
+
+html.dark ion-action-sheet,
+body.ion-theme-dark ion-action-sheet,
+body.ion-palette-dark ion-action-sheet {
+  --background: #0f1115;
+  --button-color: #ffffff;
+}
+
+/* Tab bar dark mode styles */
+html.dark ion-tab-bar,
+body.ion-theme-dark ion-tab-bar,
+body.ion-palette-dark ion-tab-bar {
+  --background: #111827;
+  --color: #9ca3af;
+  --color-selected: #60a5fa;
+  background-color: #111827;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark ion-tab-button,
+body.ion-theme-dark ion-tab-button,
+body.ion-palette-dark ion-tab-button {
+  --color: #9ca3af;
+  --color-selected: #60a5fa;
+}
+
+html.dark ion-tab-button.tab-selected,
+body.ion-theme-dark ion-tab-button.tab-selected,
+body.ion-palette-dark ion-tab-button.tab-selected {
+  --color: #60a5fa;
+}
+
+:root {
+  color-scheme: light;
+}
+
+/* Global gesture/overscroll tuning for mobile-like behavior */
+html, body, #app, ion-app {
+  touch-action: pan-x pan-y;     /* allow scrolling on both axes to enable swipe */
+  overscroll-behavior-x: none;   /* prevent browser back/forward gesture */
+}
+
+ion-content::part(scroll) {
+  overscroll-behavior-x: contain;
+}
+
+/* Reinforce Ionic containers to prevent browser horizontal navigation gesture */
+ion-page, ion-content, ion-router-outlet {
+  touch-action: auto;            /* allow horizontal gestures inside the content */
+  overscroll-behavior-x: none;
+}
+
+/* Title icon/text inline layout across all views */
+ion-title .title-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+ion-title .title-inline img {
+  display: inline-block;
+  vertical-align: middle;
+}
