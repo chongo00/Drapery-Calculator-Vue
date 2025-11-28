@@ -112,7 +112,7 @@
 
         <div class="border-t pt-4">
           <h3 class="text-md font-medium text-gray-800 dark:text-gray-100 mb-2">{{ t.settings.about }}</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-300">{{ t.settings.version }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ t.settings.version }} v{{ appVersion }}</p>
           <p class="text-sm text-gray-600 dark:text-gray-300">{{ t.settings.description }}</p>
         </div>
       </div>
@@ -127,9 +127,11 @@ import { useSettings, type RipplefoldFullnessMap } from '@/composables/useSettin
 import { useI18n } from '@/composables/useI18n'
 import { useMeasurementSystem } from '@/composables/useMeasurementSystem'
 import appIcon from '../../icons/icon-128.webp'
+import packageInfo from '../../package.json'
 
 const { t, language, setLanguage } = useI18n()
 const measurementSystem = useMeasurementSystem()
+const appVersion = packageInfo.version
 
 // Theme toggle (Dark Mode)
 const darkMode = ref(false)
