@@ -98,38 +98,12 @@
                   </ion-item>
                 </div>
                 <div class="flex gap-2 pt-1">
-                  <ion-button size="small" fill="outline" @click="addFabricWidth">{{ t.settings.addWidth }}</ion-button>
-                  <ion-button size="small" fill="clear" color="medium" @click="clearLastFabricWidth">{{ t.settings.clearLast }}</ion-button>
-                </div>
-              </div>
-
-              <div class="pt-2">
-                <ion-button fill="outline" size="small" @click="handleReset">{{ t.settings.restoreDefaults }}</ion-button>
-              </div>
-            </div>
-          </ion-accordion>
-        </ion-accordion-group>
-
-        <div class="border-t pt-4">
-          <h3 class="text-md font-medium text-gray-800 dark:text-gray-100 mb-2">{{ t.settings.about }}</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-300">{{ t.settings.version }}</p>
-          <p class="text-sm text-gray-600 dark:text-gray-300">{{ t.settings.description }}</p>
-        </div>
-      </div>
-    </ion-content>
-  </ion-page>
-</template>
-
-<script setup lang="ts">
 import { ref, watch, onMounted, computed } from 'vue'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonToggle, IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption } from '@ionic/vue'
 import { useSettings, type RipplefoldFullnessMap } from '@/composables/useSettings'
 import { useI18n } from '@/composables/useI18n'
 import { useMeasurementSystem } from '@/composables/useMeasurementSystem'
 import appIcon from '../../icons/icon-128.webp'
-
-const { t, language, setLanguage } = useI18n()
-const measurementSystem = useMeasurementSystem()
 
 // Theme toggle (Dark Mode)
 const darkMode = ref(false)
