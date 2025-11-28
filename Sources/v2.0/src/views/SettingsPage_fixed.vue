@@ -127,10 +127,6 @@ import { useSettings, type RipplefoldFullnessMap } from '@/composables/useSettin
 import { useI18n } from '@/composables/useI18n'
 import { useMeasurementSystem } from '@/composables/useMeasurementSystem'
 import appIcon from '../../icons/icon-128.webp'
-import packageInfo from '../../package.json';
-
-// Dynamically retrieve the app version
-const appVersion = packageInfo.version;
 
 const { t, language, setLanguage } = useI18n()
 const measurementSystem = useMeasurementSystem()

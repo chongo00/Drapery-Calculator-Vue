@@ -322,7 +322,7 @@ const runCalculation = async () => {
     _fabricOrientation = "Regular";
     _requiredWidths = Math.ceil(_totalWidth / parseFloat(form.fabricWidth));
     _requiredCuts = _requiredWidths;
-    _requiredCutLength = panelHeight + parseFloat(form.verticalRepeat);
+    _requiredCutLength = panelHeight + verticalRepeatInches;
     _requiredFabric = _requiredWidths * _requiredCutLength;
   }
   
