@@ -1,1 +1,0 @@
-System.register(["./index-legacy-D5LHuywn.js"],function(e,s){"use strict";var t;return{setters:[e=>{t=e.a4}],execute:function(){e("SplashScreenWeb",class extends t{async show(e){}async hide(e){}})}}});
