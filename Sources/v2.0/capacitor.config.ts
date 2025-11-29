@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.blindsbook.draperycalculator',
-  appName: 'Drapery-Calculator-Vue',
+  appId: 'com.blindsbook.drap-calc',
+  appName: 'BlindsBook Drapery Calculator',
   webDir: 'dist'
 };
 
