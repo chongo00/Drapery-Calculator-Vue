@@ -10,17 +10,22 @@ export type RipplefoldFullnessMap = {
 export interface AppSettings {
   widthMargin: number;
   easeAllowance: number;
+  headerAllowance: number;       // Double header allowance (4" header x 2 = 8")
+  hemAllowance: number;          // Double hem allowance (4" hem x 2 = 8")
   rfSnapSeparation: number;
   ripplefoldFullness: RipplefoldFullnessMap;
   railroadStrict: boolean;
   fabricWidthOptions: number[];
+  roundHalfYardFor118: boolean;  // Round to half yards for 118" fabric
 }
 
 const STORAGE_KEY = 'appSettingsV1';
 
 const baseDefaults: AppSettings = {
   widthMargin: 10,
-  easeAllowance: 2,
+  easeAllowance: 2,              // Extra ease/safety allowance
+  headerAllowance: 8,            // Double 4" header (4" x 2 = 8")
+  hemAllowance: 8,               // Double 4" hem (4" x 2 = 8")
   rfSnapSeparation: 4.25,
   ripplefoldFullness: {
     "60": 1.8,
@@ -29,16 +34,20 @@ const baseDefaults: AppSettings = {
     "120": 2.4
   },
   railroadStrict: true,
-  fabricWidthOptions: [54, 108, 110, 118]
+  fabricWidthOptions: [54, 108, 110, 118],
+  roundHalfYardFor118: true      // Round to 0.5 yards for 118" fabric
 };
 
 const cloneSettings = (source: AppSettings): AppSettings => ({
   widthMargin: source.widthMargin,
   easeAllowance: source.easeAllowance,
+  headerAllowance: source.headerAllowance,
+  hemAllowance: source.hemAllowance,
   rfSnapSeparation: source.rfSnapSeparation,
   ripplefoldFullness: { ...source.ripplefoldFullness },
   railroadStrict: source.railroadStrict,
-  fabricWidthOptions: [...source.fabricWidthOptions]
+  fabricWidthOptions: [...source.fabricWidthOptions],
+  roundHalfYardFor118: source.roundHalfYardFor118
 });
 
 function loadSettings(): AppSettings {
@@ -50,8 +59,11 @@ function loadSettings(): AppSettings {
 
     if (typeof parsed.widthMargin === 'number') defaults.widthMargin = parsed.widthMargin;
     if (typeof parsed.easeAllowance === 'number') defaults.easeAllowance = parsed.easeAllowance;
+    if (typeof parsed.headerAllowance === 'number') defaults.headerAllowance = parsed.headerAllowance;
+    if (typeof parsed.hemAllowance === 'number') defaults.hemAllowance = parsed.hemAllowance;
     if (typeof parsed.rfSnapSeparation === 'number') defaults.rfSnapSeparation = parsed.rfSnapSeparation;
     if (typeof parsed.railroadStrict === 'boolean') defaults.railroadStrict = parsed.railroadStrict;
+    if (typeof parsed.roundHalfYardFor118 === 'boolean') defaults.roundHalfYardFor118 = parsed.roundHalfYardFor118;
 
     if (parsed.ripplefoldFullness) {
       for (const key of Object.keys(defaults.ripplefoldFullness) as (keyof RipplefoldFullnessMap)[]) {
