@@ -27,39 +27,41 @@
           <p class="text-xl text-gray-600 dark:text-gray-300 mt-2">{{ t.results.yards }}</p>
         </div>
         <div class="space-y-3">
-          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
-            <span class="text-gray-600 dark:text-gray-400 font-medium">{{ t.results.dimensions }}</span>
-            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.width }}{{ result.widthFraction ? ' ' + result.widthFraction : '' }} {{ result.widthUnit || 'in' }} × {{ result.height }}{{ result.heightFraction ? ' ' + result.heightFraction : '' }} {{ result.heightUnit || 'in' }}</span>
+          <div class="flex flex-wrap items-baseline py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors gap-x-2 gap-y-1">
+            <span class="text-gray-600 dark:text-gray-400 font-medium min-w-fit">{{ t.results.dimensions }}</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold flex-1 text-right sm:text-left">{{ result.width }}{{ result.widthFraction ? ' ' + result.widthFraction : '' }} {{ result.widthUnit || 'in' }} × {{ result.height }}{{ result.heightFraction ? ' ' + result.heightFraction : '' }} {{ result.heightUnit || 'in' }}</span>
           </div>
-          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
-            <span class="text-gray-600 dark:text-gray-400 font-medium">{{ t.results.productType }}</span>
-            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.productType == '1' ? t.results.ripplefold : t.results.pinchPleated }}</span>
+          <div class="flex flex-wrap items-baseline py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors gap-x-2 gap-y-1">
+            <span class="text-gray-600 dark:text-gray-400 font-medium min-w-fit">{{ t.results.productType }}</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold flex-1 text-right sm:text-left">{{ result.productType == '1' ? t.results.ripplefold : t.results.pinchPleated }}</span>
           </div>
-          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
-            <span class="text-gray-600 dark:text-gray-400 font-medium">{{ t.results.fullness }}</span>
-            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.fullness }}</span>
+          <div class="flex flex-wrap items-baseline py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors gap-x-2 gap-y-1">
+            <span class="text-gray-600 dark:text-gray-400 font-medium min-w-fit">{{ t.results.fullness }}</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold flex-1 text-right sm:text-left">{{ result.fullness }}</span>
           </div>
-          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
-            <span class="text-gray-600 dark:text-gray-400 font-medium">{{ t.results.fabricWidths }}</span>
-            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.fabricWidths }}</span>
+          <div class="flex flex-wrap items-baseline py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors gap-x-2 gap-y-1">
+            <span class="text-gray-600 dark:text-gray-400 font-medium min-w-fit">{{ t.results.fabricWidths }}</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold flex-1 text-right sm:text-left">{{ result.fabricWidths }}</span>
           </div>
-          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
-            <span class="text-gray-600 dark:text-gray-400 font-medium">{{ t.results.fabricCuts }}</span>
-            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.fabricCuts }}</span>
+          <div class="flex flex-wrap items-baseline py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors gap-x-2 gap-y-1">
+            <span class="text-gray-600 dark:text-gray-400 font-medium min-w-fit">{{ t.results.fabricCuts }}</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold flex-1 text-right sm:text-left">{{ result.fabricCuts }}</span>
           </div>
-          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
-            <span class="text-gray-600 dark:text-gray-400 font-medium">{{ t.results.cutLength }}</span>
-            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.fabricCutLength }}{{ result.fabricCutsFraction ? ' ' + result.fabricCutsFraction : '' }} {{ result.cutLengthUnit || 'in' }}</span>
+          <div class="flex flex-wrap items-baseline py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors gap-x-2 gap-y-1">
+            <span class="text-gray-600 dark:text-gray-400 font-medium min-w-fit">{{ t.results.cutLength }}</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold flex-1 text-right sm:text-left">{{ result.fabricCutLength }}{{ result.fabricCutsFraction ? ' ' + result.fabricCutsFraction : '' }} {{ result.cutLengthUnit || 'in' }}</span>
           </div>
-          <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
-            <span class="text-gray-600 dark:text-gray-400 font-medium">{{ t.results.orientation }}</span>
-            <span :class="['inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide border', orientationBadgeClass(result.fabricOrientation)]">
-              {{ result.fabricOrientation === 'Railroad' ? t.results.railroad : t.results.regular }}
+          <div class="flex flex-wrap items-baseline py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors gap-x-2 gap-y-1">
+            <span class="text-gray-600 dark:text-gray-400 font-medium min-w-fit">{{ t.results.orientation }}</span>
+            <span class="flex-1 text-right sm:text-left">
+              <span :class="['inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide border', orientationBadgeClass(result.fabricOrientation)]">
+                {{ result.fabricOrientation === 'Railroad' ? t.results.railroad : t.results.regular }}
+              </span>
             </span>
           </div>
-          <div v-if="result.requiredSnaps > 0" class="flex justify-between items-center py-2 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors">
-            <span class="text-gray-600 dark:text-gray-400 font-medium">{{ t.results.snapsRequired }}</span>
-            <span class="text-gray-800 dark:text-gray-100 font-semibold">{{ result.requiredSnaps }}</span>
+          <div v-if="result.requiredSnaps > 0" class="flex flex-wrap items-baseline py-2 hover:bg-gray-50 dark:hover:bg-neutral-700 px-2 rounded transition-colors gap-x-2 gap-y-1">
+            <span class="text-gray-600 dark:text-gray-400 font-medium min-w-fit">{{ t.results.snapsRequired }}</span>
+            <span class="text-gray-800 dark:text-gray-100 font-semibold flex-1 text-right sm:text-left">{{ result.requiredSnaps }}</span>
           </div>
         </div>
       </div>
