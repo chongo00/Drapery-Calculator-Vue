@@ -106,12 +106,14 @@ export interface Translations {
     fabricWidthOptions: string;
     addWidth: string;
     clearLast: string;
-    restoreDefaults: string;
-    about: string;
-    version: string;
-    description: string;
-    mustBeGreaterThanZero: string;
-  };
+      restoreDefaults: string;
+      about: string;
+      version: string;
+      description: string;
+      mustBeGreaterThanZero: string;
+      allFieldsEditable: string;
+      currentMeasurementSystem: string;
+    };
   // Tabs
   tabs: {
     calculator: string;
@@ -224,6 +226,8 @@ const translations: Record<Language, Translations> = {
       version: 'Drapery Calculator',
       description: 'Calculate fabric needs for curtains efficiently.',
       mustBeGreaterThanZero: 'Must be greater than 0',
+      allFieldsEditable: 'All fields below are editable and can be customized to parameterize the calculation.',
+      currentMeasurementSystem: 'Current:',
     },
     tabs: {
       calculator: 'Calculator',
@@ -334,6 +338,8 @@ const translations: Record<Language, Translations> = {
       version: 'Calculadora de Cortinas',
       description: 'Calcule las necesidades de tela para cortinas de manera eficiente.',
       mustBeGreaterThanZero: 'Debe ser mayor que 0',
+      allFieldsEditable: 'Todos los campos a continuación son editables y se pueden personalizar para parametrizar el cálculo.',
+      currentMeasurementSystem: 'Actual:',
     },
     tabs: {
       calculator: 'Calculadora',
@@ -444,6 +450,8 @@ const translations: Record<Language, Translations> = {
       version: 'Calculateur de Rideaux',
       description: 'Calculez les besoins en tissu pour les rideaux efficacement.',
       mustBeGreaterThanZero: 'Doit être supérieur à 0',
+      allFieldsEditable: 'Tous les champs ci-dessous sont modifiables et peuvent être personnalisés pour paramétrer le calcul.',
+      currentMeasurementSystem: 'Actuel :',
     },
     tabs: {
       calculator: 'Calculatrice',
@@ -554,6 +562,8 @@ const translations: Record<Language, Translations> = {
       version: 'Calculadora de Cortinas',
       description: 'Calcule as necessidades de tecido para cortinas de forma eficiente.',
       mustBeGreaterThanZero: 'Deve ser maior que 0',
+      allFieldsEditable: 'Todos os campos abaixo são editáveis e podem ser personalizados para parametrizar o cálculo.',
+      currentMeasurementSystem: 'Atual:',
     },
     tabs: {
       calculator: 'Calculadora',

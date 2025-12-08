@@ -31,7 +31,10 @@
         </div>
 
         <div class="flex items-center justify-between gap-4">
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.settings.measurementSystem }}</span>
+          <div class="flex flex-col">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.settings.measurementSystem }}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ t.settings.currentMeasurementSystem }} {{ measurementSystem.system.value === 'imperial' ? t.settings.imperial : t.settings.metric }}</span>
+          </div>
           <ion-select :value="measurementSystem.system" @ionChange="onMeasurementSystemChange" interface="action-sheet" class="text-gray-700 dark:text-gray-100">
             <ion-select-option value="imperial">{{ t.settings.imperial }}</ion-select-option>
             <ion-select-option value="metric">{{ t.settings.metric }}</ion-select-option>
@@ -44,6 +47,9 @@
               <ion-label class="font-medium">{{ t.settings.advancedCalculationSettings }}</ion-label>
             </ion-item>
             <div slot="content" class="p-3 space-y-4 advanced-settings">
+              <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
+                <p class="text-sm text-blue-800 dark:text-blue-200">{{ t.settings.allFieldsEditable }}</p>
+              </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <ion-item lines="none" class="bg-gray-50 dark:bg-neutral-800 rounded-lg align-left-input">
                   <ion-label position="stacked">{{ t.settings.sideMarginPerPanel }} ({{ measurementSystem.getUnitLabel() }})</ion-label>
@@ -126,9 +132,10 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonToggle, IonAcc
 import { useSettings, type RipplefoldFullnessMap } from '@/composables/useSettings'
 import { useI18n } from '@/composables/useI18n'
 import { useMeasurementSystem } from '@/composables/useMeasurementSystem'
-import appIcon from '../../icons/icon-128.webp'
+import appIconAsset from '../../icons/icon-128.webp'
 import packageInfo from '../../package.json'
 
+const appIcon = appIconAsset
 const { t, language, setLanguage } = useI18n()
 const measurementSystem = useMeasurementSystem()
 const appVersion = packageInfo.version

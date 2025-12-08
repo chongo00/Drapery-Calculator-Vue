@@ -176,11 +176,12 @@ import { modalController } from '@ionic/vue';
 import ResultModal from '@/components/ResultModal.vue';
 import useVuelidate from '@vuelidate/core';
 import { required, minValue, helpers } from '@vuelidate/validators';
-import appIcon from '../../icons/icon-128.webp';
+import appIconAsset from '../../icons/icon-128.webp';
 import { useSettings } from '@/composables/useSettings';
 import { useI18n } from '@/composables/useI18n';
 import { useMeasurementSystem } from '@/composables/useMeasurementSystem';
 
+const appIcon = appIconAsset;
 const { t } = useI18n();
 const measurementSystem = useMeasurementSystem();
 
@@ -301,10 +302,7 @@ const runCalculation = async () => {
   const verticalRepeatInches = measurementSystem.toInches(parseFloat(form.verticalRepeat) || 0, measurementSystem.getUnitLabel());
 
   const drop = heightInches;
-  // Cut length calculation:
-  // Finished length + header allowance (8") + hem allowance (8") + ease (2") = +18" total
-  // This addresses the review: "should calculate finished length plus 16 to 18 inches"
-  const panelHeight = drop + appSettings.headerAllowance + appSettings.hemAllowance + appSettings.easeAllowance;
+  const panelHeight = drop + hemInches + appSettings.easeAllowance;
   const _totalWidth = (widthInches * _fullness) + (_panels * (returnInches + appSettings.widthMargin));
 
   let _requiredWidths: number;
@@ -341,20 +339,8 @@ const runCalculation = async () => {
   const hemDisplay = measurementSystem.fromInches(hemInches);
   const cutLengthDisplay = measurementSystem.fromInches(_requiredCutLength);
 
-  // Calculate yards with proper rounding
-  // For 118" fabric: round to nearest 0.5 yard (as per review feedback)
-  // For other widths: round to whole yards
-  const totalYardsRaw = _requiredFabric / 36;
-  let requiredYards: number;
-  if (fabricW >= 118 && appSettings.roundHalfYardFor118) {
-    // Round up to nearest 0.5 yard
-    requiredYards = Math.ceil(totalYardsRaw * 2) / 2;
-  } else {
-    requiredYards = Math.ceil(totalYardsRaw);
-  }
-
   const result = {
-    requiredFabric: requiredYards,
+    requiredFabric: Math.ceil(_requiredFabric / 36),
     fabricWidths: _requiredWidths,
     fabricCuts: _requiredCuts,
     fabricCutsFraction: measurementSystem.isImperial 
