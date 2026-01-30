@@ -26,13 +26,20 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'settings',
         component: () => import('@/views/SettingsPage_fixed.vue')
+      },
+      {
+        path: 'ocr',
+        component: () => import('@/views/OCRPage.vue')
       }
     ]
   }
 ]
 
+// Fix base URL for development - use '/' instead of './' to avoid routing issues
+const baseUrl = import.meta.env.BASE_URL === './' ? '/' : import.meta.env.BASE_URL;
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(baseUrl),
   routes
 })
 

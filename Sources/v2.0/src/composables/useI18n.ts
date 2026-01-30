@@ -86,6 +86,8 @@ export interface Translations {
     product: string;
     cuts: string;
     snaps: string;
+    cameraMeasurement: string;
+    cameraMeasurementApproximate: string;
   };
   // Settings page
   settings: {
@@ -119,6 +121,45 @@ export interface Translations {
     calculator: string;
     history: string;
     settings: string;
+    ocr: string;
+  };
+  // OCR page
+  ocr: {
+    title: string;
+    captureImage: string;
+    selectFromGallery: string;
+    takePhoto: string;
+    processing: string;
+    noFrameDetected: string;
+    calibrate: string;
+    selectReference: string;
+    markReference: string;
+    calibrationComplete: string;
+    measurements: string;
+    width: string;
+    height: string;
+    confidence: string;
+    useMeasurements: string;
+    editMeasurements: string;
+    saveImage: string;
+    exportResults: string;
+    clear: string;
+    retake: string;
+    calibrationRequired: string;
+    approximateMeasurement: string;
+    calibrateForRealMeasurements: string;
+    frameDetected: string;
+    adjustFrame: string;
+    precision: string;
+    high: string;
+    medium: string;
+    low: string;
+    capture: string;
+    cancel: string;
+    ocrSettings: string;
+    saveProcessedImages: string;
+    autoCalibrate: string;
+    approximateScaleLongerSide: string;
   };
 }
 
@@ -202,6 +243,8 @@ const translations: Record<Language, Translations> = {
       product: 'Product',
       cuts: 'Cuts',
       snaps: 'Snaps',
+      cameraMeasurement: 'Camera measurement',
+      cameraMeasurementApproximate: 'Approximate (camera)',
     },
     settings: {
       title: 'Settings',
@@ -233,6 +276,44 @@ const translations: Record<Language, Translations> = {
       calculator: 'Calculator',
       history: 'History',
       settings: 'Settings',
+      ocr: 'Camera Measure',
+    },
+    ocr: {
+      title: 'Camera Measurement',
+      captureImage: 'Capture Image',
+      selectFromGallery: 'Select from Gallery',
+      takePhoto: 'Take Photo',
+      processing: 'Processing...',
+      noFrameDetected: 'No window frame detected',
+      calibrate: 'Calibrate',
+      selectReference: 'Select Reference Object',
+      markReference: 'Mark Reference Object',
+      calibrationComplete: 'Calibration Complete',
+      measurements: 'Measurements',
+      width: 'Width',
+      height: 'Height',
+      confidence: 'Confidence',
+      useMeasurements: 'Use Measurements',
+      editMeasurements: 'Edit Measurements',
+      saveImage: 'Save Image',
+      exportResults: 'Export Results',
+      clear: 'Clear',
+      retake: 'Retake',
+      calibrationRequired: 'Calibration required for accurate measurements',
+      approximateMeasurement: 'Approximate measurement',
+      calibrateForRealMeasurements: 'Calibrate for real measurements (inches/cm)',
+      frameDetected: 'Frame Detected',
+      adjustFrame: 'Adjust Frame',
+      precision: 'Precision',
+      high: 'High',
+      medium: 'Medium',
+      low: 'Low',
+      capture: 'Capture',
+      cancel: 'Cancel',
+      ocrSettings: 'OCR Settings',
+      saveProcessedImages: 'Save Processed Images',
+      autoCalibrate: 'Auto Calibration',
+      approximateScaleLongerSide: 'Assume longer side (approx. measurement)',
     },
   },
   es: {
@@ -314,6 +395,8 @@ const translations: Record<Language, Translations> = {
       product: 'Producto',
       cuts: 'Cortes',
       snaps: 'Broches',
+      cameraMeasurement: 'Medición por cámara',
+      cameraMeasurementApproximate: 'Medida aproximada (cámara)',
     },
     settings: {
       title: 'Configuración',
@@ -345,6 +428,44 @@ const translations: Record<Language, Translations> = {
       calculator: 'Calculadora',
       history: 'Historial',
       settings: 'Configuración',
+      ocr: 'Medir con Cámara',
+    },
+    ocr: {
+      title: 'Medición con Cámara',
+      captureImage: 'Capturar Imagen',
+      selectFromGallery: 'Seleccionar de Galería',
+      takePhoto: 'Tomar Foto',
+      processing: 'Procesando...',
+      noFrameDetected: 'No se detectó marco de ventana',
+      calibrate: 'Calibrar',
+      selectReference: 'Seleccionar Objeto de Referencia',
+      markReference: 'Marcar Objeto de Referencia',
+      calibrationComplete: 'Calibración Completa',
+      measurements: 'Mediciones',
+      width: 'Ancho',
+      height: 'Alto',
+      confidence: 'Confianza',
+      useMeasurements: 'Usar Mediciones',
+      editMeasurements: 'Editar Mediciones',
+      saveImage: 'Guardar Imagen',
+      exportResults: 'Exportar Resultados',
+      clear: 'Limpiar',
+      retake: 'Volver a Capturar',
+      calibrationRequired: 'Se requiere calibración para mediciones precisas',
+      approximateMeasurement: 'Medida aproximada',
+      calibrateForRealMeasurements: 'Calibra para medidas reales (cm/pulgadas)',
+      frameDetected: 'Marco Detectado',
+      adjustFrame: 'Ajustar Marco',
+      precision: 'Precisión',
+      high: 'Alta',
+      medium: 'Media',
+      low: 'Baja',
+      capture: 'Capturar',
+      cancel: 'Cancelar',
+      ocrSettings: 'Configuración OCR',
+      saveProcessedImages: 'Guardar imágenes procesadas',
+      autoCalibrate: 'Calibración automática',
+      approximateScaleLongerSide: 'Asumir lado largo (medida aprox.)',
     },
   },
   fr: {
@@ -426,6 +547,8 @@ const translations: Record<Language, Translations> = {
       product: 'Produit',
       cuts: 'Coupes',
       snaps: 'Pressions',
+      cameraMeasurement: 'Mesure par caméra',
+      cameraMeasurementApproximate: 'Mesure approximative (caméra)',
     },
     settings: {
       title: 'Paramètres',
@@ -457,6 +580,44 @@ const translations: Record<Language, Translations> = {
       calculator: 'Calculatrice',
       history: 'Historique',
       settings: 'Paramètres',
+      ocr: 'Mesure Caméra',
+    },
+    ocr: {
+      title: 'Mesure par Caméra',
+      captureImage: 'Capturer l\'Image',
+      selectFromGallery: 'Sélectionner dans la Galerie',
+      takePhoto: 'Prendre une Photo',
+      processing: 'Traitement...',
+      noFrameDetected: 'Aucun cadre de fenêtre détecté',
+      calibrate: 'Calibrer',
+      selectReference: 'Sélectionner l\'Objet de Référence',
+      markReference: 'Marquer l\'Objet de Référence',
+      calibrationComplete: 'Calibration Terminée',
+      measurements: 'Mesures',
+      width: 'Largeur',
+      height: 'Hauteur',
+      confidence: 'Confiance',
+      useMeasurements: 'Utiliser les Mesures',
+      editMeasurements: 'Modifier les Mesures',
+      saveImage: 'Enregistrer l\'Image',
+      exportResults: 'Exporter les Résultats',
+      clear: 'Effacer',
+      retake: 'Reprendre',
+      calibrationRequired: 'Calibration requise pour des mesures précises',
+      approximateMeasurement: 'Mesure approximative (pixels)',
+      calibrateForRealMeasurements: 'Calibrer pour des mesures réelles (cm/pouces)',
+      frameDetected: 'Cadre Détecté',
+      adjustFrame: 'Ajuster le Cadre',
+      precision: 'Précision',
+      high: 'Élevée',
+      medium: 'Moyenne',
+      low: 'Faible',
+      capture: 'Capturer',
+      cancel: 'Annuler',
+      ocrSettings: 'Paramètres OCR',
+      saveProcessedImages: 'Enregistrer les images traitées',
+      autoCalibrate: 'Calibration automatique',
+      approximateScaleLongerSide: 'Supposer grand côté (mesure approx.)',
     },
   },
   pt: {
@@ -538,6 +699,8 @@ const translations: Record<Language, Translations> = {
       product: 'Produto',
       cuts: 'Cortes',
       snaps: 'Pressões',
+      cameraMeasurement: 'Medida por câmera',
+      cameraMeasurementApproximate: 'Medida aproximada (câmera)',
     },
     settings: {
       title: 'Configurações',
@@ -569,6 +732,44 @@ const translations: Record<Language, Translations> = {
       calculator: 'Calculadora',
       history: 'Histórico',
       settings: 'Configurações',
+      ocr: 'Medir com Câmera',
+    },
+    ocr: {
+      title: 'Medição com Câmera',
+      captureImage: 'Capturar Imagem',
+      selectFromGallery: 'Selecionar da Galeria',
+      takePhoto: 'Tirar Foto',
+      processing: 'Processando...',
+      noFrameDetected: 'Nenhuma moldura de janela detectada',
+      calibrate: 'Calibrar',
+      selectReference: 'Selecionar Objeto de Referência',
+      markReference: 'Marcar Objeto de Referência',
+      calibrationComplete: 'Calibração Completa',
+      measurements: 'Medidas',
+      width: 'Largura',
+      height: 'Altura',
+      confidence: 'Confiança',
+      useMeasurements: 'Usar Medidas',
+      editMeasurements: 'Editar Medidas',
+      saveImage: 'Salvar Imagem',
+      exportResults: 'Exportar Resultados',
+      clear: 'Limpar',
+      retake: 'Tirar Novamente',
+      calibrationRequired: 'Calibração necessária para medidas precisas',
+      approximateMeasurement: 'Medida aproximada',
+      calibrateForRealMeasurements: 'Calibrar para medidas reais (cm/polegadas)',
+      frameDetected: 'Moldura Detectada',
+      adjustFrame: 'Ajustar Moldura',
+      precision: 'Precisão',
+      high: 'Alta',
+      medium: 'Média',
+      low: 'Baixa',
+      capture: 'Capturar',
+      cancel: 'Cancelar',
+      ocrSettings: 'Configurações OCR',
+      saveProcessedImages: 'Salvar imagens processadas',
+      autoCalibrate: 'Calibração automática',
+      approximateScaleLongerSide: 'Assumir lado maior (medida aprox.)',
     },
   },
 };

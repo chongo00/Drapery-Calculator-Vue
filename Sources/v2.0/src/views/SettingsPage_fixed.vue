@@ -42,6 +42,35 @@
         </div>
 
         <ion-accordion-group class="mt-4">
+          <ion-accordion value="ocr">
+            <ion-item slot="header" class="advanced-accordion-header rounded-lg">
+              <ion-label class="font-medium">{{ t.ocr.ocrSettings }}</ion-label>
+            </ion-item>
+            <div slot="content" class="p-3 space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.ocr.precision }}</span>
+                <ion-select :value="ocrSettings.settings.precision" @ionChange="onOCRPrecisionChange" interface="action-sheet">
+                  <ion-select-option value="high">{{ t.ocr.high }}</ion-select-option>
+                  <ion-select-option value="medium">{{ t.ocr.medium }}</ion-select-option>
+                  <ion-select-option value="low">{{ t.ocr.low }}</ion-select-option>
+                </ion-select>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.ocr.saveProcessedImages }}</span>
+                <ion-toggle :checked="ocrSettings.settings.saveProcessedImages" @ionChange="onOCRSaveImagesChange"></ion-toggle>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.ocr.autoCalibrate }}</span>
+                <ion-toggle :checked="ocrSettings.settings.autoCalibrate" @ionChange="onOCRAutoCalibrateChange"></ion-toggle>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.ocr.approximateScaleLongerSide }} (cm)</span>
+                <ion-select :value="String(ocrSettings.settings.approximateScaleLongerSideCm)" @ionChange="onOCRApproximateScaleChange" interface="action-sheet">
+                  <ion-select-option v-for="cm in approximateScalePresets" :key="cm" :value="String(cm)">{{ cm }} cm</ion-select-option>
+                </ion-select>
+              </div>
+            </div>
+          </ion-accordion>
           <ion-accordion value="advanced">
             <ion-item slot="header" class="advanced-accordion-header rounded-lg">
               <ion-label class="font-medium">{{ t.settings.advancedCalculationSettings }}</ion-label>
@@ -132,6 +161,8 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonToggle, IonAcc
 import { useSettings, type RipplefoldFullnessMap } from '@/composables/useSettings'
 import { useI18n } from '@/composables/useI18n'
 import { useMeasurementSystem } from '@/composables/useMeasurementSystem'
+import { useOCRSettings } from '@/composables/useOCRSettings'
+import { APPROXIMATE_SCALE_PRESETS_CM } from '@/types/ocr'
 import appIconAsset from '../../icons/icon-128.webp'
 import packageInfo from '../../package.json'
 
@@ -172,6 +203,8 @@ onMounted(() => {
 
 // Settings state
 const { state: settings, reset } = useSettings()
+const ocrSettings = useOCRSettings()
+const approximateScalePresets = APPROXIMATE_SCALE_PRESETS_CM
 
 // Fabric width options editing helpers - convert from inches to current system for display
 const fabricWidthDrafts = ref<string[]>(settings.fabricWidthOptions.map((n) => {
@@ -272,6 +305,23 @@ const formatSettingValue = (inches: number): string => {
 const onNumberInput = (k: 'widthMargin' | 'easeAllowance' | 'rfSnapSeparation', e: any) => setNumber(k, e?.detail?.value)
 const onBooleanChange = (k: 'railroadStrict', e: any) => setBoolean(k, e?.detail?.checked)
 const onFullnessInput = (k: keyof RipplefoldFullnessMap, e: any) => setFullness(k, e?.detail?.value)
+const onOCRPrecisionChange = (e: any) => {
+  const precision = e?.detail?.value
+  if (precision === 'high' || precision === 'medium' || precision === 'low') {
+    ocrSettings.setPrecision(precision)
+  }
+}
+const onOCRSaveImagesChange = (e: any) => {
+  ocrSettings.setSaveProcessedImages(!!e?.detail?.checked)
+}
+const onOCRAutoCalibrateChange = (e: any) => {
+  ocrSettings.setAutoCalibrate(!!e?.detail?.checked)
+}
+
+const onOCRApproximateScaleChange = (e: any) => {
+  const v = e?.detail?.value
+  if (v != null) ocrSettings.setApproximateScaleLongerSideCm(Number(v))
+}
 const handleReset = () => {
   reset()
   fabricWidthDrafts.value = settings.fabricWidthOptions.map((n) => {

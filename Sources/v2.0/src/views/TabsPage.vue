@@ -5,17 +5,18 @@
       <ion-tab-bar slot="bottom">
   <ion-tab-button tab="tab1" href="/tabs/tab1" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="calculator" />
-          <ion-label>{{ t.tabs.calculator }}</ion-label>
         </ion-tab-button>
 
   <ion-tab-button tab="tab2" href="/tabs/tab2" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="list" />
-          <ion-label>{{ t.tabs.history }}</ion-label>
+        </ion-tab-button>
+
+  <ion-tab-button tab="ocr" href="/tabs/ocr" routerDirection="root">
+          <ion-icon aria-hidden="true" :icon="camera" />
         </ion-tab-button>
 
   <ion-tab-button tab="settings" href="/tabs/settings" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="settings" />
-          <ion-label>{{ t.tabs.settings }}</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
@@ -26,17 +27,15 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import { calculator, list, settings } from 'ionicons/icons';
-import { useI18n } from '@/composables/useI18n';
-
-const { t } = useI18n();
+import { IonTabBar, IonTabButton, IonTabs, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
+import { calculator, list, settings, camera } from 'ionicons/icons';
+// Removed useI18n import as labels are no longer used in tab bar
 
 const router = useRouter();
 const route = useRoute();
 
 // Tab order for swipe navigation (route.path is base-less even with BASE configured)
-const TAB_ORDER = ['/tabs/tab1', '/tabs/tab2', '/tabs/settings'];
+const TAB_ORDER = ['/tabs/tab1', '/tabs/tab2', '/tabs/ocr', '/tabs/settings'];
 
 let isPointerActive = false;
 let startX = 0;

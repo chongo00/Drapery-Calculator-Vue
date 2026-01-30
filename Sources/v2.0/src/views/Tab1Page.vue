@@ -168,7 +168,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, watch } from 'vue';
+import { reactive, ref, computed, watch, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { 
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonRadioGroup, IonRadio, IonButton
 } from '@ionic/vue';
@@ -184,6 +185,7 @@ import { useMeasurementSystem } from '@/composables/useMeasurementSystem';
 const appIcon = appIconAsset;
 const { t } = useI18n();
 const measurementSystem = useMeasurementSystem();
+const route = useRoute();
 
 // Storage helpers (localStorage for compatibility)
 const getStorageItem = (key: string) => {
@@ -280,6 +282,23 @@ watch(() => measurementSystem.system.value, (newSystem) => {
   if (newSystem === 'metric') {
     form.widthFraction = '0';
     form.heightFraction = '0';
+  }
+});
+
+// Pre-fill form from OCR query params
+onMounted(() => {
+  const query = route.query;
+  if (query.width) {
+    form.width = String(query.width);
+  }
+  if (query.height) {
+    form.height = String(query.height);
+  }
+  if (query.widthFraction) {
+    form.widthFraction = String(query.widthFraction);
+  }
+  if (query.heightFraction) {
+    form.heightFraction = String(query.heightFraction);
   }
 });
 
