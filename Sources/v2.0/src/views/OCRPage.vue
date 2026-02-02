@@ -40,7 +40,15 @@
         <div v-if="isProcessing || isCapturing" class="text-center py-8">
           <ion-spinner></ion-spinner>
           <p class="mt-4 text-gray-600 dark:text-gray-400">
-            {{ t.ocr.processing }}
+            {{
+              processingStep === 'blindsbook'
+                ? t.ocr.processingWithBlindsBook
+                : processingStep === 'gemini'
+                  ? t.ocr.processingWithGemini
+                  : processingStep === 'local'
+                    ? t.ocr.processingLocal
+                    : t.ocr.processing
+            }}
           </p>
         </div>
 
@@ -417,6 +425,7 @@ const {
   detectedFrame,
   measurements,
   isProcessing,
+  processingStep,
   error,
   currentCalibration,
   referenceObjects,

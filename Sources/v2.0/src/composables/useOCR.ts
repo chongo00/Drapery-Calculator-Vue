@@ -1,6 +1,6 @@
 // Main composable for OCR functionality
 
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 // Tesseract.js is loaded dynamically to avoid loading issues
 let Tesseract: any = null;
@@ -9,6 +9,7 @@ import { useCalibration } from './useCalibration';
 import { useOCRSettings } from './useOCRSettings';
 import { useMeasurementSystem } from './useMeasurementSystem';
 import { detectPrimaryWindowFrame } from '@/services/windowFrameDetector';
+import { detectWindowFrameWithBlindsBook } from '@/services/blindsbookWindowDetector';
 import { detectWindowFrameWithGemini } from '@/services/geminiWindowDetector';
 import { loadImageData, resizeImage, imageDataToBase64, prepareImageForOCR } from '@/services/imageProcessor';
 import { pixelsToUnits, validateMeasurement, inchesToFraction, calculateRectangleDimensions } from '@/utils/measurementUtils';
@@ -23,6 +24,8 @@ export function useOCR() {
   const detectedFrame = ref<WindowFrame | null>(null);
   const measurements = ref<MeasurementResult | null>(null);
   const isProcessing = ref(false);
+  /** Current detection step for loading message: 'blindsbook' | 'gemini' | 'local' | null */
+  const processingStep = ref<'blindsbook' | 'gemini' | 'local' | null>(null);
   const error = ref<string | null>(null);
   const ocrWorker = ref<any>(null);
   const liveStream = ref<MediaStream | null>(null);
@@ -124,10 +127,23 @@ export function useOCR() {
 
      
       const colorDataUrl = imageDataToBase64(imageData);
-      let frame = await detectWindowFrameWithGemini(colorDataUrl, imageData.width, imageData.height);
+      let frame: WindowFrame | null = null;
+
+      processingStep.value = 'blindsbook';
+      await nextTick();
+      frame = await detectWindowFrameWithBlindsBook(colorDataUrl, imageData.width, imageData.height);
+
       if (!frame) {
+        processingStep.value = 'gemini';
+        await nextTick();
+        frame = await detectWindowFrameWithGemini(colorDataUrl, imageData.width, imageData.height);
+      }
+      if (!frame) {
+        processingStep.value = 'local';
+        await nextTick();
         frame = await detectPrimaryWindowFrame(imageData);
       }
+      processingStep.value = null;
 
       if (!frame) {
         error.value = 'No window frame detected in the image';
@@ -180,7 +196,8 @@ export function useOCR() {
           };
         }
       } else {
-       
+        // Medición aproximada: se asume que el lado largo del rectángulo = longerSideCm (p. ej. 280 cm).
+        // Ajustable en Configuración > OCR > "Asumir lado largo (medida aprox.)". Para medidas reales, calibrar.
         const longerSideCm = settings.approximateScaleLongerSideCm ?? 280;
         const longerSidePx = Math.max(widthPixels, heightPixels);
         const scaleCmPerPx = longerSidePx > 0 ? longerSideCm / longerSidePx : 0;
@@ -216,45 +233,26 @@ export function useOCR() {
         }
       }
 
-      // Perform OCR to search for additional text
-      await initializeOCR();
-      let ocrResults: any[] = [];
-
-      if (ocrWorker.value) {
-        try {
-          const { data } = await ocrWorker.value.recognize(colorDataUrl);
-          if (data && data.text) {
-            ocrResults = [{
-              text: data.text,
-              confidence: data.confidence || 0
-            }];
-          }
-        } catch (ocrErr) {
-          console.warn('OCR failed', ocrErr);
-          // Continue without OCR
-        }
-      }
-
+      // Mostrar resultado de marco y mediciones de inmediato (evita esperar ~2 min por Tesseract OCR)
       const processedImage: ProcessedImage = {
         id: `img_${Date.now()}`,
         originalUri: colorDataUrl,
         windowFrame: frame,
         measurements: calculatedMeasurements || undefined,
         calibration: currentCalibration.value || undefined,
-        ocrResults: ocrResults.length > 0 ? ocrResults : undefined,
+        ocrResults: undefined,
         metadata: {
           capturedAt: new Date(),
           processedAt: new Date(),
           width: imageData.width,
           height: imageData.height,
-          fileSize: 0 // Will be calculated if needed
+          fileSize: 0
         }
       };
 
       currentImage.value = processedImage;
       measurements.value = calculatedMeasurements;
 
-     
       if (calculatedMeasurements) {
         try {
           const HISTORY_KEY = 'calculationHistory';
@@ -293,16 +291,31 @@ export function useOCR() {
         }
       }
 
-      // Save processed image if configured
       if (settings.saveProcessedImages) {
         saveImageToStorage(processedImage);
       }
+
+      // OCR (Tesseract) en segundo plano: puede tardar 1–2 min; no bloquea la UI
+      initializeOCR().then(() => {
+        if (!ocrWorker.value) return;
+        ocrWorker.value.recognize(colorDataUrl).then(({ data }: { data: { text?: string; confidence?: number } }) => {
+          if (data?.text && currentImage.value?.id === processedImage.id) {
+            currentImage.value = {
+              ...currentImage.value,
+              ocrResults: [{ text: data.text, confidence: data.confidence || 0 }]
+            };
+          }
+        }).catch((ocrErr: unknown) => {
+          console.warn('OCR failed', ocrErr);
+        });
+      });
 
     } catch (err: any) {
       error.value = err.message || 'Error processing image';
       console.error('Processing error', err);
     } finally {
       isProcessing.value = false;
+      processingStep.value = null;
     }
   };
 
@@ -446,15 +459,28 @@ export function useOCR() {
         ctx.drawImage(videoElement, 0, 0, vw, vh, 0, 0, dw, dh);
         const imageDataUrl = canvas.toDataURL('image/jpeg', 0.75);
 
-        // Yield so UI can process taps; then run detection and update overlay (never latch on first result)
+        // Yield so UI can process taps; then run detection (BlindsBook → Gemini → local) and update overlay
         setTimeout(async () => {
           if (!isLiveMode.value) return;
           try {
-            const processed = await prepareImageForOCR(imageDataUrl);
-            const frame = await detectPrimaryWindowFrame(processed);
+            let frame: WindowFrame | null = null;
+            // 1) BlindsBook-IA (mismo orden que al procesar foto)
+            frame = await detectWindowFrameWithBlindsBook(imageDataUrl, dw, dh);
+            if (!frame) {
+              // 2) Gemini
+              frame = await detectWindowFrameWithGemini(imageDataUrl, dw, dh);
+            }
+            if (!frame) {
+              // 3) Detección local (Hough)
+              const processed = await prepareImageForOCR(imageDataUrl);
+              frame = await detectPrimaryWindowFrame(processed);
+              if (!isLiveMode.value) return;
+              liveDetectionImageSize.value = { width: processed.width, height: processed.height };
+            } else {
+              liveDetectionImageSize.value = { width: dw, height: dh };
+            }
             if (!isLiveMode.value) return;
-            liveDetectionImageSize.value = { width: processed.width, height: processed.height };
-            liveDetectionFrame.value = frame; // current frame only: red if null, green if detected
+            liveDetectionFrame.value = frame; // verde si detectado, rojo si null
           } catch (err) {
             console.error('Detection error', err);
           }
@@ -530,6 +556,7 @@ export function useOCR() {
     detectedFrame: computed(() => detectedFrame.value),
     measurements: computed(() => measurements.value),
     isProcessing: computed(() => isProcessing.value),
+    processingStep: computed(() => processingStep.value),
     error: computed(() => error.value),
     currentCalibration: computed(() => currentCalibration.value),
     referenceObjects,

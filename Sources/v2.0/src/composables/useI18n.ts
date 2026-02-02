@@ -160,6 +160,9 @@ export interface Translations {
     saveProcessedImages: string;
     autoCalibrate: string;
     approximateScaleLongerSide: string;
+    processingWithBlindsBook: string;
+    processingWithGemini: string;
+    processingLocal: string;
   };
 }
 
@@ -314,6 +317,9 @@ const translations: Record<Language, Translations> = {
       saveProcessedImages: 'Save Processed Images',
       autoCalibrate: 'Auto Calibration',
       approximateScaleLongerSide: 'Assume longer side (approx. measurement)',
+      processingWithBlindsBook: 'This may take a moment. Processing with BlindsBook IA...',
+      processingWithGemini: 'Processing with Gemini IA...',
+      processingLocal: 'Processing locally. This may take a few minutes...',
     },
   },
   es: {
@@ -466,6 +472,9 @@ const translations: Record<Language, Translations> = {
       saveProcessedImages: 'Guardar imágenes procesadas',
       autoCalibrate: 'Calibración automática',
       approximateScaleLongerSide: 'Asumir lado largo (medida aprox.)',
+      processingWithBlindsBook: 'Puede tardar un momento. Procesando con BlindsBook IA...',
+      processingWithGemini: 'Procesando con Gemini IA...',
+      processingLocal: 'Procesando en local. Puede tardar unos minutos...',
     },
   },
   fr: {
@@ -618,6 +627,9 @@ const translations: Record<Language, Translations> = {
       saveProcessedImages: 'Enregistrer les images traitées',
       autoCalibrate: 'Calibration automatique',
       approximateScaleLongerSide: 'Supposer grand côté (mesure approx.)',
+      processingWithBlindsBook: 'Cela peut prendre un moment. Traitement avec BlindsBook IA...',
+      processingWithGemini: 'Traitement avec Gemini IA...',
+      processingLocal: 'Traitement local. Cela peut prendre quelques minutes...',
     },
   },
   pt: {
@@ -770,6 +782,9 @@ const translations: Record<Language, Translations> = {
       saveProcessedImages: 'Salvar imagens processadas',
       autoCalibrate: 'Calibração automática',
       approximateScaleLongerSide: 'Assumir lado maior (medida aprox.)',
+      processingWithBlindsBook: 'Pode levar um momento. Processando com BlindsBook IA...',
+      processingWithGemini: 'Processando com Gemini IA...',
+      processingLocal: 'Processando localmente. Pode levar alguns minutos...',
     },
   },
 };
