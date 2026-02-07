@@ -7,6 +7,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     redirect: '/tabs/tab1'
   },
+  // Bloquear acceso directo a OCR - redirigir a tab1
+  {
+    path: '/tabs/ocr',
+    redirect: '/tabs/tab1'
+  },
   {
     path: '/tabs/',
     component: TabsPage,
@@ -26,11 +31,8 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'settings',
         component: () => import('@/views/SettingsPage_fixed.vue')
-      },
-      {
-        path: 'ocr',
-        component: () => import('@/views/OCRPage.vue')
       }
+      // OCR ruta eliminada temporalmente
     ]
   }
 ]
