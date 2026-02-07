@@ -42,6 +42,7 @@
         </div>
 
         <ion-accordion-group class="mt-4">
+          <!-- OCR settings accordion hidden temporarily
           <ion-accordion value="ocr">
             <ion-item slot="header" class="advanced-accordion-header rounded-lg">
               <ion-label class="font-medium">{{ t.ocr.ocrSettings }}</ion-label>
@@ -71,6 +72,7 @@
               </div>
             </div>
           </ion-accordion>
+          -->
           <ion-accordion value="advanced">
             <ion-item slot="header" class="advanced-accordion-header rounded-lg">
               <ion-label class="font-medium">{{ t.settings.advancedCalculationSettings }}</ion-label>
