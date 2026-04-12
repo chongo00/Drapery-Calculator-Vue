@@ -5,17 +5,18 @@
       <ion-tab-bar slot="bottom">
   <ion-tab-button tab="tab1" href="/tabs/tab1" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="calculator" />
-          <ion-label>Calculator</ion-label>
         </ion-tab-button>
 
   <ion-tab-button tab="tab2" href="/tabs/tab2" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="list" />
-          <ion-label>History</ion-label>
+        </ion-tab-button>
+
+  <ion-tab-button tab="ocr" href="/tabs/ocr" routerDirection="root">
+          <ion-icon aria-hidden="true" :icon="camera" />
         </ion-tab-button>
 
   <ion-tab-button tab="settings" href="/tabs/settings" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="settings" />
-          <ion-label>Settings</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
@@ -26,14 +27,15 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import { calculator, list, settings } from 'ionicons/icons';
+import { IonTabBar, IonTabButton, IonTabs, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
+import { calculator, list, settings, camera } from 'ionicons/icons';
+// Removed useI18n import as labels are no longer used in tab bar
 
 const router = useRouter();
 const route = useRoute();
 
 // Tab order for swipe navigation (route.path is base-less even with BASE configured)
-const TAB_ORDER = ['/tabs/tab1', '/tabs/tab2', '/tabs/settings'];
+const TAB_ORDER = ['/tabs/tab1', '/tabs/tab2', '/tabs/ocr', '/tabs/settings'];
 
 let isPointerActive = false;
 let startX = 0;
@@ -172,5 +174,54 @@ onBeforeUnmount(() => {
 :deep(ion-tabs) {
   touch-action: pan-y; /* allow vertical scroll, block browser horizontal nav */
   overscroll-behavior-x: contain; /* contain back/forward gesture */
+}
+
+/* Dark mode styles for tab bar */
+:deep(ion-tab-bar) {
+  --background: #ffffff;
+  --color: #4a5568;
+  --color-selected: #2563eb;
+}
+
+.dark :deep(ion-tab-bar),
+html.dark :deep(ion-tab-bar),
+body.ion-theme-dark :deep(ion-tab-bar) {
+  --background: #111827;
+  --color: #9ca3af;
+  --color-selected: #60a5fa;
+  background-color: #111827;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:deep(ion-tab-button) {
+  --color: #4a5568;
+  --color-selected: #2563eb;
+}
+
+.dark :deep(ion-tab-button),
+html.dark :deep(ion-tab-button),
+body.ion-theme-dark :deep(ion-tab-button) {
+  --color: #9ca3af;
+  --color-selected: #60a5fa;
+}
+
+:deep(ion-tab-button.tab-selected) {
+  --color: #2563eb;
+}
+
+.dark :deep(ion-tab-button.tab-selected),
+html.dark :deep(ion-tab-button.tab-selected),
+body.ion-theme-dark :deep(ion-tab-button.tab-selected) {
+  --color: #60a5fa;
+}
+
+:deep(ion-label) {
+  color: var(--color);
+}
+
+.dark :deep(ion-label),
+html.dark :deep(ion-label),
+body.ion-theme-dark :deep(ion-label) {
+  color: var(--color);
 }
 </style>

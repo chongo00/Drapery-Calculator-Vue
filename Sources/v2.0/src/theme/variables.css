@@ -22,6 +22,30 @@ body.ion-palette-dark ion-action-sheet {
   --button-color: #ffffff;
 }
 
+/* Tab bar dark mode styles */
+html.dark ion-tab-bar,
+body.ion-theme-dark ion-tab-bar,
+body.ion-palette-dark ion-tab-bar {
+  --background: #111827;
+  --color: #9ca3af;
+  --color-selected: #60a5fa;
+  background-color: #111827;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark ion-tab-button,
+body.ion-theme-dark ion-tab-button,
+body.ion-palette-dark ion-tab-button {
+  --color: #9ca3af;
+  --color-selected: #60a5fa;
+}
+
+html.dark ion-tab-button.tab-selected,
+body.ion-theme-dark ion-tab-button.tab-selected,
+body.ion-palette-dark ion-tab-button.tab-selected {
+  --color: #60a5fa;
+}
+
 :root {
   color-scheme: light;
 }

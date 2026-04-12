@@ -9,7 +9,7 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   // Use a relative base so built assets load correctly from the file:// served
   // location that Capacitor uses on Android/iOS. Previously this project used
-  // an absolute base which caused the APK to reference "/Drapery-Calculator-Vue/..."
+  // an absolute base which caused the APK to reference "/Drapery-Calculator/..."
   // and the WebView failed to find the JS/CSS files, producing a black screen.
   base: './',
   plugins: [

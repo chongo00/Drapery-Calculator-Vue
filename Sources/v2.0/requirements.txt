@@ -1,0 +1,80 @@
+# Drapery Calculator - Requirements and Installation Guide
+# ========================================================
+
+# PREREQUISITES
+# -------------
+# - Node.js (v18 or higher recommended)
+# - npm (v9 or higher) or yarn
+# - Git
+
+# INSTALLATION STEPS
+# ------------------
+# 1. Navigate to the project directory:
+#    cd Drapery-Calculator-Vue/Sources/v2.0
+
+# 2. Install all dependencies:
+#    npm install
+
+# 3. For development, run:
+#    npm run dev
+
+# 4. For production build:
+#    npm run build
+
+# DEPENDENCIES LIST
+# -----------------
+# Production Dependencies:
+@capacitor/android@^7.4.4
+@capacitor/app@7.1.0
+@capacitor/core@^7.4.4
+@capacitor/haptics@7.0.2
+@capacitor/ios@^7.4.4
+@capacitor/keyboard@7.0.3
+@capacitor/splash-screen@7.0.3
+@capacitor/status-bar@7.0.3
+@ionic/vue@^8.0.0
+@ionic/vue-router@^8.0.0
+@vuelidate/core@^2.0.3
+@vuelidate/validators@^2.0.4
+ionicons@^7.0.0
+vue@^3.3.0
+vue-router@^4.2.0
+
+# Development Dependencies:
+@capacitor/assets@^3.0.5
+@capacitor/cli@7.4.4
+@vitejs/plugin-legacy@^5.0.0
+@vitejs/plugin-vue@^4.0.0
+@vue/eslint-config-typescript@^12.0.0
+@vue/test-utils@^2.3.0
+autoprefixer@^10.4.21
+cypress@^13.7.3
+eslint@^8.35.0
+eslint-plugin-vue@^9.9.0
+jsdom@^22.1.0
+postcss@^8.5.6
+tailwindcss@^3.4.18
+terser@^5.4.0
+typescript@~5.6.2
+vite@~5.2.0
+vitest@^0.34.6
+vue-tsc@^2.1.10
+
+# QUICK INSTALL COMMAND
+# ---------------------
+# Run this single command to install everything:
+# npm install
+
+# VERIFY INSTALLATION
+# -------------------
+# After installation, verify by running:
+# npm run dev
+# The application should start on http://localhost:5173 (or next available port)
+
+# NOTES
+# -----
+# - This project uses Vite as the build tool
+# - TypeScript is required for development
+# - TailwindCSS is used for styling
+# - Capacitor is used for mobile app builds (Android/iOS)
+

@@ -1,0 +1,10 @@
+{
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "volar.takeOverMode.enabled": true,
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "volar.autoCompleteRefs": true,
+    "volar.codeLens.pugTools": false,
+    "volar.codeLens.scriptSetupTools": false
+}

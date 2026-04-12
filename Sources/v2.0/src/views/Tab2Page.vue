@@ -2,18 +2,18 @@
   <ion-page class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-950">
     <ion-header class="bg-white dark:bg-neutral-950 shadow-lg">
       <ion-toolbar class="bg-transparent">
-        <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>Calculation History</span></span></ion-title>
+        <ion-title class="text-2xl font-bold text-gray-800 dark:text-gray-100"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>{{ t.history.title }}</span></span></ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding" :fullscreen="true" :force-overscroll="false">
       <ion-header collapse="condense" class="bg-white dark:bg-neutral-950">
         <ion-toolbar class="bg-transparent">
-          <ion-title size="large" class="text-xl font-semibold text-gray-700 dark:text-gray-200"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>History</span></span></ion-title>
+          <ion-title size="large" class="text-xl font-semibold text-gray-700 dark:text-gray-200"><span class="title-inline"><img :src="appIcon" class="w-7 h-7 rounded" alt="" /><span>{{ t.history.title }}</span></span></ion-title>
         </ion-toolbar>
       </ion-header>
 
       <div v-if="history.length === 0" class="text-center py-8">
-        <p class="text-gray-500 dark:text-gray-400">No calculations yet. Start calculating to see history.</p>
+        <p class="text-gray-500 dark:text-gray-400">{{ t.history.noCalculationsYet }}</p>
       </div>
 
       <ion-list v-else>
@@ -25,22 +25,30 @@
           </ion-item-divider>
           <ion-item class="bg-white dark:bg-neutral-900 rounded-lg shadow-sm">
             <ion-label>
-              <h2 class="font-semibold text-gray-800 dark:text-gray-100">Fabric: {{ calc.requiredFabric }} yards</h2>
-              <p class="text-gray-600 dark:text-gray-300">Width: {{ calc.width }} {{ calc.widthFraction }} | Height: {{ calc.height }} {{ calc.heightFraction }}</p>
-              <p class="text-gray-600 dark:text-gray-300">Product: {{ calc.productType == '1' ? 'Ripplefold' : 'Pinch Pleated' }} | Fullness: {{ calc.fullness }}</p>
-              <p v-if="(typeof calc.hem === 'number' && calc.hem > 0) || (typeof calc.easeAllowance === 'number' && calc.easeAllowance > 0)" class="text-gray-600 dark:text-gray-300">
-                <template v-if="typeof calc.hem === 'number' && calc.hem > 0">Hem: {{ calc.hem }}</template>
-                <template v-if="(typeof calc.hem === 'number' && calc.hem > 0) && (typeof calc.easeAllowance === 'number' && calc.easeAllowance > 0)"> | </template>
-                <template v-if="typeof calc.easeAllowance === 'number' && calc.easeAllowance > 0">Ease: {{ calc.easeAllowance }}</template>
-              </p>
-              <p class="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                Orientation:
-                <span :class="['inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide border', orientationBadgeClass(calc.fabricOrientation)]">
-                  {{ calc.fabricOrientation }}
-                </span>
-              </p>
-              <p class="text-gray-600 dark:text-gray-300">Cuts: {{ calc.fabricCuts }} x {{ calc.fabricCutLength }} {{ calc.fabricCutsFraction }}</p>
-              <p v-if="calc.requiredSnaps > 0" class="text-gray-600 dark:text-gray-300">Snaps: {{ calc.requiredSnaps }}</p>
+              <!-- Entrada de medición por cámara -->
+              <template v-if="calc.source === 'camera'">
+                <h2 class="font-semibold text-gray-800 dark:text-gray-100">{{ calc.approximate ? t.history.cameraMeasurementApproximate : t.history.cameraMeasurement }}</h2>
+                <p class="text-gray-600 dark:text-gray-300">{{ t.history.width }}: {{ calc.width }}{{ calc.widthFraction && Number(calc.widthFraction) ? ' ' + formatHistoryFraction(calc.widthFraction) : '' }} {{ calc.widthUnit || 'in' }} | {{ t.history.height }}: {{ calc.height }}{{ calc.heightFraction && Number(calc.heightFraction) ? ' ' + formatHistoryFraction(calc.heightFraction) : '' }} {{ calc.heightUnit || 'in' }}</p>
+              </template>
+              <!-- Entrada de cálculo completo -->
+              <template v-else>
+                <h2 class="font-semibold text-gray-800 dark:text-gray-100">{{ t.history.fabric }}: {{ calc.requiredFabric }} {{ t.results.yards }}</h2>
+                <p class="text-gray-600 dark:text-gray-300">{{ t.history.width }}: {{ calc.width }} {{ calc.widthFraction || '' }} {{ calc.widthUnit || 'in' }} | {{ t.history.height }}: {{ calc.height }} {{ calc.heightFraction || '' }} {{ calc.heightUnit || 'in' }}</p>
+                <p class="text-gray-600 dark:text-gray-300">{{ t.history.product }}: {{ calc.productType == '1' ? t.results.ripplefold : t.results.pinchPleated }} | {{ t.results.fullness }}: {{ calc.fullness }}</p>
+                <p v-if="(typeof calc.hem === 'number' && calc.hem > 0) || (typeof calc.hem === 'string' && parseFloat(calc.hem) > 0) || (typeof calc.easeAllowance === 'number' && calc.easeAllowance > 0)" class="text-gray-600 dark:text-gray-300">
+                  <template v-if="(typeof calc.hem === 'number' && calc.hem > 0) || (typeof calc.hem === 'string' && parseFloat(calc.hem) > 0)">{{ t.calculator.hem }}: {{ calc.hem }} {{ calc.hemUnit || 'in' }}</template>
+                  <template v-if="((typeof calc.hem === 'number' && calc.hem > 0) || (typeof calc.hem === 'string' && parseFloat(calc.hem) > 0)) && (typeof calc.easeAllowance === 'number' && calc.easeAllowance > 0)"> | </template>
+                  <template v-if="typeof calc.easeAllowance === 'number' && calc.easeAllowance > 0">{{ t.settings.easeAllowance }}: {{ calc.easeAllowance }}</template>
+                </p>
+                <p class="text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                  {{ t.results.orientation }}:
+                  <span :class="['inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide border', orientationBadgeClass(calc.fabricOrientation)]">
+                    {{ calc.fabricOrientation === 'Railroad' ? t.results.railroad : t.results.regular }}
+                  </span>
+                </p>
+                <p class="text-gray-600 dark:text-gray-300">{{ t.history.cuts }}: {{ calc.fabricCuts }} x {{ calc.fabricCutLength }} {{ calc.fabricCutsFraction || '' }} {{ calc.cutLengthUnit || 'in' }}</p>
+                <p v-if="calc.requiredSnaps > 0" class="text-gray-600 dark:text-gray-300">{{ t.history.snaps }}: {{ calc.requiredSnaps }}</p>
+              </template>
             </ion-label>
             <div slot="end" class="flex items-center gap-1">
               <ion-button fill="clear" color="medium" @click="copyItem(calc)" aria-label="Copy calculation">
@@ -62,6 +70,9 @@ import { ref, onMounted } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonItemDivider, IonItemGroup, IonLabel, IonIcon, IonButton, onIonViewWillEnter } from '@ionic/vue';
 import { trash, copyOutline } from 'ionicons/icons';
 import appIcon from '../../icons/icon-128.webp';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 // Storage helper function
 const getStorageItem = (key: string) => {
@@ -69,6 +80,8 @@ const getStorageItem = (key: string) => {
 };
 
 interface Calculation {
+  source?: 'camera' | 'calculation';
+  approximate?: boolean;
   requiredFabric: number;
   fabricWidths: number;
   fabricCuts: number;
@@ -81,8 +94,12 @@ interface Calculation {
   widthFraction: string;
   height: string;
   heightFraction: string;
+  widthUnit?: string;
+  heightUnit?: string;
+  cutLengthUnit?: string;
+  hemUnit?: string;
   fullness: string;
-  hem: number;
+  hem: number | string;
   easeAllowance: number;
   timestamp: string;
 }
@@ -93,6 +110,22 @@ const orientationBadgeClass = (orientation: string) => {
   return orientation === 'Railroad'
     ? 'bg-emerald-500/15 text-emerald-400 border-emerald-400/40'
     : 'bg-sky-500/15 text-sky-400 border-sky-400/40';
+};
+
+// Convierte fracción decimal (ej. "0.125") a texto para historial (entradas cámara)
+const formatHistoryFraction = (value: string): string => {
+  if (!value) return '';
+  const n = parseFloat(value);
+  if (Number.isNaN(n) || n === 0) return '';
+  if (n <= 0.0625) return '';
+  if (n <= 0.1875) return '1/8';
+  if (n <= 0.3125) return '1/4';
+  if (n <= 0.4375) return '3/8';
+  if (n <= 0.5625) return '1/2';
+  if (n <= 0.6875) return '5/8';
+  if (n <= 0.8125) return '3/4';
+  if (n <= 0.9375) return '7/8';
+  return '1';
 };
 
 const loadHistory = () => {
@@ -120,18 +153,24 @@ const deleteItem = (index: number) => {
 };
 
 const copyItem = async (calc: Calculation) => {
-  const text = `Drapery Calculation Results\n\n` +
-    `Required Fabric: ${calc.requiredFabric} yards\n` +
-    `Dimensions: ${calc.width} ${calc.widthFraction} × ${calc.height} ${calc.heightFraction}\n` +
-    `Product Type: ${calc.productType == '1' ? 'Ripplefold' : 'Pinch Pleated'}\n` +
-    `Fullness: ${calc.fullness}\n` +
-    `Hem: ${calc.hem}\n` +
-    `Ease Allowance: ${calc.easeAllowance}\n` +
-    `Fabric Widths: ${calc.fabricWidths}\n` +
-    `Fabric Cuts: ${calc.fabricCuts}\n` +
-    `Cut Length: ${calc.fabricCutLength} ${calc.fabricCutsFraction}\n` +
-    `Orientation: ${calc.fabricOrientation}` +
-    (calc.requiredSnaps > 0 ? `\nSnaps Required: ${calc.requiredSnaps}` : '');
+  const wFrac = calc.source === 'camera' && calc.widthFraction ? formatHistoryFraction(calc.widthFraction) : calc.widthFraction;
+  const hFrac = calc.source === 'camera' && calc.heightFraction ? formatHistoryFraction(calc.heightFraction) : calc.heightFraction;
+  const cameraLabel = calc.approximate ? t.value.history.cameraMeasurementApproximate : t.value.history.cameraMeasurement;
+  const text = calc.source === 'camera'
+    ? `${cameraLabel}\n` +
+      `${t.value.results.dimensions} ${calc.width}${wFrac ? ' ' + wFrac : ''} ${calc.widthUnit || 'in'} × ${calc.height}${hFrac ? ' ' + hFrac : ''} ${calc.heightUnit || 'in'}`
+    : `${t.value.results.title}\n\n` +
+      `${t.value.results.requiredFabric}: ${calc.requiredFabric} ${t.value.results.yards}\n` +
+      `${t.value.results.dimensions} ${calc.width}${calc.widthFraction ? ' ' + calc.widthFraction : ''} ${calc.widthUnit || 'in'} × ${calc.height}${calc.heightFraction ? ' ' + calc.heightFraction : ''} ${calc.heightUnit || 'in'}\n` +
+      `${t.value.results.productType} ${calc.productType == '1' ? t.value.results.ripplefold : t.value.results.pinchPleated}\n` +
+      `${t.value.results.fullness} ${calc.fullness}\n` +
+      `${t.value.calculator.hem}: ${calc.hem} ${calc.hemUnit || 'in'}\n` +
+      `${t.value.settings.easeAllowance}: ${calc.easeAllowance}\n` +
+      `${t.value.results.fabricWidths} ${calc.fabricWidths}\n` +
+      `${t.value.results.fabricCuts} ${calc.fabricCuts}\n` +
+      `${t.value.results.cutLength} ${calc.fabricCutLength}${calc.fabricCutsFraction ? ' ' + calc.fabricCutsFraction : ''} ${calc.cutLengthUnit || 'in'}\n` +
+      `${t.value.results.orientation} ${calc.fabricOrientation === 'Railroad' ? t.value.results.railroad : t.value.results.regular}` +
+      (calc.requiredSnaps > 0 ? `\n${t.value.results.snapsRequired} ${calc.requiredSnaps}` : '');
 
   const fallbackCopy = () => {
     const textarea = document.createElement('textarea');
