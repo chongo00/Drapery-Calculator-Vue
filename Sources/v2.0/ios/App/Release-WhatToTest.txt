@@ -1,0 +1,5 @@
+• Browsing and searching through content
+• Creating, editing, and deleting items
+• Offline behavior and reconnection handling
+• Performance on slow networks
+• Report any unexpected crashes or freezes

@@ -1,0 +1,114 @@
+trigger:
+  branches:
+    include:
+      - '*'
+  paths:
+    include:
+      - Sources/v2.0/**
+      - ado-deploy-client-ios.yml
+
+variables:
+  - group: apple-appstore
+  - name: appBundleId
+    value: 'com.blindsbook.drap-calc'
+  - name: appVersion
+    value: '$(APP_VERSION)'                             #Pipeline variable to set the app version
+  - name: uploadToTestFlight
+    value: '$(UPLOAD_TO_TESTFLIGHT)'                    #Pipeline variable to control whether to upload to TestFlight or not
+  - name: appSpecificId
+    value: '1357933382'
+  - name: appleCertSecureFile
+    value: 'AppleDistribution-HG9C7KC3FW.p12'           #Library secure file
+  - name: appleCertSecureFilePassword
+    value: '$(APPSTORE_CERT_PASSWORD)'                  #Library variable group 'apple-appstore'
+  - name: appleProvProfileSecureFile
+    value: 'BlindsBook_Drapery_Calculator_AppStore.mobileprovision' #Library secure file
+  - name: clientSourcePath
+    value: 'Sources/v2.0'
+  - name: externalTesters
+    value: '$(EXTERNAL_TESTERS)'                        #Pipeline variable to set the app version
+
+pool:
+  vmImage: 'macOS-latest'
+
+steps:
+  - checkout: self
+
+  - task: UseNode@1
+    inputs:
+      version: '22.x'
+    displayName: 'Install Node.js 22'
+
+  - script: |
+      cd $(clientSourcePath)
+      npm version $(appVersion) --no-git-tag-version
+    displayName: "Set package.json version"
+
+  - script: |
+      cd $(clientSourcePath)
+      npm ci
+      npm run build
+    displayName: 'Build Vue App'
+
+  - script: |
+      cd $(clientSourcePath)
+      npx cap sync ios
+    displayName: 'Capacitor Sync iOS'
+
+  - script: |
+      cd $(clientSourcePath)/ios/App
+      pod install
+    displayName: 'Install CocoaPods'
+
+  - script: |
+      cd $(clientSourcePath)/ios/App
+      agvtool new-marketing-version $(appVersion)
+    displayName: 'Set iOS Marketing Version'
+
+  - script: |
+      cd $(clientSourcePath)/ios/App
+      agvtool new-version -all $(Build.BuildId)
+    displayName: 'Set iOS Build Number'
+
+  - task: InstallAppleCertificate@2
+    inputs:
+      certSecureFile: '$(appleCertSecureFile)'
+      certPwd: '$(appleCertSecureFilePassword)'
+    displayName: 'Install Distribution Certificate'
+
+  - task: InstallAppleProvisioningProfile@1
+    inputs:
+      provisioningProfileLocation: 'secureFiles'
+      provProfileSecureFile: '$(appleProvProfileSecureFile)'
+    displayName: 'Install Provisioning Profile'
+
+  - task: Xcode@5
+    displayName: 'Build & Archive iOS App'
+    inputs:
+      actions: 'build archive'
+      scheme: 'App'
+      sdk: 'iphoneos'
+      configuration: 'Release'
+      xcWorkspacePath: '$(clientSourcePath)/ios/App/App.xcworkspace'
+      xcodeVersion: 'default'
+      packageApp: true
+      exportPath: '$(build.artifactStagingDirectory)'
+      exportOptions: 'plist'
+      exportOptionsPlist: '$(clientSourcePath)/ios/App/ExportOptions-appstore.plist'
+      signingOption: 'default'
+
+  - task: AppStoreRelease@1
+    displayName: 'Upload to TestFlight'
+    condition: eq(variables['uploadToTestFlight'], 'true')
+    inputs:
+      serviceEndpoint: 'Apple App Store Connect'
+      releaseTrack: 'TestFlight'
+      appIdentifier: '$(appBundleId)'
+      appSpecificId: '$(appSpecificId)'
+      appType: 'iOS'
+      ipaPath: '$(build.artifactStagingDirectory)/**/*.ipa'
+      shouldSubmitForReview: false
+      shouldAutoRelease: false
+      distributedToExternalTesters: true
+      externalTestersGroups: '$(externalTesters)'
+      releaseNotes: '$(clientSourcePath)/ios/App/Release-WhatToTest.txt'
