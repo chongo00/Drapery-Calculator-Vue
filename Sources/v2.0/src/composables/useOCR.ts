@@ -11,9 +11,47 @@ import { useMeasurementSystem } from './useMeasurementSystem';
 import { detectPrimaryWindowFrame } from '@/services/windowFrameDetector';
 import { detectWindowFrameWithBlindsBook } from '@/services/blindsbookWindowDetector';
 import { detectWindowFrameWithGemini } from '@/services/geminiWindowDetector';
+import { detectWindowFrameWithAzureBackend } from '@/services/azureVisionBackendClient';
 import { loadImageData, resizeImage, imageDataToBase64, prepareImageForOCR } from '@/services/imageProcessor';
 import { pixelsToUnits, validateMeasurement, inchesToFraction, calculateRectangleDimensions } from '@/utils/measurementUtils';
 import { saveProcessedImage as saveImageToStorage } from '@/services/imageStorageService';
+import { ARMeasure } from '@blindsbook/ar-measure';
+
+type BBox = { x: number; y: number; width: number; height: number };
+
+function rectToBBox(frame: WindowFrame): BBox {
+  const r = frame.rectangle;
+  const x = Math.min(r.topLeft.x, r.bottomLeft.x, r.topRight.x, r.bottomRight.x);
+  const y = Math.min(r.topLeft.y, r.topRight.y, r.bottomLeft.y, r.bottomRight.y);
+  const maxX = Math.max(r.topLeft.x, r.bottomLeft.x, r.topRight.x, r.bottomRight.x);
+  const maxY = Math.max(r.topLeft.y, r.topRight.y, r.bottomLeft.y, r.bottomRight.y);
+  return { x, y, width: Math.max(1, maxX - x), height: Math.max(1, maxY - y) };
+}
+
+function iou(a: BBox, b: BBox): number {
+  const x1 = Math.max(a.x, b.x);
+  const y1 = Math.max(a.y, b.y);
+  const x2 = Math.min(a.x + a.width, b.x + b.width);
+  const y2 = Math.min(a.y + a.height, b.y + b.height);
+  const interW = Math.max(0, x2 - x1);
+  const interH = Math.max(0, y2 - y1);
+  const inter = interW * interH;
+  const union = a.width * a.height + b.width * b.height - inter;
+  return union <= 0 ? 0 : inter / union;
+}
+
+function estimateSizeFromAR(
+  bboxPx: { width: number; height: number },
+  ar: { distanceMeters: number; fx: number; fy: number }
+): { widthCm: number; heightCm: number } {
+  // Pinhole approximation: sizeMeters ~= pixels * distance / focalLengthPx
+  const widthM = (bboxPx.width * ar.distanceMeters) / ar.fx;
+  const heightM = (bboxPx.height * ar.distanceMeters) / ar.fy;
+  return {
+    widthCm: Math.round(widthM * 1000) / 10, // 0.1 cm
+    heightCm: Math.round(heightM * 1000) / 10,
+  };
+}
 
 export function useOCR() {
   const { currentCalibration, setCurrentCalibration, referenceObjects } = useCalibration();
@@ -33,6 +71,15 @@ export function useOCR() {
   const liveDetectionFrame = ref<WindowFrame | null>(null);
   /** Size of the image detection ran on (for scaling overlay to video) */
   const liveDetectionImageSize = ref<{ width: number; height: number } | null>(null);
+
+  // Stability: enable Capture only when bbox is stable for N consecutive detections
+  const isLiveFrameStable = ref(false);
+  const stableFrameCount = ref(0);
+  const lastStableFrame = ref<WindowFrame | null>(null);
+  const lastStableBBox = ref<BBox | null>(null);
+
+  const STABLE_MIN_FRAMES = 4; // ~ 4 * 400ms = 1.6s default
+  const STABLE_IOU_THRESHOLD = 0.85;
 
   /**
    * Initializes Tesseract worker for OCR
@@ -426,9 +473,12 @@ export function useOCR() {
       videoElement.srcObject = stream;
       isLiveMode.value = true;
 
-      // Detection on main thread; each cycle updates overlay (red/verde like Face ID). Fast path for small frames.
+      // Start AR (best-effort). If unavailable, we still show boxes but measurements may be approximate.
+      try { await ARMeasure.start(); } catch { /* ignore */ }
+
+      // Backend detection (Azure Vision) on interval; each cycle updates overlay (green when window detected).
       const LIVE_DETECT_MAX = 320; // smaller = faster, UI stays responsive
-      const DETECT_INTERVAL_MS = 280;
+      const DETECT_INTERVAL_MS = 400;
 
       const detectLoop = () => {
         if (!isLiveMode.value || !videoElement.videoWidth) return;
@@ -459,19 +509,15 @@ export function useOCR() {
         ctx.drawImage(videoElement, 0, 0, vw, vh, 0, 0, dw, dh);
         const imageDataUrl = canvas.toDataURL('image/jpeg', 0.75);
 
-        // Yield so UI can process taps; then run detection (BlindsBook → Gemini → local) and update overlay
+        // Yield so UI can process taps; then call backend and update overlay
         setTimeout(async () => {
           if (!isLiveMode.value) return;
           try {
-            let frame: WindowFrame | null = null;
-            // 1) BlindsBook-IA (mismo orden que al procesar foto)
-            frame = await detectWindowFrameWithBlindsBook(imageDataUrl, dw, dh);
+            // Azure Vision backend (preferred). Fallback to BlindsBook/Gemini/local if backend not configured.
+            let frame: WindowFrame | null = await detectWindowFrameWithAzureBackend(imageDataUrl, dw, dh, ['window']);
+            if (!frame) frame = await detectWindowFrameWithBlindsBook(imageDataUrl, dw, dh);
+            if (!frame) frame = await detectWindowFrameWithGemini(imageDataUrl, dw, dh);
             if (!frame) {
-              // 2) Gemini
-              frame = await detectWindowFrameWithGemini(imageDataUrl, dw, dh);
-            }
-            if (!frame) {
-              // 3) Detección local (Hough)
               const processed = await prepareImageForOCR(imageDataUrl);
               frame = await detectPrimaryWindowFrame(processed);
               if (!isLiveMode.value) return;
@@ -481,6 +527,24 @@ export function useOCR() {
             }
             if (!isLiveMode.value) return;
             liveDetectionFrame.value = frame; // verde si detectado, rojo si null
+
+            // Update stability tracker
+            if (frame) {
+              const bb = rectToBBox(frame);
+              if (lastStableBBox.value && iou(bb, lastStableBBox.value) >= STABLE_IOU_THRESHOLD) {
+                stableFrameCount.value += 1;
+              } else {
+                stableFrameCount.value = 1;
+              }
+              lastStableBBox.value = bb;
+              lastStableFrame.value = frame;
+              isLiveFrameStable.value = stableFrameCount.value >= STABLE_MIN_FRAMES;
+            } else {
+              stableFrameCount.value = 0;
+              lastStableBBox.value = null;
+              lastStableFrame.value = null;
+              isLiveFrameStable.value = false;
+            }
           } catch (err) {
             console.error('Detection error', err);
           }
@@ -509,6 +573,12 @@ export function useOCR() {
     }
     liveDetectionFrame.value = null;
     liveDetectionImageSize.value = null;
+    stableFrameCount.value = 0;
+    lastStableBBox.value = null;
+    lastStableFrame.value = null;
+    isLiveFrameStable.value = false;
+    // Stop AR session
+    try { ARMeasure.stop(); } catch { /* ignore */ }
   };
 
   /**
@@ -541,6 +611,164 @@ export function useOCR() {
   };
 
   /**
+   * Applies a live capture result using the already detected live frame + AR distance.
+   * This avoids re-detecting the frame again after capture.
+   */
+  const applyLiveCapture = async (
+    imageDataUrl: string,
+    frame: WindowFrame,
+    imageWidth: number,
+    imageHeight: number
+  ): Promise<void> => {
+    detectedFrame.value = frame;
+
+    const rect = frame.rectangle;
+    const { width: widthPx, height: heightPx } = calculateRectangleDimensions(rect);
+
+    let calculatedMeasurements: MeasurementResult | null = null;
+
+    // Prefer AR measurement (real) when tracking + intrinsics are available
+    try {
+      const ar = await ARMeasure.getCenterRaycastDistance();
+      if (
+        ar.trackingState === 'tracking' &&
+        typeof ar.distanceMeters === 'number' &&
+        typeof ar.fx === 'number' &&
+        typeof ar.fy === 'number' &&
+        ar.distanceMeters > 0 &&
+        ar.fx > 0 &&
+        ar.fy > 0
+      ) {
+        const size = estimateSizeFromAR(
+          { width: widthPx, height: heightPx },
+          { distanceMeters: ar.distanceMeters, fx: ar.fx, fy: ar.fy }
+        );
+
+        if (measurementSystem.isImperial.value) {
+          const widthInches = size.widthCm / 2.54;
+          const heightInches = size.heightCm / 2.54;
+          const widthParts = inchesToFraction(widthInches);
+          const heightParts = inchesToFraction(heightInches);
+          calculatedMeasurements = {
+            width: widthParts.whole,
+            height: heightParts.whole,
+            widthUnit: 'inches',
+            heightUnit: 'inches',
+            widthFraction: widthParts.fraction,
+            heightFraction: heightParts.fraction,
+            confidence: frame.confidence,
+            source: 'detection',
+          };
+        } else {
+          calculatedMeasurements = {
+            width: size.widthCm,
+            height: size.heightCm,
+            widthUnit: 'cm',
+            heightUnit: 'cm',
+            confidence: frame.confidence,
+            source: 'detection',
+          };
+        }
+      }
+    } catch {
+      // ignore; fall back below
+    }
+
+    // Fallback: approximate using configured "longer side" scaling
+    if (!calculatedMeasurements) {
+      const longerSideCm = settings.approximateScaleLongerSideCm ?? 280;
+      const longerSidePx = Math.max(widthPx, heightPx);
+      const scaleCmPerPx = longerSidePx > 0 ? longerSideCm / longerSidePx : 0;
+      const widthCm = widthPx * scaleCmPerPx;
+      const heightCm = heightPx * scaleCmPerPx;
+
+      if (measurementSystem.isImperial.value) {
+        const widthInches = widthCm / 2.54;
+        const heightInches = heightCm / 2.54;
+        const widthParts = inchesToFraction(widthInches);
+        const heightParts = inchesToFraction(heightInches);
+        calculatedMeasurements = {
+          width: widthParts.whole,
+          height: heightParts.whole,
+          widthUnit: 'inches',
+          heightUnit: 'inches',
+          widthFraction: widthParts.fraction,
+          heightFraction: heightParts.fraction,
+          confidence: frame.confidence,
+          source: 'detection',
+          approximate: true,
+        };
+      } else {
+        calculatedMeasurements = {
+          width: Math.round(widthCm * 10) / 10,
+          height: Math.round(heightCm * 10) / 10,
+          widthUnit: 'cm',
+          heightUnit: 'cm',
+          confidence: frame.confidence,
+          source: 'detection',
+          approximate: true,
+        };
+      }
+    }
+
+    const processedImage: ProcessedImage = {
+      id: `img_${Date.now()}`,
+      originalUri: imageDataUrl,
+      windowFrame: frame,
+      measurements: calculatedMeasurements || undefined,
+      calibration: currentCalibration.value || undefined,
+      ocrResults: undefined,
+      metadata: {
+        capturedAt: new Date(),
+        processedAt: new Date(),
+        width: imageWidth,
+        height: imageHeight,
+        fileSize: 0,
+      },
+    };
+
+    currentImage.value = processedImage;
+    measurements.value = calculatedMeasurements;
+
+    // Save to history (same shape used elsewhere)
+    if (calculatedMeasurements) {
+      try {
+        const HISTORY_KEY = 'calculationHistory';
+        const MAX_HISTORY = 50;
+        const m = calculatedMeasurements;
+        const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(HISTORY_KEY) : null;
+        const history = raw ? JSON.parse(raw) : [];
+        const cameraEntry = {
+          source: 'camera' as const,
+          approximate: !!m.approximate,
+          width: m.width.toString(),
+          widthFraction: (m.widthUnit === 'inches' ? m.widthFraction?.toString() : undefined) ?? '0',
+          height: m.height.toString(),
+          heightFraction: (m.heightUnit === 'inches' ? m.heightFraction?.toString() : undefined) ?? '0',
+          widthUnit: m.widthUnit,
+          heightUnit: m.heightUnit,
+          timestamp: new Date().toISOString(),
+          requiredFabric: 0,
+          fabricWidths: 0,
+          fabricCuts: 0,
+          fabricCutsFraction: '',
+          fabricCutLength: 0,
+          requiredSnaps: 0,
+          productType: '',
+          fabricOrientation: 'Regular',
+          fullness: '',
+          hem: 0,
+          easeAllowance: 0,
+        };
+        history.unshift(cameraEntry);
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+        }
+      } catch { /* ignore */ }
+    }
+  };
+
+  /**
    * Cleans up the OCR worker and live stream
    */
   const cleanup = async (): Promise<void> => {
@@ -564,6 +792,9 @@ export function useOCR() {
     isLiveMode: computed(() => isLiveMode.value),
     liveDetectionFrame: computed(() => liveDetectionFrame.value),
     liveDetectionImageSize: computed(() => liveDetectionImageSize.value),
+    isLiveFrameStable: computed(() => isLiveFrameStable.value),
+    stableFrameCount: computed(() => stableFrameCount.value),
+    lastStableFrame: computed(() => lastStableFrame.value),
     captureFromCamera,
     selectFromGallery,
     processImage,
@@ -577,6 +808,7 @@ export function useOCR() {
     startLiveDetection,
     stopLiveDetection,
     captureFromLiveStream,
+    applyLiveCapture,
     cleanup
   };
 }

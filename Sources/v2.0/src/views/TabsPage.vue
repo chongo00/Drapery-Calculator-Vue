@@ -11,11 +11,9 @@
           <ion-icon aria-hidden="true" :icon="list" />
         </ion-tab-button>
 
-<!-- OCR tab oculto temporalmente
   <ion-tab-button tab="ocr" href="/tabs/ocr" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="camera" />
         </ion-tab-button>
--->
 
   <ion-tab-button tab="settings" href="/tabs/settings" routerDirection="root">
           <ion-icon aria-hidden="true" :icon="settings" />
@@ -30,15 +28,14 @@
 import { onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonTabBar, IonTabButton, IonTabs, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import { calculator, list, settings } from 'ionicons/icons';
+import { calculator, list, camera, settings } from 'ionicons/icons';
 // Removed useI18n import as labels are no longer used in tab bar
 
 const router = useRouter();
 const route = useRoute();
 
 // Tab order for swipe navigation (route.path is base-less even with BASE configured)
-// const TAB_ORDER = ['/tabs/tab1', '/tabs/tab2', '/tabs/ocr', '/tabs/settings'];
-const TAB_ORDER = ['/tabs/tab1', '/tabs/tab2', '/tabs/settings'];
+const TAB_ORDER = ['/tabs/tab1', '/tabs/tab2', '/tabs/ocr', '/tabs/settings'];
 
 let isPointerActive = false;
 let startX = 0;

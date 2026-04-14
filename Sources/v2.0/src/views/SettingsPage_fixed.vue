@@ -42,37 +42,36 @@
         </div>
 
         <ion-accordion-group class="mt-4">
-          <!-- OCR settings accordion hidden temporarily
-          <ion-accordion value="ocr">
+          <ion-accordion value="scan">
             <ion-item slot="header" class="advanced-accordion-header rounded-lg">
-              <ion-label class="font-medium">{{ t.ocr.ocrSettings }}</ion-label>
+              <ion-label class="font-medium">{{ t.ocr.cameraScanSettings }}</ion-label>
             </ion-item>
             <div slot="content" class="p-3 space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.ocr.precision }}</span>
-                <ion-select :value="ocrSettings.settings.precision" @ionChange="onOCRPrecisionChange" interface="action-sheet">
-                  <ion-select-option value="high">{{ t.ocr.high }}</ion-select-option>
-                  <ion-select-option value="medium">{{ t.ocr.medium }}</ion-select-option>
-                  <ion-select-option value="low">{{ t.ocr.low }}</ion-select-option>
-                </ion-select>
-              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{{ t.ocr.cameraScanHelpShort }}</p>
               <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.ocr.saveProcessedImages }}</span>
                 <ion-toggle :checked="ocrSettings.settings.saveProcessedImages" @ionChange="onOCRSaveImagesChange"></ion-toggle>
               </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.ocr.autoCalibrate }}</span>
-                <ion-toggle :checked="ocrSettings.settings.autoCalibrate" @ionChange="onOCRAutoCalibrateChange"></ion-toggle>
+              <div v-if="visionBackendConfigured" class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.ocr.showBackupOptions }}</span>
+                <ion-toggle :checked="revealFallbackOptions" @ionChange="onRevealFallbackChange"></ion-toggle>
               </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t.ocr.approximateScaleLongerSide }} (cm)</span>
-                <ion-select :value="String(ocrSettings.settings.approximateScaleLongerSideCm)" @ionChange="onOCRApproximateScaleChange" interface="action-sheet">
-                  <ion-select-option v-for="cm in approximateScalePresets" :key="cm" :value="String(cm)">{{ cm }} cm</ion-select-option>
+            </div>
+          </ion-accordion>
+          <ion-accordion v-if="fallbackAccordionVisible" value="fallback">
+            <ion-item slot="header" class="advanced-accordion-header rounded-lg">
+              <ion-label class="font-medium">{{ t.ocr.fallbackSectionTitle }}</ion-label>
+            </ion-item>
+            <div slot="content" class="p-3 space-y-4">
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{{ t.ocr.fallbackSectionDisclaimer }}</p>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-200 shrink">{{ t.ocr.approximateScaleLongerSide }} ({{ measurementSystem.getUnitLabel() }})</span>
+                <ion-select :value="String(ocrSettings.settings.approximateScaleLongerSideCm)" @ionChange="onOCRApproximateScaleChange" interface="action-sheet" class="max-w-[55%]">
+                  <ion-select-option v-for="opt in approximateScaleSelectOptions" :key="opt.cm" :value="String(opt.cm)">{{ opt.label }}</ion-select-option>
                 </ion-select>
               </div>
             </div>
           </ion-accordion>
-          -->
           <ion-accordion value="advanced">
             <ion-item slot="header" class="advanced-accordion-header rounded-lg">
               <ion-label class="font-medium">{{ t.settings.advancedCalculationSettings }}</ion-label>
@@ -206,7 +205,23 @@ onMounted(() => {
 // Settings state
 const { state: settings, reset } = useSettings()
 const ocrSettings = useOCRSettings()
-const approximateScalePresets = APPROXIMATE_SCALE_PRESETS_CM
+
+const visionBackendConfigured = computed(() =>
+  Boolean(String(import.meta.env.VITE_VISION_BACKEND_URL ?? '').trim())
+)
+const revealFallbackOptions = ref(false)
+const fallbackAccordionVisible = computed(
+  () => !visionBackendConfigured.value || revealFallbackOptions.value
+)
+
+/** Presets stored as cm in settings; labels follow measurement system (cm vs in). */
+const approximateScaleSelectOptions = computed(() => {
+  const inchPerCm = 1 / 2.54
+  return APPROXIMATE_SCALE_PRESETS_CM.map((cm: number) => ({
+    cm,
+    label: measurementSystem.isMetric.value ? `${cm} cm` : `${Math.round(cm * inchPerCm)} in`
+  }))
+})
 
 // Fabric width options editing helpers - convert from inches to current system for display
 const fabricWidthDrafts = ref<string[]>(settings.fabricWidthOptions.map((n) => {
@@ -307,17 +322,12 @@ const formatSettingValue = (inches: number): string => {
 const onNumberInput = (k: 'widthMargin' | 'easeAllowance' | 'rfSnapSeparation', e: any) => setNumber(k, e?.detail?.value)
 const onBooleanChange = (k: 'railroadStrict', e: any) => setBoolean(k, e?.detail?.checked)
 const onFullnessInput = (k: keyof RipplefoldFullnessMap, e: any) => setFullness(k, e?.detail?.value)
-const onOCRPrecisionChange = (e: any) => {
-  const precision = e?.detail?.value
-  if (precision === 'high' || precision === 'medium' || precision === 'low') {
-    ocrSettings.setPrecision(precision)
-  }
-}
 const onOCRSaveImagesChange = (e: any) => {
   ocrSettings.setSaveProcessedImages(!!e?.detail?.checked)
 }
-const onOCRAutoCalibrateChange = (e: any) => {
-  ocrSettings.setAutoCalibrate(!!e?.detail?.checked)
+
+const onRevealFallbackChange = (e: any) => {
+  revealFallbackOptions.value = !!e?.detail?.checked
 }
 
 const onOCRApproximateScaleChange = (e: any) => {

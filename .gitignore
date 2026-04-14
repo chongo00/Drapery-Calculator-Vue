@@ -46,3 +46,6 @@ package-lock.json
 
 # Ignore build output
 dist/
+
+# Temporary Claude working directories
+tmpclaude-*
