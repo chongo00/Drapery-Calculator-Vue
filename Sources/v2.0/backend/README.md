@@ -38,6 +38,30 @@ Copy `.env.example` to `.env` and fill:
 - `VISION_ALLOWED_LABELS`: CSV labels to keep, default `window`
 - `CORS_ORIGIN`: your Ionic dev origin, e.g. `http://localhost:8100`
 
+## Docker (Azure Container Apps, Web App for Containers, ACR, etc.)
+
+Build desde la carpeta del backend:
+
+```bash
+cd Sources/v2.0/backend
+docker build -t drapery-vision-backend:latest .
+```
+
+Run local (mismas variables que `.env`):
+
+```bash
+docker run --rm -p 4100:4100 \
+  -e PORT=4100 \
+  -e AZURE_VISION_ENDPOINT="https://<resource>.cognitiveservices.azure.com" \
+  -e AZURE_VISION_KEY="<key>" \
+  -e CORS_ORIGIN="https://tu-app.com,capacitor://localhost" \
+  drapery-vision-backend:latest
+```
+
+- **Azure** suele inyectar `PORT` (p. ej. `8080`). En **Web App for Containers** mapea el puerto del contenedor al que expone la plataforma y define `PORT` en *Application settings* si hace falta que coincida con el `EXPOSE`/escucha del proceso.
+- Configura en el recurso Azure las variables: `AZURE_VISION_ENDPOINT`, `AZURE_VISION_KEY`, opcionalmente `CORS_ORIGIN` (origenes permitidos, separados por coma), `VISION_ALLOWED_LABELS`, `AZURE_VISION_API_VERSION`.
+- Health: `GET /health` (útil como *health probe* en Container Apps / App Service).
+
 ## Run
 
 ```bash
