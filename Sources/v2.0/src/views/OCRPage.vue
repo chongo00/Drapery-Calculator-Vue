@@ -113,7 +113,7 @@
           >
             <ion-card-header>
               <ion-card-title class="text-sm">
-                {{ t.ocr.stabilizing }}... ({{ stableFrameCount }}/4)
+                {{ t.ocr.stabilizing }}... ({{ stableFrameCount }}/{{ stableMinFrames }})
               </ion-card-title>
             </ion-card-header>
           </ion-card>
@@ -444,6 +444,7 @@ const {
   liveDetectionFrame,
   isLiveFrameStable,
   stableFrameCount,
+  stableMinFrames,
   lastStableFrame,
   liveDetectionImageSize,
   selectFromGallery,

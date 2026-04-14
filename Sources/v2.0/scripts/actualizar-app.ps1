@@ -52,7 +52,7 @@ Write-Host "Instalando en telefono ..." -ForegroundColor Yellow
 $result = & $adb install -r $apk 2>&1
 if ($LASTEXITCODE -ne 0 -and ($result -match "INSTALL_FAILED_UPDATE_INCOMPATIBLE|signatures do not match")) {
     Write-Host "Desinstalando version anterior (firma distinta) ..." -ForegroundColor Yellow
-    & $adb uninstall com.blindsbook.drap-calc 2>$null
+    & $adb uninstall com.blindsbook.draperycalculator 2>$null
     & $adb install -r $apk
 }
 if ($LASTEXITCODE -ne 0) {
@@ -60,5 +60,5 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 Write-Host "App actualizada en el telefono." -ForegroundColor Green
-& $adb shell am start -n com.blindsbook.drap-calc/.MainActivity 2>$null
+& $adb shell am start -n com.blindsbook.draperycalculator/.MainActivity 2>$null
 Write-Host "Listo." -ForegroundColor Green

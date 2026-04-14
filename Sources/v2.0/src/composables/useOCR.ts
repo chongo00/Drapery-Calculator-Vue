@@ -9,7 +9,6 @@ import { useCalibration } from './useCalibration';
 import { useOCRSettings } from './useOCRSettings';
 import { useMeasurementSystem } from './useMeasurementSystem';
 import { detectPrimaryWindowFrame } from '@/services/windowFrameDetector';
-import { detectWindowFrameWithBlindsBook } from '@/services/blindsbookWindowDetector';
 import { detectWindowFrameWithGemini } from '@/services/geminiWindowDetector';
 import { detectWindowFrameWithAzureBackend } from '@/services/azureVisionBackendClient';
 import { loadImageData, resizeImage, imageDataToBase64, prepareImageForOCR } from '@/services/imageProcessor';
@@ -78,8 +77,11 @@ export function useOCR() {
   const lastStableFrame = ref<WindowFrame | null>(null);
   const lastStableBBox = ref<BBox | null>(null);
 
-  const STABLE_MIN_FRAMES = 4; // ~ 4 * 400ms = 1.6s default
-  const STABLE_IOU_THRESHOLD = 0.85;
+  // Tune for responsiveness: fewer stable frames + slightly looser IoU improves UX on real devices.
+  const STABLE_MIN_FRAMES = 3;
+  const STABLE_IOU_THRESHOLD = 0.75;
+
+  const liveDetectInFlight = ref(false);
 
   /**
    * Initializes Tesseract worker for OCR
@@ -178,7 +180,8 @@ export function useOCR() {
 
       processingStep.value = 'blindsbook';
       await nextTick();
-      frame = await detectWindowFrameWithBlindsBook(colorDataUrl, imageData.width, imageData.height);
+      // Order required for image-based detection: Azure Vision backend -> Gemini -> Local
+      frame = await detectWindowFrameWithAzureBackend(colorDataUrl, imageData.width, imageData.height, ['window']);
 
       if (!frame) {
         processingStep.value = 'gemini';
@@ -477,8 +480,12 @@ export function useOCR() {
       try { await ARMeasure.start(); } catch { /* ignore */ }
 
       // Backend detection (Azure Vision) on interval; each cycle updates overlay (green when window detected).
-      const LIVE_DETECT_MAX = 320; // smaller = faster, UI stays responsive
-      const DETECT_INTERVAL_MS = 400;
+      const LIVE_DETECT_MAX = 256; // smaller = faster (upload + backend)
+      const DETECT_INTERVAL_MS = 250;
+      const DETECT_JPEG_QUALITY = 0.6;
+
+      const detectCanvas = document.createElement('canvas');
+      let detectCtx: CanvasRenderingContext2D | null = null;
 
       const detectLoop = () => {
         if (!isLiveMode.value || !videoElement.videoWidth) return;
@@ -497,25 +504,31 @@ export function useOCR() {
           }
         }
 
-        const canvas = document.createElement('canvas');
-        canvas.width = dw;
-        canvas.height = dh;
-        const ctx = canvas.getContext('2d');
+        if (!detectCtx || detectCanvas.width !== dw || detectCanvas.height !== dh) {
+          detectCanvas.width = dw;
+          detectCanvas.height = dh;
+          detectCtx = detectCanvas.getContext('2d');
+        }
+        const ctx = detectCtx;
         if (!ctx) {
           if (isLiveMode.value) setTimeout(detectLoop, DETECT_INTERVAL_MS);
           return;
         }
 
         ctx.drawImage(videoElement, 0, 0, vw, vh, 0, 0, dw, dh);
-        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+        const imageDataUrl = detectCanvas.toDataURL('image/jpeg', DETECT_JPEG_QUALITY);
 
         // Yield so UI can process taps; then call backend and update overlay
         setTimeout(async () => {
           if (!isLiveMode.value) return;
+          if (liveDetectInFlight.value) {
+            if (isLiveMode.value) setTimeout(detectLoop, DETECT_INTERVAL_MS);
+            return;
+          }
           try {
-            // Azure Vision backend (preferred). Fallback to BlindsBook/Gemini/local if backend not configured.
+            liveDetectInFlight.value = true;
+            // Order required for image-based detection: Azure Vision backend -> Gemini -> Local
             let frame: WindowFrame | null = await detectWindowFrameWithAzureBackend(imageDataUrl, dw, dh, ['window']);
-            if (!frame) frame = await detectWindowFrameWithBlindsBook(imageDataUrl, dw, dh);
             if (!frame) frame = await detectWindowFrameWithGemini(imageDataUrl, dw, dh);
             if (!frame) {
               const processed = await prepareImageForOCR(imageDataUrl);
@@ -547,6 +560,8 @@ export function useOCR() {
             }
           } catch (err) {
             console.error('Detection error', err);
+          } finally {
+            liveDetectInFlight.value = false;
           }
           if (isLiveMode.value) setTimeout(detectLoop, DETECT_INTERVAL_MS);
         }, 0);
@@ -577,6 +592,7 @@ export function useOCR() {
     lastStableBBox.value = null;
     lastStableFrame.value = null;
     isLiveFrameStable.value = false;
+    liveDetectInFlight.value = false;
     // Stop AR session
     try { ARMeasure.stop(); } catch { /* ignore */ }
   };
@@ -794,6 +810,7 @@ export function useOCR() {
     liveDetectionImageSize: computed(() => liveDetectionImageSize.value),
     isLiveFrameStable: computed(() => isLiveFrameStable.value),
     stableFrameCount: computed(() => stableFrameCount.value),
+    stableMinFrames: STABLE_MIN_FRAMES,
     lastStableFrame: computed(() => lastStableFrame.value),
     captureFromCamera,
     selectFromGallery,
