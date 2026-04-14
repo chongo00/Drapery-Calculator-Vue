@@ -49,10 +49,6 @@ steps:
           --image $(acrName).azurecr.io/$(imageName):$(imageTag) \
           --min-replicas 1 \
           --max-replicas 3
-        az containerapp ingress traffic set \
-          --resource-group $(containerAppResourceGroup) \
-          --name $(containerAppName) \
-          --revision-weight latest=100
 
   - task: AzureCLI@2
     displayName: Health check (GET /health)
