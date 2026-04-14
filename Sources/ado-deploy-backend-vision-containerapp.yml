@@ -1,0 +1,105 @@
+trigger:
+  branches:
+    include:
+      - '*'
+  paths:
+    include:
+      - Sources/v2.0/backend/**
+      - Sources/ado-deploy-backend-vision-containerapp.yml
+
+variables:
+  # Ajusta el nombre del Service Connection en Azure DevOps (Project Settings -> Service connections).
+  - name: azureServiceConnection
+    value: 'BlindsBook-Azure'
+
+  - name: backendPath
+    value: 'Sources/v2.0/backend'
+
+  # ACR donde se publicará la imagen
+  - name: acrName
+    value: 'blindsbookmobileapi'
+
+  # Imagen/repo dentro de ACR
+  - name: imageRepository
+    value: 'drapery-vision-backend'
+
+  # Container App destino
+  - name: resourceGroup
+    value: 'BlindsBook-Mobile'
+  - name: containerAppName
+    value: 'blindsbook-drapery-calculator'
+
+  # Tag de la imagen (por commit)
+  - name: imageTag
+    value: '$(Build.SourceVersion)'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - checkout: self
+
+  - task: AzureCLI@2
+    displayName: 'Build & push backend image to ACR'
+    inputs:
+      azureSubscription: '$(azureServiceConnection)'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -euo pipefail
+        echo "Building image $(acrName).azurecr.io/$(imageRepository):$(imageTag)"
+        cd "$(backendPath)"
+        az acr build \
+          --registry "$(acrName)" \
+          --image "$(imageRepository):$(imageTag)" \
+          .
+
+  - task: AzureCLI@2
+    displayName: 'Deploy image to Azure Container App (keep 1 replica active)'
+    inputs:
+      azureSubscription: '$(azureServiceConnection)'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -euo pipefail
+        ACR_LOGIN_SERVER="$(acrName).azurecr.io"
+        IMAGE="$ACR_LOGIN_SERVER/$(imageRepository):$(imageTag)"
+        echo "Updating container app $(containerAppName) to $IMAGE"
+
+        # Actualiza la imagen y asegura al menos 1 réplica siempre activa (evita cold-start y caídas por escala a 0)
+        az containerapp update \
+          --resource-group "$(resourceGroup)" \
+          --name "$(containerAppName)" \
+          --image "$IMAGE" \
+          --min-replicas 1 \
+          --max-replicas 3
+
+        # Enruta el 100% del tráfico al latest revision (evita quedarse apuntando a una revisión vieja con fallo)
+        az containerapp ingress traffic set \
+          --resource-group "$(resourceGroup)" \
+          --name "$(containerAppName)" \
+          --revision-weight latest=100
+
+  - task: AzureCLI@2
+    displayName: 'Health check (GET /health)'
+    inputs:
+      azureSubscription: '$(azureServiceConnection)'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -euo pipefail
+        FQDN="$(az containerapp show -g \"$(resourceGroup)\" -n \"$(containerAppName)\" --query \"properties.configuration.ingress.fqdn\" -o tsv)"
+        URL="https://$FQDN/health"
+        echo "Checking $URL"
+        for i in $(seq 1 20); do
+          code="$(curl -sS -o /dev/null -w \"%{http_code}\" \"$URL\" || true)"
+          if [ "$code" = "200" ]; then
+            echo "OK"
+            exit 0
+          fi
+          echo "Attempt $i: HTTP $code; waiting..."
+          sleep 5
+        done
+        echo "Health check failed"
+        exit 1
+
