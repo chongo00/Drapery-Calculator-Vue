@@ -58,7 +58,7 @@ steps:
       scriptLocation: inlineScript
       inlineScript: |
         set -euo pipefail
-        FQDN="$(az containerapp show -g \"$(containerAppResourceGroup)\" -n \"$(containerAppName)\" --query \"properties.configuration.ingress.fqdn\" -o tsv)"
+        FQDN="$(az containerapp show -g "$(containerAppResourceGroup)" -n "$(containerAppName)" --query "properties.configuration.ingress.fqdn" -o tsv)"
         URL="https://$FQDN/health"
         for i in $(seq 1 20); do
           code="$(curl -sS -o /dev/null -w \"%{http_code}\" \"$URL\" || true)"
