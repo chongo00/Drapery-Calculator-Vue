@@ -8,7 +8,7 @@ trigger:
       - Sources/ado-deploy-backend-vision-containerapp.yml
 
 variables:
-  azureSubscription: 'BlindsBook-Azure'
+  azureSubscription: 'Azure Connection'
   acrName: 'blindsbookmobileapi'
   imageName: 'drapery-vision-backend'
   imageTag: '$(Build.SourceVersion)'
