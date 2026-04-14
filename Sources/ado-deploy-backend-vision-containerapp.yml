@@ -58,10 +58,12 @@ steps:
       scriptLocation: inlineScript
       inlineScript: |
         set -euo pipefail
-        FQDN="$(az containerapp show -g "$(containerAppResourceGroup)" -n "$(containerAppName)" --query "properties.configuration.ingress.fqdn" -o tsv)"
-        URL="https://$FQDN/health"
+        FQDN="$(az containerapp show -g "$(containerAppResourceGroup)" -n "$(containerAppName)" --query "properties.configuration.ingress.fqdn" -o tsv | tr -d '\r')"
+        echo "$FQDN"
+        if [ -z "$FQDN" ]; then exit 1; fi
+        URL="https://${FQDN}/health"
         for i in $(seq 1 20); do
-          code="$(curl -sS -o /dev/null -w \"%{http_code}\" \"$URL\" || true)"
+          code="$(curl -sS -o /dev/null -w "%{http_code}" "$URL" || true)"
           if [ "$code" = "200" ]; then
             exit 0
           fi
