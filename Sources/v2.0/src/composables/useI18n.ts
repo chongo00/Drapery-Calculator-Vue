@@ -149,6 +149,7 @@ export interface Translations {
     approximateMeasurement: string;
     calibrateForRealMeasurements: string;
     frameDetected: string;
+    stabilizing: string;
     adjustFrame: string;
     precision: string;
     high: string;
@@ -157,6 +158,11 @@ export interface Translations {
     capture: string;
     cancel: string;
     ocrSettings: string;
+    cameraScanSettings: string;
+    cameraScanHelpShort: string;
+    fallbackSectionTitle: string;
+    fallbackSectionDisclaimer: string;
+    showBackupOptions: string;
     saveProcessedImages: string;
     autoCalibrate: string;
     approximateScaleLongerSide: string;
@@ -306,6 +312,7 @@ const translations: Record<Language, Translations> = {
       approximateMeasurement: 'Approximate measurement',
       calibrateForRealMeasurements: 'Calibrate for real measurements (inches/cm)',
       frameDetected: 'Frame Detected',
+      stabilizing: 'Stabilizing',
       adjustFrame: 'Adjust Frame',
       precision: 'Precision',
       high: 'High',
@@ -314,9 +321,16 @@ const translations: Record<Language, Translations> = {
       capture: 'Capture',
       cancel: 'Cancel',
       ocrSettings: 'OCR Settings',
-      saveProcessedImages: 'Save Processed Images',
+      cameraScanSettings: 'Camera scan',
+      cameraScanHelpShort:
+        'When configured, detection can use cloud analysis. Real-world size uses on-device camera measurement when available.',
+      fallbackSectionTitle: 'If the analysis service is unavailable',
+      fallbackSectionDisclaimer:
+        'Rough estimate only: the app assumes the longest side of the detected frame matches the length you choose. Not exact.',
+      showBackupOptions: 'Show backup estimate options',
+      saveProcessedImages: 'Save scan photos',
       autoCalibrate: 'Auto Calibration',
-      approximateScaleLongerSide: 'Assume longer side (approx. measurement)',
+      approximateScaleLongerSide: 'Assumed length of longest side',
       processingWithBlindsBook: 'This may take a moment. Processing with BlindsBook IA...',
       processingWithGemini: 'Processing with Gemini IA...',
       processingLocal: 'Processing locally. This may take a few minutes...',
@@ -461,6 +475,7 @@ const translations: Record<Language, Translations> = {
       approximateMeasurement: 'Medida aproximada',
       calibrateForRealMeasurements: 'Calibra para medidas reales (cm/pulgadas)',
       frameDetected: 'Marco Detectado',
+      stabilizing: 'Estabilizando',
       adjustFrame: 'Ajustar Marco',
       precision: 'Precisión',
       high: 'Alta',
@@ -469,9 +484,16 @@ const translations: Record<Language, Translations> = {
       capture: 'Capturar',
       cancel: 'Cancelar',
       ocrSettings: 'Configuración OCR',
-      saveProcessedImages: 'Guardar imágenes procesadas',
+      cameraScanSettings: 'Escaneo con cámara',
+      cameraScanHelpShort:
+        'Si está configurado, la detección puede usar análisis en la nube. El tamaño real usa la medición con la cámara del dispositivo cuando es posible.',
+      fallbackSectionTitle: 'Si el servicio de análisis no está disponible',
+      fallbackSectionDisclaimer:
+        'Solo una estimación aproximada: la app supone que el lado más largo del marco detectado coincide con la longitud que elijas. No es exacto.',
+      showBackupOptions: 'Mostrar opciones de estimación de respaldo',
+      saveProcessedImages: 'Guardar fotos del escaneo',
       autoCalibrate: 'Calibración automática',
-      approximateScaleLongerSide: 'Asumir lado largo (medida aprox.)',
+      approximateScaleLongerSide: 'Longitud supuesta del lado más largo',
       processingWithBlindsBook: 'Puede tardar un momento. Procesando con BlindsBook IA...',
       processingWithGemini: 'Procesando con Gemini IA...',
       processingLocal: 'Procesando en local. Puede tardar unos minutos...',
@@ -616,6 +638,7 @@ const translations: Record<Language, Translations> = {
       approximateMeasurement: 'Mesure approximative (pixels)',
       calibrateForRealMeasurements: 'Calibrer pour des mesures réelles (cm/pouces)',
       frameDetected: 'Cadre Détecté',
+      stabilizing: 'Stabilisation',
       adjustFrame: 'Ajuster le Cadre',
       precision: 'Précision',
       high: 'Élevée',
@@ -624,9 +647,16 @@ const translations: Record<Language, Translations> = {
       capture: 'Capturer',
       cancel: 'Annuler',
       ocrSettings: 'Paramètres OCR',
-      saveProcessedImages: 'Enregistrer les images traitées',
+      cameraScanSettings: 'Numérisation par caméra',
+      cameraScanHelpShort:
+        'Si configuré, la détection peut utiliser une analyse cloud. La taille réelle utilise la mesure caméra sur l’appareil lorsque c’est possible.',
+      fallbackSectionTitle: 'Si le service d’analyse est indisponible',
+      fallbackSectionDisclaimer:
+        'Estimation grossière uniquement : l’application suppose que le plus grand côté du cadre détecté correspond à la longueur choisie. Pas exact.',
+      showBackupOptions: 'Afficher les options de secours (estimation)',
+      saveProcessedImages: 'Enregistrer les photos du scan',
       autoCalibrate: 'Calibration automatique',
-      approximateScaleLongerSide: 'Supposer grand côté (mesure approx.)',
+      approximateScaleLongerSide: 'Longueur supposée du plus grand côté',
       processingWithBlindsBook: 'Cela peut prendre un moment. Traitement avec BlindsBook IA...',
       processingWithGemini: 'Traitement avec Gemini IA...',
       processingLocal: 'Traitement local. Cela peut prendre quelques minutes...',
@@ -771,6 +801,7 @@ const translations: Record<Language, Translations> = {
       approximateMeasurement: 'Medida aproximada',
       calibrateForRealMeasurements: 'Calibrar para medidas reais (cm/polegadas)',
       frameDetected: 'Moldura Detectada',
+      stabilizing: 'Estabilizando',
       adjustFrame: 'Ajustar Moldura',
       precision: 'Precisão',
       high: 'Alta',
@@ -779,9 +810,16 @@ const translations: Record<Language, Translations> = {
       capture: 'Capturar',
       cancel: 'Cancelar',
       ocrSettings: 'Configurações OCR',
-      saveProcessedImages: 'Salvar imagens processadas',
+      cameraScanSettings: 'Leitura com câmera',
+      cameraScanHelpShort:
+        'Se estiver configurada, a deteção pode usar análise na cloud. O tamanho real usa a medição com a câmera do dispositivo quando disponível.',
+      fallbackSectionTitle: 'Se o serviço de análise não estiver disponível',
+      fallbackSectionDisclaimer:
+        'Apenas estimativa grosseira: a app assume que o lado mais longo da moldura detetada corresponde ao comprimento que escolher. Não é exato.',
+      showBackupOptions: 'Mostrar opções de estimativa de reserva',
+      saveProcessedImages: 'Guardar fotos do escaneamento',
       autoCalibrate: 'Calibração automática',
-      approximateScaleLongerSide: 'Assumir lado maior (medida aprox.)',
+      approximateScaleLongerSide: 'Comprimento assumido do lado mais longo',
       processingWithBlindsBook: 'Pode levar um momento. Processando com BlindsBook IA...',
       processingWithGemini: 'Processando com Gemini IA...',
       processingLocal: 'Processando localmente. Pode levar alguns minutos...',

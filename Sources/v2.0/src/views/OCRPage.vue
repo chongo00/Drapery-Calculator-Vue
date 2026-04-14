@@ -98,12 +98,22 @@
 
           <!-- Live Detection Status -->
           <ion-card
-            v-if="liveDetectionFrame"
+            v-if="isLiveFrameStable && liveDetectionFrame"
             class="bg-green-50 dark:bg-green-900/20"
           >
             <ion-card-header>
               <ion-card-title class="text-sm">
                 {{ t.ocr.frameDetected }}
+              </ion-card-title>
+            </ion-card-header>
+          </ion-card>
+          <ion-card
+            v-else-if="liveDetectionFrame"
+            class="bg-yellow-50 dark:bg-yellow-900/20"
+          >
+            <ion-card-header>
+              <ion-card-title class="text-sm">
+                {{ t.ocr.stabilizing }}... ({{ stableFrameCount }}/4)
               </ion-card-title>
             </ion-card-header>
           </ion-card>
@@ -123,6 +133,7 @@
             <ion-button
               expand="block"
               color="success"
+              :disabled="!isLiveFrameStable || isCapturing"
               @click="handleCaptureFromLive"
             >
               <ion-icon :icon="camera"></ion-icon>
@@ -431,6 +442,9 @@ const {
   referenceObjects,
   isLiveMode,
   liveDetectionFrame,
+  isLiveFrameStable,
+  stableFrameCount,
+  lastStableFrame,
   liveDetectionImageSize,
   selectFromGallery,
   processImage,
@@ -442,6 +456,7 @@ const {
   startLiveDetection,
   stopLiveDetection,
   captureFromLiveStream,
+  applyLiveCapture,
   cleanup,
 } = useOCR();
 
@@ -474,12 +489,18 @@ const handleStopLive = () => {
 
 const handleCaptureFromLive = async () => {
   if (!liveVideo.value) return;
+  if (!isLiveFrameStable.value || !lastStableFrame.value) return;
   isCapturing.value = true;
   try {
+    const vw = liveVideo.value.videoWidth;
+    const vh = liveVideo.value.videoHeight;
     const dataUrl = await captureFromLiveStream(liveVideo.value);
     showLiveCamera.value = false;
     await nextTick();
-    if (dataUrl) await processImage(dataUrl);
+    if (dataUrl) {
+      // Apply using the already detected live frame + AR (no re-detection)
+      await applyLiveCapture(dataUrl, lastStableFrame.value, vw, vh);
+    }
   } finally {
     isCapturing.value = false;
   }

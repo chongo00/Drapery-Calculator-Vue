@@ -23,6 +23,7 @@
     "@capacitor/share": "^7.0.1",
     "@capacitor/splash-screen": "7.0.3",
     "@capacitor/status-bar": "7.0.3",
+    "@blindsbook/ar-measure": "file:src/plugins/ar-measure",
     "@google/generative-ai": "^0.21.0",
     "@ionic/vue": "^8.0.0",
     "@ionic/vue-router": "^8.0.0",
@@ -36,6 +37,7 @@
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "7.4.4",
+    "@capacitor/create-plugin": "^0.22.0",
     "@vitejs/plugin-legacy": "^5.0.0",
     "@vitejs/plugin-vue": "^5.0.0",
     "@vue/eslint-config-typescript": "^12.0.0",
