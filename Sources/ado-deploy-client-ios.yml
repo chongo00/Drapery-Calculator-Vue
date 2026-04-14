@@ -5,7 +5,7 @@ trigger:
   paths:
     include:
       - Sources/v2.0/**
-      - ado-deploy-client-ios.yml
+      - Sources/ado-deploy-client-ios.yml
 
 variables:
   - group: apple-appstore
@@ -99,7 +99,7 @@ steps:
 
   - task: AppStoreRelease@1
     displayName: 'Upload to TestFlight'
-    condition: eq(variables['uploadToTestFlight'], 'true')
+    condition: and(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['uploadToTestFlight'], 'true'))
     inputs:
       serviceEndpoint: 'Apple App Store Connect'
       releaseTrack: 'TestFlight'
