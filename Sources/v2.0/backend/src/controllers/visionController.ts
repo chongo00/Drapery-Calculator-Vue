@@ -6,6 +6,9 @@ import type { DetectResponse } from '../types/vision';
 const DetectBodySchema = z.object({
   imageBase64: z.string().min(10).optional(),
   allowedLabels: z.array(z.string()).optional(),
+  imageWidth: z.number().int().positive().optional(),
+  imageHeight: z.number().int().positive().optional(),
+  topN: z.number().int().min(1).max(50).optional(),
 });
 
 function decodeBase64Image(input: string): Buffer {
@@ -19,9 +22,15 @@ export async function detectController(req: Request, res: Response) {
 
     let imageBytes: Buffer | null = null;
     let allowedLabels: string[] | undefined;
+    let imageWidth: number | undefined;
+    let imageHeight: number | undefined;
+    let topN: number | undefined;
 
     if (parsed.success) {
       allowedLabels = parsed.data.allowedLabels;
+      imageWidth = parsed.data.imageWidth;
+      imageHeight = parsed.data.imageHeight;
+      topN = parsed.data.topN;
       if (parsed.data.imageBase64) {
         imageBytes = decodeBase64Image(parsed.data.imageBase64);
       }
@@ -42,8 +51,14 @@ export async function detectController(req: Request, res: Response) {
       return res.status(400).json(out);
     }
 
-    const objects = await detectObjectsFromImage(imageBytes, allowedLabels);
-    const out: DetectResponse = { success: true, objects };
+    const opts: any = {};
+    if (allowedLabels !== undefined) opts.allowedLabels = allowedLabels;
+    if (imageWidth !== undefined) opts.imageWidth = imageWidth;
+    if (imageHeight !== undefined) opts.imageHeight = imageHeight;
+    if (topN !== undefined) opts.topN = topN;
+
+    const result = await detectObjectsFromImage(imageBytes, opts);
+    const out: DetectResponse = { success: true, objects: result.objects, best: result.best };
     return res.json(out);
   } catch (e: any) {
     const status = typeof e?.status === 'number' ? e.status : 500;

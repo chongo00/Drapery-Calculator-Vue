@@ -37,9 +37,13 @@
         ></ion-alert>
 
         <!-- Loading State (including right after tapping Capture) -->
-        <div v-if="isProcessing || isCapturing" class="text-center py-8">
-          <ion-spinner></ion-spinner>
-          <p class="mt-4 text-gray-600 dark:text-gray-400">
+        <div
+          v-if="isProcessing || isCapturing"
+          class="min-h-[55vh] flex flex-col items-center justify-center text-center py-10"
+        >
+          <div class="bg-white/80 dark:bg-neutral-900/70 backdrop-blur rounded-2xl shadow-lg px-6 py-8 w-full">
+            <ion-spinner></ion-spinner>
+            <p class="mt-4 text-gray-700 dark:text-gray-200 font-semibold text-lg">
             {{
               processingStep === 'blindsbook'
                 ? t.ocr.processingWithBlindsBook
@@ -49,7 +53,11 @@
                     ? t.ocr.processingLocal
                     : t.ocr.processing
             }}
-          </p>
+            </p>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Por favor espera...
+            </p>
+          </div>
         </div>
 
         <!-- No Image State -->
@@ -62,13 +70,15 @@
             {{ t.ocr.captureImage }}
           </h2>
           <div class="flex flex-col space-y-3">
-            <ion-button expand="block" @click="handleStartLiveCamera">
+            <ion-button expand="block" shape="round" class="ocr-btn" @click="handleTakePhoto">
               <ion-icon :icon="camera"></ion-icon>
               {{ t.ocr.takePhoto }}
             </ion-button>
             <ion-button
               expand="block"
               fill="outline"
+              shape="round"
+              class="ocr-btn"
               @click="handleSelectFromGallery"
             >
               <ion-icon :icon="images"></ion-icon>
@@ -132,8 +142,10 @@
           <div class="flex flex-col space-y-2">
             <ion-button
               expand="block"
+              shape="round"
+              class="ocr-btn"
               color="success"
-              :disabled="!isLiveFrameStable || isCapturing"
+              :disabled="!lastStableFrame || isCapturing"
               @click="handleCaptureFromLive"
             >
               <ion-icon :icon="camera"></ion-icon>
@@ -142,6 +154,8 @@
             <ion-button
               expand="block"
               fill="outline"
+              shape="round"
+              class="ocr-btn"
               color="danger"
               @click="handleStopLive"
             >
@@ -180,7 +194,7 @@
               }}</ion-card-title>
             </ion-card-header>
             <ion-card-content>
-              <ion-button expand="block" @click="showCalibrationModal = true">
+              <ion-button expand="block" shape="round" class="ocr-btn" @click="showCalibrationModal = true">
                 {{ t.ocr.calibrate }}
               </ion-button>
             </ion-card-content>
@@ -214,24 +228,29 @@
             <ion-card-content class="space-y-3">
               <div class="flex justify-between">
                 <span class="font-medium">{{ t.ocr.width }}:</span>
-                <span>{{
-                  formatMeasurement(measurements.width, measurements.widthUnit)
-                }}</span>
+                <span>{{ formatDimension('width') }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="font-medium">{{ t.ocr.height }}:</span>
-                <span>{{
-                  formatMeasurement(
-                    measurements.height,
-                    measurements.heightUnit
-                  )
-                }}</span>
+                <span>{{ formatDimension('height') }}</span>
               </div>
               <template v-if="measurements.approximate">
                 <ion-button
                   expand="block"
+                  fill="outline"
+                  shape="round"
+                  class="ocr-btn"
+                  @click="showScaleModal = true"
+                >
+                  Ajustar escala
+                </ion-button>
+              </template>
+              <template v-if="measurements.approximate && canCalibrate">
+                <ion-button
+                  expand="block"
+                  shape="round"
+                  class="ocr-btn mt-4"
                   @click="showCalibrationModal = true"
-                  class="mt-4"
                 >
                   {{ t.ocr.calibrateForRealMeasurements }}
                 </ion-button>
@@ -239,14 +258,17 @@
               <template v-else>
                 <ion-button
                   expand="block"
+                  shape="round"
+                  class="ocr-btn mt-4"
                   @click="handleUseMeasurements"
-                  class="mt-4"
                 >
                   {{ t.ocr.useMeasurements }}
                 </ion-button>
                 <ion-button
                   expand="block"
                   fill="outline"
+                  shape="round"
+                  class="ocr-btn"
                   @click="showEditModal = true"
                 >
                   {{ t.ocr.editMeasurements }}
@@ -257,17 +279,19 @@
 
           <!-- Action Buttons -->
           <div class="flex flex-col space-y-2">
-            <ion-button expand="block" fill="outline" @click="handleRetake">
+            <ion-button expand="block" fill="outline" shape="round" class="ocr-btn" @click="handleRetake">
               <ion-icon :icon="refresh"></ion-icon>
               {{ t.ocr.retake }}
             </ion-button>
-            <ion-button expand="block" fill="outline" @click="handleClear">
+            <ion-button expand="block" fill="outline" shape="round" class="ocr-btn" @click="handleClear">
               <ion-icon :icon="trash"></ion-icon>
               {{ t.ocr.clear }}
             </ion-button>
             <ion-button
               expand="block"
               fill="outline"
+              shape="round"
+              class="ocr-btn"
               @click="handleExport"
               v-if="measurements && !measurements.approximate"
             >
@@ -287,7 +311,7 @@
           <ion-toolbar>
             <ion-title>{{ t.ocr.calibrate }}</ion-title>
             <ion-buttons slot="end">
-              <ion-button @click="showCalibrationModal = false">{{
+              <ion-button shape="round" class="ocr-btn" @click="showCalibrationModal = false">{{
                 t.common.close
               }}</ion-button>
             </ion-buttons>
@@ -321,6 +345,8 @@
             </ion-item>
             <ion-button
               expand="block"
+              shape="round"
+              class="ocr-btn"
               :disabled="!selectedReference || !referencePixelSize"
               @click="handleCalibrate"
             >
@@ -336,7 +362,7 @@
           <ion-toolbar>
             <ion-title>{{ t.ocr.editMeasurements }}</ion-title>
             <ion-buttons slot="end">
-              <ion-button @click="showEditModal = false">{{
+              <ion-button shape="round" class="ocr-btn" @click="showEditModal = false">{{
                 t.common.close
               }}</ion-button>
             </ion-buttons>
@@ -379,8 +405,42 @@
                 step="0.125"
               ></ion-input>
             </ion-item>
-            <ion-button expand="block" @click="handleSaveEdit">
+            <ion-button expand="block" shape="round" class="ocr-btn" @click="handleSaveEdit">
               {{ t.common.close }}
+            </ion-button>
+          </div>
+        </ion-content>
+      </ion-modal>
+
+      <!-- Quick scale adjustment modal (for approximate measurements) -->
+      <ion-modal :is-open="showScaleModal" @didDismiss="showScaleModal = false">
+        <ion-header>
+          <ion-toolbar>
+            <ion-title>Ajustar escala</ion-title>
+            <ion-buttons slot="end">
+              <ion-button shape="round" class="ocr-btn" @click="showScaleModal = false">{{
+                t.common.close
+              }}</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+          <div class="space-y-4">
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              Ingresa el tamaño real aproximado del <strong>lado largo</strong> (alto o ancho) para recalcular las medidas.
+            </p>
+            <ion-item>
+              <ion-label position="stacked">Lado largo real ({{ measurementSystem.getUnitLabel() }})</ion-label>
+              <ion-input v-model.number="knownLongSide" type="number" inputmode="decimal"></ion-input>
+            </ion-item>
+            <ion-button
+              expand="block"
+              shape="round"
+              class="ocr-btn"
+              :disabled="!knownLongSide || knownLongSide <= 0"
+              @click="applyQuickScale"
+            >
+              Recalcular
             </ion-button>
           </div>
         </ion-content>
@@ -390,7 +450,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed } from "vue";
 import { useRouter } from "vue-router";
 import {
   IonPage,
@@ -424,17 +484,21 @@ import { useCalibration } from "@/composables/useCalibration";
 import { drawRectangle } from "@/services/imageProcessor";
 import { shareResults } from "@/services/exportService";
 import { formatMeasurement as formatMeasurementUtil } from "@/utils/measurementUtils";
+import { calculateRectangleDimensions } from "@/utils/measurementUtils";
+import { useOCRSettings } from "@/composables/useOCRSettings";
 import type { CalibrationReference } from "@/types/ocr";
 
 const router = useRouter();
 const { t } = useI18n();
 const measurementSystem = useMeasurementSystem();
 const { createCalibration } = useCalibration();
+const { setApproximateScaleLongerSideCm } = useOCRSettings();
 
 const {
   currentImage,
   detectedFrame,
   measurements,
+  detectionProvider,
   isProcessing,
   processingStep,
   error,
@@ -446,7 +510,9 @@ const {
   stableFrameCount,
   stableMinFrames,
   lastStableFrame,
+  lastStableProvider,
   liveDetectionImageSize,
+  captureFromCamera,
   selectFromGallery,
   processImage,
   setCalibration,
@@ -461,6 +527,11 @@ const {
   cleanup,
 } = useOCR();
 
+const canCalibrate = computed(() => {
+  const provider = measurements.value?.detectionProvider ?? detectionProvider.value;
+  return provider === 'local';
+});
+
 const overlayCanvas = ref<HTMLCanvasElement | null>(null);
 const liveVideo = ref<HTMLVideoElement | null>(null);
 const liveOverlayCanvas = ref<HTMLCanvasElement | null>(null);
@@ -468,6 +539,8 @@ const showLiveCamera = ref(false);
 const isCapturing = ref(false);
 const showCalibrationModal = ref(false);
 const showEditModal = ref(false);
+const showScaleModal = ref(false);
+const knownLongSide = ref<number>(0);
 const selectedReference = ref<CalibrationReference | null>(null);
 const referencePixelSize = ref<number | null>(null);
 const editedWidth = ref<number>(0);
@@ -475,12 +548,8 @@ const editedWidthFraction = ref<number>(0);
 const editedHeight = ref<number>(0);
 const editedHeightFraction = ref<number>(0);
 
-const handleStartLiveCamera = async () => {
-  const allowed = await requestCameraPermission();
-  if (!allowed) {
-    return; // error set by useOCR
-  }
-  showLiveCamera.value = true;
+const handleTakePhoto = async () => {
+  await captureFromCamera();
 };
 
 const handleStopLive = () => {
@@ -490,7 +559,7 @@ const handleStopLive = () => {
 
 const handleCaptureFromLive = async () => {
   if (!liveVideo.value) return;
-  if (!isLiveFrameStable.value || !lastStableFrame.value) return;
+  if (!lastStableFrame.value || !lastStableProvider.value) return;
   isCapturing.value = true;
   try {
     const vw = liveVideo.value.videoWidth;
@@ -500,11 +569,26 @@ const handleCaptureFromLive = async () => {
     await nextTick();
     if (dataUrl) {
       // Apply using the already detected live frame + AR (no re-detection)
-      await applyLiveCapture(dataUrl, lastStableFrame.value, vw, vh);
+      await applyLiveCapture(dataUrl, lastStableFrame.value, vw, vh, lastStableProvider.value);
     }
   } finally {
     isCapturing.value = false;
   }
+};
+
+const applyQuickScale = async () => {
+  if (!currentImage.value || !detectedFrame.value) return;
+  const v = Number(knownLongSide.value);
+  if (!v || v <= 0) return;
+
+  const { width: wPx, height: hPx } = calculateRectangleDimensions(detectedFrame.value.rectangle);
+  const longerSidePx = Math.max(wPx, hPx);
+  if (!longerSidePx) return;
+
+  const longerSideCm = measurementSystem.isImperial.value ? v * 2.54 : v;
+  setApproximateScaleLongerSideCm(longerSideCm);
+  showScaleModal.value = false;
+  await processImage(currentImage.value.originalUri);
 };
 
 const handleSelectFromGallery = async () => {
@@ -581,9 +665,36 @@ const handleExport = async () => {
   }
 };
 
-const formatMeasurement = (value: number, unit: string): string => {
+const fractionToLabel = (fraction: number | undefined): string => {
+  if (!fraction) return '';
+  const map: Record<string, string> = {
+    '0.125': '1/8',
+    '0.25': '1/4',
+    '0.375': '3/8',
+    '0.5': '1/2',
+    '0.625': '5/8',
+    '0.75': '3/4',
+    '0.875': '7/8',
+  };
+  const key = String(Math.round(fraction * 1000) / 1000);
+  return map[key] ?? '';
+};
+
+const formatDimension = (dim: 'width' | 'height'): string => {
+  if (!measurements.value) return '';
+  const unit = dim === 'width' ? measurements.value.widthUnit : measurements.value.heightUnit;
+  const value = dim === 'width' ? measurements.value.width : measurements.value.height;
+  const frac = dim === 'width' ? measurements.value.widthFraction : measurements.value.heightFraction;
+
   if (unit === 'px') return `${Math.round(value)} px`;
-  return formatMeasurementUtil(value, unit as 'inches' | 'cm', unit === 'inches');
+  if (unit === 'inches') {
+    const fracLabel = fractionToLabel(frac);
+    return fracLabel ? `${value} ${fracLabel} in` : `${value} in`;
+  }
+  if (unit === 'cm') {
+    return `${value} cm`;
+  }
+  return formatMeasurementUtil(value, unit as any, unit === 'inches');
 };
 
 // Watch to update edited values when measurements change
@@ -698,5 +809,10 @@ onBeforeUnmount(() => {
 <style scoped>
 canvas {
   image-rendering: pixelated;
+}
+
+.ocr-btn {
+  --border-radius: 9999px;
+  font-weight: 600;
 }
 </style>

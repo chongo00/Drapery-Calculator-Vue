@@ -50,6 +50,8 @@ export interface MeasurementResult {
   heightFraction?: number; // For imperial system
   confidence: number;
   source: 'detection' | 'ocr' | 'manual';
+  /** Provider used to detect the window frame (for UX decisions like calibration visibility) */
+  detectionProvider?: 'azure' | 'gemini' | 'local';
   calibrationId?: string;
   /** When true, dimensions are in pixels (no calibration); "Use in calculator" requires calibration */
   approximate?: boolean;

@@ -6,7 +6,10 @@ const EnvSchema = z.object({
   CORS_ORIGIN: z.string().optional(),
   AZURE_VISION_ENDPOINT: z.string().url(),
   AZURE_VISION_KEY: z.string().min(10),
-  AZURE_VISION_API_VERSION: z.string().default('2023-04-01-preview'),
+  AZURE_VISION_API_VERSION: z.string().default('2024-02-01').transform((v) => {
+    // Some environments may still inject deprecated preview versions.
+    return v === '2023-04-01-preview' ? '2024-02-01' : v;
+  }),
   VISION_ALLOWED_LABELS: z.string().default('window'),
 });
 

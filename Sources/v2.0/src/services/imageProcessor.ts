@@ -42,6 +42,18 @@ export function imageDataToBase64(imageData: ImageData): string {
   return canvas.toDataURL('image/jpeg', 0.8);
 }
 
+export function imageDataToBase64WithQuality(imageData: ImageData, quality: number): string {
+  const canvas = document.createElement('canvas');
+  canvas.width = imageData.width;
+  canvas.height = imageData.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('No se pudo obtener contexto del canvas');
+  }
+  ctx.putImageData(imageData, 0, 0);
+  return canvas.toDataURL('image/jpeg', Math.max(0.3, Math.min(0.95, quality)));
+}
+
 /**
  * Resizes an image maintaining aspect ratio
  */

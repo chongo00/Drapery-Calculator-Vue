@@ -10,11 +10,13 @@ export type DetectedObject = {
   confidence: number;
   boundingBox: BoundingBox;
   estimatedSize: { widthCm: number; heightCm: number } | null;
+  score?: number;
 };
 
 export type DetectResponse = {
   success: boolean;
   objects: DetectedObject[];
+  best?: DetectedObject | null;
   message?: string;
 };
 

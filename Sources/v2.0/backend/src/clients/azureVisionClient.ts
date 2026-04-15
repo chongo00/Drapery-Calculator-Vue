@@ -14,7 +14,7 @@ function joinUrl(base: string, path: string): string {
 export async function analyzeImageObjects(imageBytes: Buffer): Promise<AzureObject[]> {
   const url = joinUrl(
     env.AZURE_VISION_ENDPOINT,
-    `/imageanalysis:analyze?api-version=${encodeURIComponent(env.AZURE_VISION_API_VERSION)}&features=objects`
+    `/computervision/imageanalysis:analyze?api-version=${encodeURIComponent(env.AZURE_VISION_API_VERSION)}&features=objects`
   );
 
   const res = await fetch(url, {

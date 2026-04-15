@@ -10,13 +10,76 @@ import { useOCRSettings } from './useOCRSettings';
 import { useMeasurementSystem } from './useMeasurementSystem';
 import { detectPrimaryWindowFrame } from '@/services/windowFrameDetector';
 import { detectWindowFrameWithGemini } from '@/services/geminiWindowDetector';
-import { detectWindowFrameWithAzureBackend } from '@/services/azureVisionBackendClient';
-import { loadImageData, resizeImage, imageDataToBase64, prepareImageForOCR } from '@/services/imageProcessor';
+import { detectObjectsWithAzureBackend, detectWindowFrameWithAzureBackend } from '@/services/azureVisionBackendClient';
+import { loadImageData, resizeImage, imageDataToBase64WithQuality, prepareImageForOCR, adjustBrightness, adjustContrast } from '@/services/imageProcessor';
 import { pixelsToUnits, validateMeasurement, inchesToFraction, calculateRectangleDimensions } from '@/utils/measurementUtils';
 import { saveProcessedImage as saveImageToStorage } from '@/services/imageStorageService';
-import { ARMeasure } from '@blindsbook/ar-measure';
 
 type BBox = { x: number; y: number; width: number; height: number };
+
+function findUsSwitchPlate(objects: Array<{ label: string; confidence: number; boundingBox: { x: number; y: number; width: number; height: number } }>) {
+  const keywords = ['electrical outlet', 'outlet', 'light switch', 'switch', 'socket'];
+  const scored = objects
+    .map(o => {
+      const label = (o.label || '').toLowerCase();
+      const hit = keywords.some(k => label.includes(k));
+      if (!hit) return null;
+      const w = o.boundingBox.width;
+      const h = o.boundingBox.height;
+      const ar = Math.min(w, h) / Math.max(1, Math.max(w, h)); // ~0.61 expected
+      const arScore = 1 - Math.min(1, Math.abs(ar - 0.611) / 0.611);
+      const conf = typeof o.confidence === 'number' ? o.confidence : 0;
+      return { o, score: conf * 0.7 + arScore * 0.3 };
+    })
+    .filter(Boolean) as Array<{ o: any; score: number }>;
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0]?.o ?? null;
+}
+
+function findUsDoor(objects: Array<{ label: string; confidence: number; boundingBox: { x: number; y: number; width: number; height: number } }>) {
+  const keywords = ['door'];
+  const scored = objects
+    .map(o => {
+      const label = (o.label || '').toLowerCase();
+      const hit = keywords.some(k => label.includes(k));
+      if (!hit) return null;
+      const w = Math.max(1, o.boundingBox.width);
+      const h = Math.max(1, o.boundingBox.height);
+      const ar = w / h; // doors are tall: ~0.35-0.6
+      const arScore = 1 - Math.min(1, Math.abs(ar - 0.4) / 0.4);
+      const conf = typeof o.confidence === 'number' ? o.confidence : 0;
+      const area = w * h;
+      return { o, score: conf * 0.5 + arScore * 0.3 + Math.min(1, area / (400 * 600)) * 0.2 };
+    })
+    .filter(Boolean) as Array<{ o: any; score: number }>;
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0]?.o ?? null;
+}
+
+type ARMeasureApi = {
+  start(): Promise<void>;
+  stop(): Promise<void>;
+  getCenterRaycastDistance(): Promise<
+    | {
+        distanceMeters: number;
+        fx?: number;
+        fy?: number;
+      }
+    | null
+  >;
+};
+
+let cachedARMeasure: ARMeasureApi | null | undefined;
+async function getARMeasure(): Promise<ARMeasureApi | null> {
+  if (cachedARMeasure !== undefined) return cachedARMeasure;
+  try {
+    const mod = (await import('@blindsbook/ar-measure')) as any;
+    cachedARMeasure = (mod?.ARMeasure ?? null) as ARMeasureApi | null;
+  } catch {
+    cachedARMeasure = null;
+  }
+  return cachedARMeasure;
+}
 
 function rectToBBox(frame: WindowFrame): BBox {
   const r = frame.rectangle;
@@ -47,8 +110,8 @@ function estimateSizeFromAR(
   const widthM = (bboxPx.width * ar.distanceMeters) / ar.fx;
   const heightM = (bboxPx.height * ar.distanceMeters) / ar.fy;
   return {
-    widthCm: Math.round(widthM * 1000) / 10, // 0.1 cm
-    heightCm: Math.round(heightM * 1000) / 10,
+    widthCm: Math.round(widthM * 10000) / 100, // 0.01 cm
+    heightCm: Math.round(heightM * 10000) / 100,
   };
 }
 
@@ -56,10 +119,13 @@ export function useOCR() {
   const { currentCalibration, setCurrentCalibration, referenceObjects } = useCalibration();
   const { settings } = useOCRSettings();
   const measurementSystem = useMeasurementSystem();
+  const azureOnly = import.meta.env?.VITE_OCR_AZURE_ONLY === '1' || import.meta.env?.VITE_OCR_AZURE_ONLY === 'true';
+  const isDev = import.meta.env?.DEV === true;
 
   const currentImage = ref<ProcessedImage | null>(null);
   const detectedFrame = ref<WindowFrame | null>(null);
   const measurements = ref<MeasurementResult | null>(null);
+  const detectionProvider = ref<'azure' | 'gemini' | 'local' | null>(null);
   const isProcessing = ref(false);
   /** Current detection step for loading message: 'blindsbook' | 'gemini' | 'local' | null */
   const processingStep = ref<'blindsbook' | 'gemini' | 'local' | null>(null);
@@ -75,6 +141,7 @@ export function useOCR() {
   const isLiveFrameStable = ref(false);
   const stableFrameCount = ref(0);
   const lastStableFrame = ref<WindowFrame | null>(null);
+  const lastStableProvider = ref<'azure' | 'gemini' | 'local' | null>(null);
   const lastStableBBox = ref<BBox | null>(null);
 
   // Tune for responsiveness: fewer stable frames + slightly looser IoU improves UX on real devices.
@@ -172,26 +239,73 @@ export function useOCR() {
     try {
       
       const loaded = await loadImageData(imageUri);
-      const imageData = resizeImage(loaded, 1024, 1024);
+      // For Azure we keep more detail; field photos need higher resolution/less compression.
+      const imageData = resizeImage(loaded, 1536, 1536);
 
      
-      const colorDataUrl = imageDataToBase64(imageData);
+      // Boost exposure/contrast a bit to help object detection in darker photos
+      const enhanced = adjustContrast(adjustBrightness(imageData, 12), 12);
+      const colorDataUrl = imageDataToBase64WithQuality(enhanced, 0.9);
       let frame: WindowFrame | null = null;
+      let provider: 'azure' | 'gemini' | 'local' | null = null;
+
+      const detectAzureWithRetry = async (imageUrl: string, timeoutMs: number): Promise<WindowFrame | null> => {
+        const first = await detectWindowFrameWithAzureBackend(
+          imageUrl,
+          imageData.width,
+          imageData.height,
+          [],
+          { timeoutMs }
+        );
+        if (first) return first;
+        return await detectWindowFrameWithAzureBackend(
+          imageUrl,
+          imageData.width,
+          imageData.height,
+          [],
+          { timeoutMs }
+        );
+      };
 
       processingStep.value = 'blindsbook';
       await nextTick();
       // Order required for image-based detection: Azure Vision backend -> Gemini -> Local
-      frame = await detectWindowFrameWithAzureBackend(colorDataUrl, imageData.width, imageData.height, ['window']);
+      const t0 = performance.now();
+      // Attempt A (enhanced)
+      frame = await detectAzureWithRetry(colorDataUrl, 8000);
+      if (frame) provider = 'azure';
+
+      // Attempt B: more aggressive enhancement for very dark/low-contrast photos
+      if (!frame) {
+        const enhanced2 = adjustContrast(adjustBrightness(imageData, 28), 22);
+        const colorDataUrl2 = imageDataToBase64WithQuality(enhanced2, 0.92);
+        frame = await detectAzureWithRetry(colorDataUrl2, 8000);
+        if (frame) provider = 'azure';
+      }
+      if (isDev) {
+        const ms = Math.round(performance.now() - t0);
+        // eslint-disable-next-line no-console
+        console.debug('[OCR] Azure detect finished', { ms, ok: !!frame, azureOnly });
+      }
+
+      if (azureOnly && !frame) {
+        processingStep.value = null;
+        error.value = 'Azure Vision no detectó el marco (modo solo Azure activo).';
+        isProcessing.value = false;
+        return;
+      }
 
       if (!frame) {
         processingStep.value = 'gemini';
         await nextTick();
         frame = await detectWindowFrameWithGemini(colorDataUrl, imageData.width, imageData.height);
+        if (frame) provider = 'gemini';
       }
       if (!frame) {
         processingStep.value = 'local';
         await nextTick();
         frame = await detectPrimaryWindowFrame(imageData);
+        if (frame) provider = 'local';
       }
       processingStep.value = null;
 
@@ -202,6 +316,7 @@ export function useOCR() {
       }
 
       detectedFrame.value = frame;
+      detectionProvider.value = provider;
 
       // Calculate measurements: with calibration = real units; without = approximate (pixels)
       let calculatedMeasurements: MeasurementResult | null = null;
@@ -232,6 +347,7 @@ export function useOCR() {
             heightFraction: heightParts.fraction,
             confidence: frame.confidence,
             source: 'detection',
+            detectionProvider: provider ?? undefined,
             calibrationId: currentCalibration.value.reference.type
           };
         } else {
@@ -242,15 +358,54 @@ export function useOCR() {
             heightUnit: 'cm',
             confidence: frame.confidence,
             source: 'detection',
+            detectionProvider: provider ?? undefined,
             calibrationId: currentCalibration.value.reference.type
           };
         }
       } else {
+        // Try automatic scale from US single-gang switch plate if Azure returned it.
+        let scaleCmPerPxFromPlate: number | null = null;
+        let scaleCmPerPxFromDoor: number | null = null;
+        if (provider === 'azure') {
+          const raw = await detectObjectsWithAzureBackend(
+            colorDataUrl,
+            imageData.width,
+            imageData.height,
+            [],
+            { timeoutMs: 8000 }
+          );
+          const plate = raw ? findUsSwitchPlate(raw.objects) : null;
+          if (plate) {
+            const bb = plate.boundingBox;
+            const plateWpx = Math.max(1, bb.width);
+            const plateHpx = Math.max(1, bb.height);
+            const scaleX = 6.99 / plateWpx;
+            const scaleY = 11.43 / plateHpx;
+            scaleCmPerPxFromPlate = (scaleX + scaleY) / 2;
+          }
+
+          if (!scaleCmPerPxFromPlate) {
+            const door = raw ? findUsDoor(raw.objects) : null;
+            if (door) {
+              // US typical interior door: 80in x 32in ≈ 203.2cm x 81.3cm
+              const bb = door.boundingBox;
+              const doorWpx = Math.max(1, bb.width);
+              const doorHpx = Math.max(1, bb.height);
+              const scaleX = 81.3 / doorWpx;
+              const scaleY = 203.2 / doorHpx;
+              scaleCmPerPxFromDoor = (scaleX + scaleY) / 2;
+            }
+          }
+        }
+
         // Medición aproximada: se asume que el lado largo del rectángulo = longerSideCm (p. ej. 280 cm).
         // Ajustable en Configuración > OCR > "Asumir lado largo (medida aprox.)". Para medidas reales, calibrar.
         const longerSideCm = settings.approximateScaleLongerSideCm ?? 280;
         const longerSidePx = Math.max(widthPixels, heightPixels);
-        const scaleCmPerPx = longerSidePx > 0 ? longerSideCm / longerSidePx : 0;
+        const scaleCmPerPx =
+          scaleCmPerPxFromPlate ??
+          scaleCmPerPxFromDoor ??
+          (longerSidePx > 0 ? longerSideCm / longerSidePx : 0);
         const widthCm = widthPixels * scaleCmPerPx;
         const heightCm = heightPixels * scaleCmPerPx;
 
@@ -268,16 +423,18 @@ export function useOCR() {
             heightFraction: heightParts.fraction,
             confidence: frame.confidence,
             source: 'detection',
+            detectionProvider: provider ?? undefined,
             approximate: true
           };
         } else {
           calculatedMeasurements = {
-            width: Math.round(widthCm * 10) / 10,
-            height: Math.round(heightCm * 10) / 10,
+            width: Math.round(widthCm * 100) / 100,
+            height: Math.round(heightCm * 100) / 100,
             widthUnit: 'cm',
             heightUnit: 'cm',
             confidence: frame.confidence,
             source: 'detection',
+            detectionProvider: provider ?? undefined,
             approximate: true
           };
         }
@@ -428,7 +585,7 @@ export function useOCR() {
    * Gets data to pre-fill the form
    */
   const getFormData = (): { width: string; widthFraction: string; height: string; heightFraction: string } | null => {
-    if (!measurements.value || measurements.value.approximate) return null;
+    if (!measurements.value) return null;
 
     const width = measurements.value.width.toString();
     const height = measurements.value.height.toString();
@@ -477,7 +634,12 @@ export function useOCR() {
       isLiveMode.value = true;
 
       // Start AR (best-effort). If unavailable, we still show boxes but measurements may be approximate.
-      try { await ARMeasure.start(); } catch { /* ignore */ }
+      try {
+        const ar = await getARMeasure();
+        await ar?.start();
+      } catch {
+        /* ignore */
+      }
 
       // Backend detection (Azure Vision) on interval; each cycle updates overlay (green when window detected).
       const LIVE_DETECT_MAX = 256; // smaller = faster (upload + backend)
@@ -528,13 +690,25 @@ export function useOCR() {
           try {
             liveDetectInFlight.value = true;
             // Order required for image-based detection: Azure Vision backend -> Gemini -> Local
-            let frame: WindowFrame | null = await detectWindowFrameWithAzureBackend(imageDataUrl, dw, dh, ['window']);
-            if (!frame) frame = await detectWindowFrameWithGemini(imageDataUrl, dw, dh);
+            let frame: WindowFrame | null = await detectWindowFrameWithAzureBackend(imageDataUrl, dw, dh, [], {
+              timeoutMs: 1200,
+            });
+            if (!frame) {
+              frame = await detectWindowFrameWithAzureBackend(imageDataUrl, dw, dh, [], { timeoutMs: 1200 });
+            }
+
+            let provider: 'azure' | 'gemini' | 'local' | null = frame ? 'azure' : null;
+            if (!frame) {
+              frame = await detectWindowFrameWithGemini(imageDataUrl, dw, dh);
+              if (frame) provider = 'gemini';
+            }
+
             if (!frame) {
               const processed = await prepareImageForOCR(imageDataUrl);
               frame = await detectPrimaryWindowFrame(processed);
               if (!isLiveMode.value) return;
               liveDetectionImageSize.value = { width: processed.width, height: processed.height };
+              if (frame) provider = 'local';
             } else {
               liveDetectionImageSize.value = { width: dw, height: dh };
             }
@@ -551,11 +725,13 @@ export function useOCR() {
               }
               lastStableBBox.value = bb;
               lastStableFrame.value = frame;
+              lastStableProvider.value = provider;
               isLiveFrameStable.value = stableFrameCount.value >= STABLE_MIN_FRAMES;
             } else {
               stableFrameCount.value = 0;
               lastStableBBox.value = null;
               lastStableFrame.value = null;
+              lastStableProvider.value = null;
               isLiveFrameStable.value = false;
             }
           } catch (err) {
@@ -591,10 +767,15 @@ export function useOCR() {
     stableFrameCount.value = 0;
     lastStableBBox.value = null;
     lastStableFrame.value = null;
+    lastStableProvider.value = null;
     isLiveFrameStable.value = false;
     liveDetectInFlight.value = false;
     // Stop AR session
-    try { ARMeasure.stop(); } catch { /* ignore */ }
+    try {
+      void getARMeasure().then(ar => ar?.stop()).catch(() => undefined);
+    } catch {
+      /* ignore */
+    }
   };
 
   /**
@@ -634,9 +815,11 @@ export function useOCR() {
     imageDataUrl: string,
     frame: WindowFrame,
     imageWidth: number,
-    imageHeight: number
+    imageHeight: number,
+    provider: 'azure' | 'gemini' | 'local'
   ): Promise<void> => {
     detectedFrame.value = frame;
+    detectionProvider.value = provider;
 
     const rect = frame.rectangle;
     const { width: widthPx, height: heightPx } = calculateRectangleDimensions(rect);
@@ -645,9 +828,10 @@ export function useOCR() {
 
     // Prefer AR measurement (real) when tracking + intrinsics are available
     try {
-      const ar = await ARMeasure.getCenterRaycastDistance();
+      const arApi = await getARMeasure();
+      const ar = await arApi?.getCenterRaycastDistance();
+      if (!ar) throw new Error('AR unavailable');
       if (
-        ar.trackingState === 'tracking' &&
         typeof ar.distanceMeters === 'number' &&
         typeof ar.fx === 'number' &&
         typeof ar.fy === 'number' &&
@@ -674,6 +858,7 @@ export function useOCR() {
             heightFraction: heightParts.fraction,
             confidence: frame.confidence,
             source: 'detection',
+            detectionProvider: provider,
           };
         } else {
           calculatedMeasurements = {
@@ -683,6 +868,7 @@ export function useOCR() {
             heightUnit: 'cm',
             confidence: frame.confidence,
             source: 'detection',
+            detectionProvider: provider,
           };
         }
       }
@@ -712,16 +898,18 @@ export function useOCR() {
           heightFraction: heightParts.fraction,
           confidence: frame.confidence,
           source: 'detection',
+          detectionProvider: provider,
           approximate: true,
         };
       } else {
         calculatedMeasurements = {
-          width: Math.round(widthCm * 10) / 10,
-          height: Math.round(heightCm * 10) / 10,
+          width: Math.round(widthCm * 100) / 100,
+          height: Math.round(heightCm * 100) / 100,
           widthUnit: 'cm',
           heightUnit: 'cm',
           confidence: frame.confidence,
           source: 'detection',
+          detectionProvider: provider,
           approximate: true,
         };
       }
@@ -799,6 +987,7 @@ export function useOCR() {
     currentImage: computed(() => currentImage.value),
     detectedFrame: computed(() => detectedFrame.value),
     measurements: computed(() => measurements.value),
+    detectionProvider: computed(() => detectionProvider.value),
     isProcessing: computed(() => isProcessing.value),
     processingStep: computed(() => processingStep.value),
     error: computed(() => error.value),
@@ -812,6 +1001,7 @@ export function useOCR() {
     stableFrameCount: computed(() => stableFrameCount.value),
     stableMinFrames: STABLE_MIN_FRAMES,
     lastStableFrame: computed(() => lastStableFrame.value),
+    lastStableProvider: computed(() => lastStableProvider.value),
     captureFromCamera,
     selectFromGallery,
     processImage,

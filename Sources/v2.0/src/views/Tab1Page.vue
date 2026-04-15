@@ -53,10 +53,10 @@
           </div>
           <p v-if="shouldShowError('width') && v$.width.required.$invalid" class="validation-error">{{ t.calculator.widthRequired }}</p>
           <p v-else-if="shouldShowError('width') && v$.width.minValue.$invalid" class="validation-error">{{ t.calculator.widthGreaterThanZero }}</p>
-          <p v-else-if="shouldShowError('width') && (v$.width.integer as any)?.$invalid" class="validation-error">{{ t.calculator.widthMustBeInteger }}</p>
+          <p v-else-if="shouldShowError('width') && widthIntegerInvalid" class="validation-error">{{ t.calculator.widthMustBeInteger }}</p>
           <p v-if="shouldShowError('height') && v$.height.required.$invalid" class="validation-error">{{ t.calculator.heightRequired }}</p>
           <p v-else-if="shouldShowError('height') && v$.height.minValue.$invalid" class="validation-error">{{ t.calculator.heightGreaterThanZero }}</p>
-          <p v-else-if="shouldShowError('height') && (v$.height.integer as any)?.$invalid" class="validation-error">{{ t.calculator.heightMustBeInteger }}</p>
+          <p v-else-if="shouldShowError('height') && heightIntegerInvalid" class="validation-error">{{ t.calculator.heightMustBeInteger }}</p>
 
           <div class="section-card space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">{{ t.calculator.productType }}</h3>
@@ -249,6 +249,9 @@ const v$ = useVuelidate(rules, form);
 const submitted = ref(false);
 const showErrorBanner = ref(false);
 
+const widthIntegerInvalid = computed(() => !!(v$.value as any)?.width?.integer?.$invalid);
+const heightIntegerInvalid = computed(() => !!(v$.value as any)?.height?.integer?.$invalid);
+
 const handleTouched = (field: FormField) => {
   showErrorBanner.value = false;
   const control = v$.value[field];
@@ -285,22 +288,17 @@ watch(() => measurementSystem.system.value, (newSystem) => {
   }
 });
 
-// Pre-fill form from OCR query params
-onMounted(() => {
+const applyOcrQueryToForm = () => {
   const query = route.query;
-  if (query.width) {
-    form.width = String(query.width);
-  }
-  if (query.height) {
-    form.height = String(query.height);
-  }
-  if (query.widthFraction) {
-    form.widthFraction = String(query.widthFraction);
-  }
-  if (query.heightFraction) {
-    form.heightFraction = String(query.heightFraction);
-  }
-});
+  if (query.width) form.width = String(query.width);
+  if (query.height) form.height = String(query.height);
+  if (query.widthFraction) form.widthFraction = String(query.widthFraction);
+  if (query.heightFraction) form.heightFraction = String(query.heightFraction);
+};
+
+// Pre-fill form from OCR query params (works even if Tab1 is already mounted)
+onMounted(applyOcrQueryToForm);
+watch(() => route.query, applyOcrQueryToForm, { deep: true });
 
 const runCalculation = async () => {
   const _panels = parseInt(form.opening);
