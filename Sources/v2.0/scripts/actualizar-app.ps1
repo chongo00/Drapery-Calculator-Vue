@@ -1,5 +1,5 @@
 # Script unico: compilar e instalar la app en el telefono (para iterar con feedback).
-# Requisitos: npm run build ya hecho, C:\Android con Gradle + SDK + platform-tools, telefono por USB con depuracion USB.
+# Requisitos: C:\Android con Gradle + SDK + platform-tools, telefono por USB con depuracion USB.
 # Uso: .\scripts\actualizar-app.ps1
 
 $ErrorActionPreference = "Stop"
@@ -9,9 +9,17 @@ if ((Split-Path -Leaf $root) -eq "scripts") { $root = Split-Path -Parent $root }
 Write-Host "=== Actualizar app en telefono ===" -ForegroundColor Cyan
 Write-Host "Proyecto: $root" -ForegroundColor Gray
 
-# 1. Comprobar dist
+# 0. Compilar proyecto Vue
+Write-Host "Compilando proyecto Vue (npm run build)..." -ForegroundColor Yellow
+Push-Location $root
+& npm run build
+if ($LASTEXITCODE -ne 0) { Pop-Location; Write-Host "Build Vue fallido." -ForegroundColor Red; exit 1 }
+Pop-Location
+Write-Host "OK." -ForegroundColor Green
+
+# 1. Comprobar dist existe
 if (-not (Test-Path "$root\dist\index.html")) {
-    Write-Host "ERROR: Ejecuta antes: npm run build" -ForegroundColor Red
+    Write-Host "ERROR: No se encontro dist/index.html" -ForegroundColor Red
     exit 1
 }
 

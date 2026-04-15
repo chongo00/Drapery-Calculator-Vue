@@ -28,7 +28,7 @@
 import { onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonTabBar, IonTabButton, IonTabs, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import { calculator, list, settings, camera } from 'ionicons/icons';
+import { calculator, list, camera, settings } from 'ionicons/icons';
 // Removed useI18n import as labels are no longer used in tab bar
 
 const router = useRouter();
