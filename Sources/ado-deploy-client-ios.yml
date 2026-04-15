@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - 'master'
+      - master
   paths:
     include:
       - Sources/v2.0/**
@@ -28,87 +28,119 @@ variables:
   - name: externalTesters
     value: '$(EXTERNAL_TESTERS)'                        #Pipeline variable to set the app version
 
-pool:
-  vmImage: 'macOS-latest'
+stages:
 
-steps:
-  - checkout: self
+# ---------------------------------------------------------
+#  STAGE 1: BUILD
+# ---------------------------------------------------------
+- stage: Build
+  displayName: "Build iOS App"
+  jobs:
+    - job: BuildJob
+      displayName: "Build & Archive"
+      pool:
+        vmImage: 'macOS-latest'
 
-  - task: UseNode@1
-    inputs:
-      version: '22.x'
-    displayName: 'Install Node.js 22'
+      steps:
+        - checkout: self
 
-  - script: |
-      cd $(clientSourcePath)
-      npm version $(appVersion) --no-git-tag-version
-    displayName: "Set package.json version"
+        - task: UseNode@1
+          inputs:
+            version: '22.x'
+          displayName: 'Install Node.js 22'
 
-  - script: |
-      cd $(clientSourcePath)
-      npm ci
-      npm run build
-    displayName: 'Build Vue App'
+        - script: |
+            cd $(clientSourcePath)
+            npm version $(appVersion) --no-git-tag-version
+          displayName: "Set package.json version"
 
-  - script: |
-      cd $(clientSourcePath)
-      npx cap sync ios
-    displayName: 'Capacitor Sync iOS'
+        - script: |
+            cd $(clientSourcePath)
+            npm ci
+            npm run build
+          displayName: 'Build Vue App'
 
-  - script: |
-      cd $(clientSourcePath)/ios/App
-      pod install
-    displayName: 'Install CocoaPods'
+        - script: |
+            cd $(clientSourcePath)
+            npx cap sync ios
+          displayName: 'Capacitor Sync iOS'
 
-  - script: |
-      cd $(clientSourcePath)/ios/App
-      agvtool new-marketing-version $(appVersion)
-    displayName: 'Set iOS Marketing Version'
+        - script: |
+            cd $(clientSourcePath)/ios/App
+            pod install
+          displayName: 'Install CocoaPods'
 
-  - script: |
-      cd $(clientSourcePath)/ios/App
-      agvtool new-version -all $(Build.BuildId)
-    displayName: 'Set iOS Build Number'
+        - script: |
+            cd $(clientSourcePath)/ios/App
+            agvtool new-marketing-version $(appVersion)
+          displayName: 'Set iOS Marketing Version'
 
-  - task: InstallAppleCertificate@2
-    inputs:
-      certSecureFile: '$(appleCertSecureFile)'
-      certPwd: '$(appleCertSecureFilePassword)'
-    displayName: 'Install Distribution Certificate'
+        - script: |
+            cd $(clientSourcePath)/ios/App
+            agvtool new-version -all $(Build.BuildId)
+          displayName: 'Set iOS Build Number'
 
-  - task: InstallAppleProvisioningProfile@1
-    inputs:
-      provisioningProfileLocation: 'secureFiles'
-      provProfileSecureFile: '$(appleProvProfileSecureFile)'
-    displayName: 'Install Provisioning Profile'
+        - task: InstallAppleCertificate@2
+          inputs:
+            certSecureFile: '$(appleCertSecureFile)'
+            certPwd: '$(appleCertSecureFilePassword)'
+          displayName: 'Install Distribution Certificate'
 
-  - task: Xcode@5
-    displayName: 'Build & Archive iOS App'
-    inputs:
-      actions: 'build archive'
-      scheme: 'App'
-      sdk: 'iphoneos'
-      configuration: 'Release'
-      xcWorkspacePath: '$(clientSourcePath)/ios/App/App.xcworkspace'
-      xcodeVersion: 'default'
-      packageApp: true
-      exportPath: '$(build.artifactStagingDirectory)'
-      exportOptions: 'plist'
-      exportOptionsPlist: '$(clientSourcePath)/ios/App/ExportOptions-appstore.plist'
-      signingOption: 'default'
+        - task: InstallAppleProvisioningProfile@1
+          inputs:
+            provisioningProfileLocation: 'secureFiles'
+            provProfileSecureFile: '$(appleProvProfileSecureFile)'
+          displayName: 'Install Provisioning Profile'
 
-  - task: AppStoreRelease@1
-    displayName: 'Upload to TestFlight'
-    condition: and(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['uploadToTestFlight'], 'true'))
-    inputs:
-      serviceEndpoint: 'Apple App Store Connect'
-      releaseTrack: 'TestFlight'
-      appIdentifier: '$(appBundleId)'
-      appSpecificId: '$(appSpecificId)'
-      appType: 'iOS'
-      ipaPath: '$(build.artifactStagingDirectory)/**/*.ipa'
-      shouldSubmitForReview: false
-      shouldAutoRelease: false
-      distributedToExternalTesters: true
-      externalTestersGroups: '$(externalTesters)'
-      releaseNotes: '$(clientSourcePath)/ios/App/Release-WhatToTest.txt'
+        - task: Xcode@5
+          displayName: 'Build & Archive iOS App'
+          inputs:
+            actions: 'build archive'
+            scheme: 'App'
+            sdk: 'iphoneos'
+            configuration: 'Release'
+            xcWorkspacePath: '$(clientSourcePath)/ios/App/App.xcworkspace'
+            xcodeVersion: 'default'
+            packageApp: true
+            exportPath: '$(build.artifactStagingDirectory)'
+            exportOptions: 'plist'
+            exportOptionsPlist: '$(clientSourcePath)/ios/App/ExportOptions-appstore.plist'
+            signingOption: 'default'
+
+        - publish: $(build.artifactStagingDirectory)
+          artifact: ios-ipa
+          displayName: "Publish IPA Artifact"
+
+
+# ---------------------------------------------------------
+#  STAGE 2: DEPLOY
+# ---------------------------------------------------------
+- stage: Deploy
+  displayName: "Upload to TestFlight"
+  dependsOn: Build
+
+  jobs:
+    - job: DeployJob
+      displayName: "Deploy to TestFlight"
+      pool:
+        vmImage: 'macOS-latest'
+
+      steps:
+        - download: current
+          artifact: ios-ipa
+
+        - task: AppStoreRelease@1
+          displayName: 'Upload to TestFlight'
+          condition: eq(variables['uploadToTestFlight'], 'true')
+          inputs:
+            serviceEndpoint: 'Apple App Store Connect'
+            releaseTrack: 'TestFlight'
+            appIdentifier: '$(appBundleId)'
+            appSpecificId: '$(appSpecificId)'
+            appType: 'iOS'
+            ipaPath: '$(Pipeline.Workspace)/ios-ipa/**/*.ipa'
+            shouldSubmitForReview: false
+            shouldAutoRelease: false
+            distributedToExternalTesters: true
+            externalTestersGroups: '$(externalTesters)'
+            releaseNotes: '$(clientSourcePath)/ios/App/Release-WhatToTest.txt'
